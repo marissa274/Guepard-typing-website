@@ -1,0 +1,10 @@
+import {JSDOM} from 'jsdom';
+import {vi,afterEach} from 'vitest';
+import {cleanup} from '@testing-library/react';
+const browserStorage=new JSDOM('',{url:'http://localhost/'}).window.localStorage;
+vi.stubGlobal('localStorage',browserStorage);
+Object.defineProperty(window,'localStorage',{configurable:true,value:browserStorage});
+afterEach(()=>{cleanup();localStorage.clear()});
+window.matchMedia=vi.fn().mockImplementation(query=>({matches:false,media:query,addEventListener:vi.fn(),removeEventListener:vi.fn()}));
+window.HTMLDialogElement.prototype.showModal=function(){this.open=true};
+window.HTMLDialogElement.prototype.close=function(){this.open=false;this.dispatchEvent(new Event('close'))};

@@ -1,0 +1,16 @@
+# Jungle en relief : ressources et prompts
+
+Outil utilisé : imagegen intégré (pas de CLI). Le logo fourni reste inchangé.
+
+## public/assets/relief-background.png
+
+Create one landscape 3:2 website background: an EMPTY jungle clearing built as a tactile miniature paper-clay diorama, with rounded simplified 3D volume, handmade uneven edges and very visible broad overlapping FELT TIP MARKER strokes coloring every surface. Matte rough paper surfaces, warm soft depth shadows, NOT polished smooth CGI, NOT photorealistic, NOT intricate pencil crosshatching. Warm sand #F7E7C6 center, forest #2F6B3D and leaf #5BAE4A chunky trees and distant rounded canopy framing left/right, small blue #5BC0EB river on lower right. Sparse simplified huge leaf forms around perimeter, recessed sunlit center. NO ANIMALS, no text, no signs, no foreground objects crossing center: animals and foliage will be separate layers. Large central clearing for a real UI button. Colorful playful child-friendly crafted dimensional set, subtle texture on paper. Full bleed.
+
+## public/assets/relief-animals.png
+
+Create a TRUE TRANSPARENT PNG asset atlas, exactly 3 columns x 2 rows, equal cells, overall landscape 3:2. Six SEPARATE cheerful jungle animal cutouts, entire silhouette contained within its own cell, margins and transparent gaps, no labels. Top left: cute brown monkey dangling one hand above its head as if gripping a ledge, tail curled. Top middle: large colorful mango orange and blue parrot perched on short branch. Top right: friendly gray elephant head and upper body, trunk curling. Bottom left: friendly giraffe neck and head. Bottom middle: cute crocodile lying horizontally. Bottom right: toucan on small branch. All in one coherent style: simplified rounded 3D paper-clay sculptural volume, tactile uneven handcrafted edges, matte paper surfaces colored with clearly VISIBLE BROAD FELT TIP MARKER STROKES, dimensional soft shadows within each animal, no ground shadows. Warm expressive faces, large simple shapes, forest #2F6B3D leaf #5BAE4A orange #F28C28 yellow #F6C445 river blue #5BC0EB sand #F7E7C6. NOT smooth polished CGI, not photorealistic, no fine pencil hatching, no background scenery. The six cells must be cleanly separable by CSS sprite positioning.
+
+## public/assets/relief-foliage.png
+
+TRUE TRANSPARENT PNG sprite atlas with exactly TWO equal square panels side by side, overall 2:1 landscape. LEFT PANEL: a lush corner cluster of oversized chunky monstera leaves, ferns, banana leaves growing from bottom left, forming a low L-shaped foreground frame, filling its square but transparent negative space upper right. RIGHT PANEL: three long curving hanging jungle vines with several chunky rounded leaves, suspended from top, filling its square. Separate full silhouettes with transparent gap between cells. Style simplified sculptural rounded 3D paper-clay volume, matte paper surfaces hand-colored with very visible broad overlapping FELT TIP MARKER strokes, slightly irregular dark outlines, tactile handcrafted edges, dimensional soft shadows on leaves, no ground shadow. Forest #2F6B3D and leaf #5BAE4A, small mango #F28C28 accents. Warm playful children's handmade diorama, NOT polished CGI or photorealism, no intricate fine pencil hatching, no animals, no text. Web layers for gentle animation.
+
