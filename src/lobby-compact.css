@@ -1,0 +1,66 @@
+/* Compact waiting room: real controls inside a separate illustrated frame. */
+.lobby-page{--side-space:clamp(110px,17vw,350px);padding:34px var(--side-space) 100px;min-height:0}
+.lobby-page .woodland-scenery{background-position:center top;background-size:cover}
+.lobby-page .woodland-shell{max-width:1400px;padding:18px 22px;border:14px solid transparent;border-radius:24px 19px 23px 18px;background:linear-gradient(#fff3dfea,#fff3dfea) padding-box,repeating-linear-gradient(3deg,#88572e 0 2px,#b78046 3px 5px,#d3a36c 6px,#986235 8px,#b78149 12px) border-box;box-shadow:inset 0 0 0 2px #e7c392,0 3px 0 #664624,0 12px 26px #19372050}
+.lobby-page .woodland-shell::before,.lobby-page .woodland-shell::after{top:-50px;height:43px}
+.lobby-page .lobby-topbar{margin-bottom:4px;min-height:30px}
+.lobby-page .woodland-back{font-size:16px;padding:4px 0;min-height:30px}
+.lobby-page .room-connection{font-size:12px}
+.lobby-page .lobby-title-row{flex-direction:row;align-items:center;gap:18px;margin-bottom:14px}
+.lobby-page .woodland-title{flex:1;min-width:0}
+.lobby-page .woodland-title h1{font-size:clamp(29px,2.35vw,45px);margin:6px 0;letter-spacing:-1px;line-height:1.15}
+.lobby-page .room-heading-meta{gap:10px}.lobby-page .room-host,.lobby-page .room-status{font-size:14px}.lobby-page .room-status{padding:5px 12px}
+.lobby-page .room-invitation{width:290px;padding:12px 16px;border:1px solid #dfcfb0;border-radius:17px;display:grid;grid-template-columns:1fr auto;align-items:center;gap:6px 10px;box-shadow:0 3px 8px #6e52201c}
+.lobby-page .room-invitation .woodland-eyebrow{grid-column:1/-1;font-size:11px;letter-spacing:.7px}.lobby-page .room-invitation p{font-size:13px;margin:0;line-height:1.4}.lobby-page .room-code{font-size:25px;margin:0;letter-spacing:2px}.lobby-page .room-invitation button{font-size:14px;padding:9px 12px;min-height:40px}.lobby-page .room-invitation>small:empty{display:none}.lobby-page .room-invitation>small,.lobby-page .invitation-result{grid-column:1/-1;margin:0}
+.lobby-page .lobby-panels{grid-template-columns:minmax(0,1fr) minmax(0,1.04fr);gap:16px;align-items:stretch}
+.lobby-page .wood-panel{padding:16px 18px;border-radius:20px;min-width:0}
+.lobby-page .wood-panel-heading{gap:10px;margin:0 0 6px}.lobby-page .wood-panel-heading h2{font-size:clamp(23px,1.65vw,30px);margin:0}.lobby-page .wood-panel-heading .woodland-eyebrow{display:none}.lobby-page .wood-panel-heading h2>span{font-size:20px}.lobby-page .wood-small-button{font-size:15px;padding:8px 11px;min-height:38px}.lobby-page .settings-access{font-size:12px}.lobby-page .wood-hint{font-size:14px;line-height:1.4;margin:5px 0 10px}
+.lobby-page .participants-scroll{overflow:auto;max-height:414px;min-height:0;scrollbar-color:#8caa6c #eee0c2;scrollbar-width:thin;overscroll-behavior:contain;padding:2px 4px 85px 0;margin-bottom:-85px}
+.lobby-page .room-roster,.lobby-page .spectator-group .room-roster{max-height:none;overflow:visible;margin:0}
+.lobby-page .room-roster>li,.lobby-page .spectator-group .room-roster>li{min-height:59px;padding:7px 10px;margin:0 0 5px;gap:10px;border-radius:13px}
+.lobby-page .room-roster .animal-avatar{width:42px;height:42px}.lobby-page .person-copy>strong{font-size:17px;line-height:1.2}.lobby-page .person-tags{gap:3px 6px;margin-top:3px}.lobby-page .person-tags span{font-size:13px}.lobby-page .bot-level{width:125px;flex:0 1 125px;min-height:34px;font-size:13px;padding:5px;margin:0}.lobby-page .person-menu{align-self:center}.lobby-page .person-menu summary{width:30px;min-height:34px}.lobby-page .spectator-group{margin-top:9px;padding-top:8px}.lobby-page .spectator-group h3{font-size:18px;margin-bottom:6px}
+.lobby-page .room-settings-controls>.wood-fields{margin:4px 0 8px;gap:0}.lobby-page .room-settings-controls>.wood-fields>div{grid-template-columns:minmax(120px,.9fr) minmax(0,1fr);padding:4px 0;gap:10px}.lobby-page .room-settings-controls>.wood-fields label{font-size:16px;line-height:1.25}.lobby-page .room-settings-controls>.wood-fields input,.lobby-page .room-settings-controls>.wood-fields select{min-height:40px;font-size:16px;padding:8px 10px}.lobby-page .wood-disclosure{padding:11px 0}.lobby-page .wood-disclosure summary{font-size:16px}.lobby-page .wood-disclosure:last-child{padding-bottom:0}
+.lobby-page .room-launch{margin-top:14px;padding:12px 18px;gap:16px;border-radius:17px}.lobby-page .room-launch strong{font-size:18px}.lobby-page .room-launch p{font-size:14px;margin-top:3px}.lobby-page .room-launch .wood-primary{min-height:48px;font-size:20px;padding:10px 22px;min-width:255px}
+/* Animal silhouettes keep their original aspect ratio, outside the controls. */
+.lobby-page .lobby-world-animals{overflow:visible}.lobby-page .lobby-world-animal{opacity:1;width:calc(var(--side-space) * .95)}
+.lobby-page .lobby-monkey{left:2%;right:auto;top:0;width:calc(var(--side-space)*.85);height:auto;aspect-ratio:1;z-index:1}
+.lobby-page .lobby-toucan{left:0;right:auto;top:25%;width:calc(var(--side-space)*.92);height:auto;aspect-ratio:491/512;z-index:1}
+.lobby-page .lobby-giraffe{right:0;top:7%;width:calc(var(--side-space)*.94);aspect-ratio:2/3}.lobby-page .lobby-parrot{right:0;top:auto;bottom:15%;width:calc(var(--side-space)*.9)}
+.lobby-page .lobby-elephant{left:0;top:auto;bottom:13%;width:calc(var(--side-space)*.85)}.lobby-page .lobby-crocodile{right:0;bottom:0;width:calc(var(--side-space)*.95);aspect-ratio:610/512}
+.lobby-page .lobby-sleeping-cheetah{position:absolute;pointer-events:none;left:0;bottom:-12px;width:calc(var(--side-space)*1.08);aspect-ratio:1;background:url('/assets/cheetahs-3d-marker.png') left center/200% 100%;z-index:3}
+.lobby-page .lobby-leaves{z-index:1;width:var(--side-space);height:auto;aspect-ratio:1}.lobby-page .lobby-leaves-upper-left{left:0;top:8%}.lobby-page .lobby-leaves-upper-right{right:0;top:35%}
+[data-theme=dark] .lobby-page .woodland-shell{background:linear-gradient(#173747ee,#173747ee) padding-box,repeating-linear-gradient(3deg,#684629 0 2px,#926a3f 3px 5px,#bb915d 6px,#72502f 8px,#926739 12px) border-box}
+[data-theme=dark] .lobby-page .lobby-sleeping-cheetah{background-image:url('/assets/cheetahs-night.png')}
+@media(max-width:1600px) and (min-width:1101px){.lobby-page{--side-space:11vw}.lobby-page .room-invitation{width:265px}.lobby-page .woodland-shell{padding:14px 16px}}
+@media(max-width:1100px){.lobby-page{--side-space:45px;padding-top:35px;padding-bottom:140px}.lobby-page .lobby-panels{grid-template-columns:1fr}.lobby-page .lobby-title-row{flex-direction:column;align-items:stretch}.lobby-page .room-invitation{width:100%}.lobby-page .participants-scroll{max-height:380px}.lobby-page .lobby-world-animal,.lobby-page .lobby-monkey,.lobby-page .lobby-toucan{width:100px;opacity:1;z-index:1}.lobby-page .lobby-sleeping-cheetah{width:160px}.lobby-page .lobby-monkey{top:0;left:0}.lobby-page .lobby-giraffe{display:block}.lobby-page .lobby-toucan{top:30%}}
+@media(max-width:650px){.lobby-page{--side-space:10px}.lobby-page .woodland-shell{padding:12px 10px;border-width:9px}.lobby-page .lobby-topbar{flex-wrap:wrap;gap:4px}.lobby-page .wood-panel{padding:14px 10px}.lobby-page .wood-panel-heading h2{font-size:23px}.lobby-page .wood-small-button{font-size:13px}.lobby-page .room-settings-controls>.wood-fields>div{display:grid;grid-template-columns:minmax(95px,.8fr) minmax(0,1fr)}.lobby-page .room-settings-controls>.wood-fields label{font-size:14px;margin:0}.lobby-page .bot-level{flex-basis:96px;width:96px;font-size:12px}.lobby-page .room-roster>li{padding:7px 5px;gap:6px}.lobby-page .person-copy>strong{font-size:16px}.lobby-page .person-tags span{font-size:12px}.lobby-page .room-launch{padding:12px}.lobby-page .room-launch .wood-primary{min-width:0}.lobby-page .lobby-world-animals{opacity:1}.lobby-page .lobby-monkey{top:-24px;width:75px;left:auto;right:0}}
+/* Final framing adjustments after the same-size screenshot comparison. */
+.lobby-page .woodland-shell{background:linear-gradient(#fff3df,#fff3df) padding-box,repeating-linear-gradient(3deg,#88572e 0 2px,#b78046 3px 5px,#d3a36c 6px,#986235 8px,#b78149 12px) border-box}
+.lobby-page .lobby-leaves-upper-left,.lobby-page .lobby-leaves-upper-right{width:calc(var(--side-space)*.55);top:auto;bottom:5%;z-index:0}
+.lobby-page .lobby-toucan,.lobby-page .lobby-monkey{z-index:2}.lobby-page .lobby-world-animals{z-index:1}
+.lobby-page .room-invitation{width:300px;grid-template-columns:1fr auto}.lobby-page .room-invitation button{white-space:nowrap;font-size:13px;padding:8px}.lobby-page .room-code{font-size:23px}
+.lobby-page .participants-board>.wood-hint,.lobby-page .settings-board>.wood-hint{margin:0 0 6px;font-size:13px}
+.lobby-page .room-settings-controls>.wood-fields input,.lobby-page .room-settings-controls>.wood-fields select{height:40px;min-height:40px;line-height:1.2;box-sizing:border-box}
+.lobby-page .room-settings-controls>.wood-fields>div{padding:3px 0}.lobby-page .wood-disclosure{padding:9px 0}.lobby-page .wood-disclosure summary{line-height:1.35}
+
+@media(min-width:1101px){.lobby-page .lobby-title-row{min-height:80px}.lobby-page .lobby-panels .wood-panel{padding-top:12px;padding-bottom:12px}.lobby-page .room-invitation{flex-shrink:0}.lobby-page .wood-panel-heading{margin-bottom:5px}.lobby-page .participants-scroll{max-height:375px}.lobby-page .room-launch{margin-top:10px}}
+@media(max-width:650px){.lobby-page .room-invitation{width:100%}}
+.lobby-page .participants-board>.wood-hint,.lobby-page .settings-board>.wood-hint{display:none}
+.lobby-page .wood-panel-heading{margin-bottom:10px}
+.lobby-page .lobby-title-row{margin-bottom:10px}
+@media(min-width:1101px){.lobby-page{padding-top:26px}.lobby-page .woodland-shell::before,.lobby-page .woodland-shell::after{top:-42px;height:35px}}
+/* Use the original home artwork, without stretching the footer mascot. */
+#app:has(>.lobby-page){min-height:100svh;display:flex;flex-direction:column}
+#app:has(>.lobby-page)>.canopy-header,#app:has(>.lobby-page)>.compact-footer{flex-shrink:0;width:100%;margin:0}
+#app:has(>.lobby-page)>.lobby-page{flex:1 0 auto;margin:0}
+.lobby-page{overflow:clip}
+.lobby-page .woodland-scenery{background-image:url('/assets/relief-background.png');background-position:center center;background-size:cover}
+[data-theme=dark] .lobby-page .woodland-scenery{background-image:url('/assets/jungle-blue-night.png');background-position:center center;background-size:cover}
+/* The giraffe stands farther back, its feet behind the undergrowth. */
+.lobby-page .lobby-giraffe{top:13%;right:1.5%;width:calc(var(--side-space)*.72);animation:none;z-index:0}
+.lobby-page .lobby-parrot{bottom:12%;right:0;z-index:2;animation:none}
+/* Extend the bird's own perch to the trunk at the edge of the scene. */
+.lobby-page .lobby-parrot::before{content:'';position:absolute;left:51%;right:-35%;top:76%;height:clamp(10px,1.2vw,23px);border:2px solid #634624;border-radius:50% 20% 30% 30%;background:repeating-linear-gradient(5deg,#8c6036 0 2px,#bb8b52 3px 5px,#a57542 6px 8px);transform:rotate(-12deg);transform-origin:left center;box-shadow:0 4px 4px #233b2433;z-index:-1}
+.lobby-page .lobby-leaves-upper-right{bottom:auto;top:44%;width:calc(var(--side-space)*.68);z-index:1}
+@media(max-width:1100px){.lobby-page .lobby-giraffe{width:85px;right:0;top:12%}.lobby-page .lobby-parrot{width:100px}.lobby-page .lobby-leaves-upper-right{width:75px}}
+.lobby-page .lobby-leaves-upper-right{top:35%;width:calc(var(--side-space)*.45)}

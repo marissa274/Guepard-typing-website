@@ -1,0 +1,16 @@
+import {test,expect} from '@playwright/test';
+test('compact lobby keeps real roster scrollable and launch visible beside scenery',async({page,request})=>{
+ const {room,token}=await (await request.post('/api/rooms',{data:{name:'La clairière des rapides',nickname:'Marissa',animal:'cheetah',visibility:'semi'}})).json();const headers={Authorization:'Bearer '+token};
+ try{
+ for(let i=0;i<5;i++)await request.post('/api/rooms/'+room.id,{headers,data:{action:'bot'}});
+ await page.goto('/');const homeMascot=await page.locator('.footer-cheetah').evaluate(el=>{const s=getComputedStyle(el);return [s.backgroundImage,s.backgroundSize,s.width,s.height]});await page.evaluate(({id,token})=>sessionStorage.setItem('guepard-room-'+id,token),{id:room.id,token});await page.setViewportSize({width:2048,height:1048});await page.goto('/lobby/'+room.id);await expect(page.locator('.room-roster>li')).toHaveCount(6);await page.screenshot({path:'/tmp/guepard-lobby-compact-reference.png',fullPage:true});
+ await page.setViewportSize({width:3044,height:1960});
+ const edges=await page.evaluate(()=>{const h=document.querySelector('header')!.getBoundingClientRect(),m=document.querySelector('.lobby-page')!.getBoundingClientRect(),f=document.querySelector('footer')!.getBoundingClientRect();return [h.top,m.top-h.bottom,f.top-m.bottom,document.documentElement.scrollHeight-f.bottom-window.scrollY]});for(const gap of edges)expect(Math.abs(gap)).toBeLessThan(2);
+ await page.screenshot({path:'/tmp/guepard-lobby-no-gaps.png',fullPage:true});await page.setViewportSize({width:2048,height:1048});
+ const launch=await page.locator('.room-launch').boundingBox();expect(launch!.y+launch!.height).toBeLessThan(1048);const left=await page.locator('.participants-board').boundingBox(),right=await page.locator('.settings-board').boundingBox();expect(Math.abs(left!.y-right!.y)).toBeLessThan(2);await expect(page.locator('header')).toBeVisible();await expect(page.locator('.lobby-page + footer')).toHaveCount(1);await page.setViewportSize({width:1440,height:1050});expect(await page.locator('.footer-cheetah').evaluate(el=>{const s=getComputedStyle(el);return [s.backgroundImage,s.backgroundSize,s.width,s.height]})).toEqual(homeMascot);expect(await page.evaluate(()=>Math.abs(document.documentElement.scrollHeight-(document.querySelector('footer')!.getBoundingClientRect().bottom+window.scrollY)))).toBeLessThan(2);
+ for(let i=0;i<26;i++)await request.post('/api/rooms/'+room.id,{headers,data:{action:'bot'}});
+ await expect(page.locator('.room-roster>li')).toHaveCount(32);expect(await page.locator('.participants-scroll').evaluate(el=>el.scrollHeight>el.clientHeight)).toBe(true);await page.locator('.room-roster>li').last().scrollIntoViewIfNeeded();await expect(page.locator('.room-roster>li').last()).toBeVisible();
+ await page.setViewportSize({width:1440,height:900});await page.screenshot({path:'/tmp/guepard-lobby-compact-desktop.png',fullPage:true});const compact=await page.locator('.room-launch').boundingBox();expect(compact!.y+compact!.height).toBeLessThan(900);
+ await page.setViewportSize({width:390,height:844});expect(await page.locator('body').evaluate(el=>el.scrollWidth)).toBe(390);await page.screenshot({path:'/tmp/guepard-lobby-compact-mobile.png',fullPage:true});
+ }finally{await request.post('/api/rooms/'+room.id,{headers,data:{action:'leave'}})}
+});

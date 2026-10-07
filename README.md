@@ -83,6 +83,16 @@ Le site utilise React, Next.js et Tailwind CSS. **Vite et Vitest ont été retir
 - Départ commun après 4 secondes, texte aléatoire conforme aux options, progression partagée, bots avec variations et erreurs simulées, abandon après inactivité de frappe, résultats simples et retour au salon. La saisie en cours est restaurée après rechargement. Une arrivée après le départ est spectatrice jusqu’à la prochaine course.
 - La nouvelle interface du lobby est actuellement en français ; le header conserve son sélecteur FR/EN. La traduction intégrale de ce nouvel écran, les bonus de jeu et les statistiques avancées/heatmaps du cahier des charges restent des travaux distincts.
 
+## Pistes et podium du salon partagé
+
+Pendant la course, les pistes restent dans l’ordre des participants, au-dessus de la saisie. La position représente la progression validée ; le pseudo et la couleur restent fixes. Le classement utilise l’ordre d’arrivée, puis la progression, avec les abandons à la fin et un rang partagé en cas d’égalité. Aucun bonus ne modifie ce classement.
+
+Tous partent en guépards. Les espèces suivent ensuite le rang : guépard, gazelle, lièvre, puis paliers renard/panda et tortue en dernier. À deux joueurs : guépard/tortue ; à trois : guépard/gazelle/tortue. Un changement doit persister 900 ms ; une égalité temporaire conserve l’espèce précédente. Le podium reprend les participants réels et cette même règle. La revanche réinitialise les apparences. Les animations respectent la réduction des mouvements.
+
+L’atlas transparent `public/assets/race-runners.png` a été généré pour ce projet : six animaux de profil tournés vers la droite, volumes arrondis, texture de feutre et crayon, contours artisanaux, grille 3 × 2 (guépard, gazelle, lièvre / renard, panda, tortue), marge autour de chaque silhouette. Les positions et transformations restent des éléments d’interface indépendants.
+
+Le test `tests/e2e/visual-race.spec.ts` vérifie les dépassements, égalités, pistes fixes, podium, revanche et largeur mobile. `tests/race-ranking.test.jsx` couvre les règles de classement et de transformation.
+
 ## Stockage et futur PostgreSQL
 
 Sans base configurée, `.data/rooms.json` conserve les salons entre redémarrages. Le fichier est ignoré par Git. Ce mode est destiné à une seule instance Node locale. Les salons expirent après 24 h et sont nettoyés lors d’une nouvelle création.
@@ -101,3 +111,9 @@ npm run build
 ```
 
 Les tests Playwright utilisent Chrome installé sur macOS s’il est présent, ou le navigateur Playwright par défaut. `PLAYWRIGHT_CHROME_PATH` permet de préciser un autre exécutable ; ailleurs, installer Chromium avec `npx playwright install chromium`. Les tests créent des salons temporaires sur le serveur local. Les captures de vérification sont enregistrées sous `/tmp/guepard-lobby-*.png`.
+
+## Guide, foulées et résultats
+
+`/how` présente quatre étapes illustrées, une navigation active et les liens vers le jeu rapide et la création. Les sprites `race-gaits.png` contiennent quatre poses distinctes par espèce ; `sleeping-tail.png` anime la queue du guépard endormi. Les prompts et les références sont dans `public/assets/PLAY-EXPERIENCE-PROMPTS.md`. Les foulées cessent à l’arrêt et respectent la réduction des animations. Elles ne modifient jamais la progression serveur.
+
+Le podium du salon partagé affiche vitesse, précision et score de frappe (nombre de caractères validés, sans changement de la règle de classement). L’heure de fin est enregistrée par le serveur. La revanche est une action atomique réservée à l’hôte. Les résultats personnels alimentent les statistiques locales ; la heatmap compte les touches attendues et les erreurs de saisie sur cet appareil et cette session. Aucun historique de frappes distantes n’est inventé.
