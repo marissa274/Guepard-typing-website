@@ -19,9 +19,9 @@ npm start     # Serveur de production sur le port 5173
 
 ## Accueil
 
-La page `/races` présente trois grandes cartes de jungle illustrées (canopée, rivière, clairière dorée), avec paysages en pleine surface, grands textes contrastés, boutons directement sur les cartes et superposition native au défilement via `position: sticky`. Sur les écrans trop courts et avec `prefers-reduced-motion`, les cartes défilent normalement pour préserver la lisibilité. Les courses restent celles de la démonstration existante. Les illustrations et leurs prompts sont documentés dans `public/assets/RACE-PROMPTS.md`.
+La page `/races` présente uniquement les salons publics réellement ouverts. Chaque carte utilise le paysage entier associé à l’animal de la course, avec nom, nombre de joueurs, état et action « Rejoindre » ou « Regarder la course ». Quand aucun salon public n’existe, elle affiche un état vide et une action de création. Les cartes se superposent au défilement sur les grands écrans ; avec `prefers-reduced-motion`, elles défilent normalement. Les illustrations et leurs prompts sont documentés dans `public/assets/RACE-PROMPTS.md`.
 
-Un header avec le logo original agrandi, une seule scène de jungle, puis le footer. Le tableau central contient trois liens accessibles : rejoindre une course, créer une course privée, parcourir les courses. Les assets, les animations CSS, les profondeurs et la préférence de réduction des mouvements sont conservés. Tailwind gère les mises en page des nouveaux éléments sans appliquer de reset à la direction artistique existante.
+Un header avec le logo original agrandi, une seule scène de jungle, puis le footer. Le tableau central contient trois liens accessibles : rejoindre rapidement, créer une course privée et parcourir les courses publiques. `/play` rejoint un salon public en attente ou en crée un si nécessaire. Les animations, profondeurs et la préférence de réduction des mouvements sont conservées.
 
 ## Architecture
 
@@ -29,19 +29,19 @@ Un header avec le logo original agrandi, une seule scène de jungle, puis le foo
 - `app/[[...path]]/page.jsx` : point d’entrée App Router ; navigation avec `next/link`.
 - `src/components/` : composants React de la scène, du header, du footer, des courses, du jeu et des fenêtres de démonstration.
 - `src/hooks/useParallax.js` : parallaxe bornée, avec nettoyage des événements et respect de `prefers-reduced-motion`.
-- `src/data.js` : adaptateur de démonstration pour les courses publiques, textes et salons privés ; à remplacer par une API.
+- `src/data.js` : adaptateur des anciens parcours de démonstration ; les salons publics et privés utilisent l’API `/api/rooms`.
 - `src/i18n.js` : traductions partagées.
 - `app/globals.css` : Tailwind CSS et ajustements de la pancarte/logo.
 - `src/style.css`, `src/jungle.css` : styles et animations historiques préservés.
 - `public/assets/` : illustrations et documents des prompts.
 
-Les chemins `/login`, `/signup`, `/races`, `/private`, `/race/:id`, `/how`, `/stats` et les pages d’information sont accessibles directement. Les anciens liens `#/…` sont redirigés vers les nouveaux chemins. Les préférences existantes `guepard-*` sont reprises.
+Les chemins `/login`, `/signup`, `/play`, `/races`, `/private`, `/lobby/:id`, `/race/:id`, `/how`, `/stats` et les pages d’information sont accessibles directement. Les anciens liens `#/…` sont redirigés vers les nouveaux chemins. Les préférences existantes `guepard-*` sont reprises.
 
 ## Démonstration et futur backend
 
-L’authentification reste explicitement un compte de démonstration. Les courses publiques et les adversaires sont fictifs ; la saisie, la précision, le chronomètre et les résultats sont calculés localement.
+L’authentification reste explicitement un compte de démonstration. Les anciens parcours `/race/:id` sont locaux ; les salons `/lobby/:id` sont partagés entre navigateurs.
 
-La création de course ouvre désormais un salon partagé `/lobby/:id`. Les paramètres, participants et départ sont synchronisés entre navigateurs. Les cartes historiques restent des démonstrations lorsqu’aucun salon public n’est ouvert.
+La création de course ouvre un salon partagé `/lobby/:id`. Les paramètres, participants et départ sont synchronisés entre navigateurs. La page des courses publiques n’affiche aucun salon fictif.
 
 Les préférences et profils de démonstration utilisent localStorage. L’identité et les résultats d’un invité utilisent sessionStorage et disparaissent à la fin de sa session de navigation. Les informations légales et coordonnées restent à compléter avant publication.
 
@@ -74,9 +74,9 @@ Le site utilise React, Next.js et Tailwind CSS. **Vite et Vitest ont été retir
 ## Lobby de jungle et identité animale
 
 - `/private` : création d’un salon, avec choix obligatoire parmi guépard, perroquet et crocodile. Le catalogue `src/lib/animals.ts` lie ces animaux aux paysages `race-sun.png`, `race-canopy.png` et `race-river.png`. Aucune image libre n’est requise ni acceptée pour les cartes.
-- `/signup` : choix d’un avatar personnel distinct de l’animal du salon. Le choix est appliqué au compte de démonstration. L’authentification réelle Discord/GitHub et par mot de passe reste à brancher ; l’interface le précise.
+- `/signup` : choix d’un portrait personnel parmi six animaux, distinct de l’animal et du paysage du salon. Une variante aux yeux fermés apparaît en mode nuit. Le choix est appliqué au compte de démonstration. L’authentification réelle reste à brancher.
 - Invité : guépard attribué par le serveur ; pseudo et résultats locaux limités à la session.
-- `/lobby/:id` : header existant, deux tableaux de bois clair, réglages dépliables, animaux réutilisés de l’accueil, footer existant. Aucun emoji décoratif ajouté. Animations séparées des contrôles, pause du singe/toucan au focus et respect de la réduction des animations.
+- `/lobby/:id` : forêt pleine page, tableaux de bois clair avec veinures et fissures discrètes, réglages dépliables, animaux réutilisés de l’accueil et footer existant. Aucun emoji décoratif ajouté. Animations séparées des contrôles, pause du singe/toucan au focus et respect de la réduction des animations.
 - Seul l’hôte configure, désigne les spectateurs, ajoute des bots, choisit leur niveau individuel et retire les participants. Le minimum est deux joueurs, bots inclus ; les spectateurs ne comptent pas. Pas de validation « prêt » ni de plafond fixe de participants. Un groupe de 32 personnes a été testé via l’API.
 - Public : carte visible dans `/races`. Semi-public : code à saisir. Privé : lien généré par l’hôte, valable 30 minutes, consommé atomiquement à la première utilisation. L’hôte peut générer une nouvelle invitation par personne.
 - Synchronisation : flux SSE authentifié par jeton de membre, avec reconnexion automatique. Le serveur relit les données toutes les 600 ms et pousse les révisions ; le navigateur ne recharge pas la page. Jetons dans sessionStorage, jamais inclus dans la liste des participants. Un retrait révoque l’accès ; quitter comme hôte ferme le salon.

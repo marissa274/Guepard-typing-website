@@ -1,9 +1,7 @@
 /* Shared, illustrated animal identities. The art comes from the home page. */
-.animal-avatar{display:inline-block;flex:0 0 auto;width:54px;height:54px;border-radius:50%;border:1px solid #bfba91;background-color:#f7e7c6;background-repeat:no-repeat;vertical-align:middle;background-image:url('/assets/relief-animals.png');background-size:300% 200%}
-.avatar-cheetah{background-image:url('/assets/cheetahs-3d-marker.png');background-size:245% 125%;background-position:99% 15%}
-.avatar-parrot{background-position:50% 0}.avatar-crocodile{background-position:50% 100%}
-[data-theme=dark] .animal-avatar{background-image:url('/assets/animals-night.png');background-color:#e7d4aa}
-[data-theme=dark] .avatar-cheetah{background-image:url('/assets/cheetahs-night.png')}
+.animal-avatar{display:inline-block;flex:0 0 auto;width:54px;height:54px;border-radius:50%;border:2px solid #f7e7c6;background-color:#f7e7c6;background-repeat:no-repeat;vertical-align:middle;background-image:url('/assets/animal-portraits.png');background-size:300% 200%;box-shadow:0 2px 0 #967447,0 4px 8px #3a2c1930}
+.avatar-cheetah{background-position:0 0}.avatar-parrot{background-position:50% 0}.avatar-crocodile{background-position:100% 0}.avatar-monkey{background-position:0 100%}.avatar-elephant{background-position:50% 100%}.avatar-toucan{background-position:100% 100%}
+[data-theme=dark] .animal-avatar{background-image:url('/assets/animal-portraits-night.png');background-color:#163451}
 .account summary{display:flex;align-items:center;gap:8px}.account summary .animal-avatar,.expeditions-identity summary .animal-avatar{width:32px;height:32px}
 .guest-animal,.create-identity{display:flex;align-items:center;gap:13px;margin:20px 0;font-size:13px;line-height:1.6}
 .animal-picker{border:0;margin:0;padding:0;min-width:0}.animal-picker legend{font-size:14px;font-weight:800;margin-bottom:12px}.animal-options{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}.animal-options label{position:relative;isolation:isolate;display:flex;flex-direction:column;align-items:center;gap:8px;padding:13px 8px;background:#fff8e7;border:2px solid #c7bd9b;border-radius:15px;cursor:pointer;text-align:center;overflow:hidden;margin:0}.animal-options label.selected{border-color:#2f6b3d;box-shadow:0 0 0 2px #5bae4a40}.animal-options input{position:absolute;right:8px;top:8px;accent-color:#2f6b3d;width:15px;height:15px;min-height:0!important;padding:0}.animal-options label:focus-within{outline:3px solid #f28c28;outline-offset:3px}.animal-options strong{display:block;font-size:12px;color:#24482f}.animal-options small{font-size:11px;color:#526b45;display:block;margin-top:3px}.animal-picker-landscape label{min-height:195px;padding-top:100px;align-items:flex-start;text-align:left}.animal-option-landscape{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:-2}.animal-picker-landscape label::after{content:'';position:absolute;inset:40% 0 0;z-index:-1;background:linear-gradient(transparent,#f7e7c6 75%)}.animal-picker-landscape .animal-avatar{width:45px;height:45px}.animal-picker-landscape input{background:#fff8e7}.animal-picker-landscape label.selected{border-color:#f28c28;box-shadow:0 0 0 3px #f28c2850}
@@ -19,3 +17,59 @@
 @media(prefers-reduced-motion:reduce){.lobby-monkey .animal-cutout,.lobby-toucan,.lobby-toucan .animal-cutout,.lobby-leaves .leaves-cutout,.lobby-page+.compact-footer .footer-cheetah{animation:none!important;transform:none!important}}
 .woodland-page .animal-options input[type=radio]{width:16px;height:16px;min-height:0;padding:0;margin:0;box-shadow:none;accent-color:#2f6b3d}
 .room-roster:has(.person-menu[open]){padding-bottom:90px}
+/* The lobby is another clearing in the same illustrated forest as the home scene. */
+.lobby-page{padding-top:74px;padding-bottom:170px}
+.lobby-page .woodland-scenery{background:linear-gradient(90deg,#163a2445 0%,#f7e7c633 24%,#f7e7c638 75%,#153e294e 100%),linear-gradient(180deg,#f7e7c622,#f7e7c66b 65%,#f7e7c66a),url('/assets/relief-background.png') center top/cover}
+.lobby-page .woodland-shell{max-width:1480px}
+.lobby-page .woodland-title{padding:17px 23px;background:#f7e7c6c7;border-radius:24px;box-shadow:0 6px 28px #17351e20;backdrop-filter:blur(3px)}
+.lobby-page .woodland-title h1{font-size:clamp(40px,4.3vw,70px);line-height:1.05;margin:13px 0 2px}
+.lobby-page .lobby-title-row{margin-bottom:65px}
+.lobby-page .woodland-back{font-size:17px;font-weight:750;background:#f7e7c6de;border-radius:24px;padding:9px 15px}
+.lobby-page .room-connection{font-size:14px;background:#f7e7c6db;padding:9px 14px;border-radius:24px}
+.lobby-page .room-status,.lobby-page .room-host{font-size:16px;font-weight:800}
+.lobby-page .room-invitation{background:#f3dab0ef;padding:20px 23px;width:min(100%,370px);border:2px solid #b78c55;border-radius:17px 24px 19px 16px;box-shadow:0 6px 0 #9f7444,0 12px 26px #17351e24}
+.lobby-page .room-invitation p,.lobby-page .room-invitation button{font-size:16px}
+.lobby-page .room-code{font-size:34px}
+.lobby-page .woodland-eyebrow{font-size:13px;letter-spacing:1.6px}
+.lobby-page .lobby-panels{grid-template-columns:minmax(0,1fr) minmax(0,1.08fr);gap:42px}
+.lobby-page .wood-panel{background-image:url('/assets/wood-cracks.svg'),repeating-linear-gradient(1deg,transparent 0 91px,#ad804327 92px,#fff1cc75 94px,transparent 96px),repeating-linear-gradient(177deg,transparent 0 9px,#9e753608 11px,transparent 12px),linear-gradient(100deg,#f8e4bb,#eacb93 70%,#e5bd80);background-size:680px 700px,auto,auto,auto;background-position:center top;padding:36px;border-width:3px;border-radius:19px 27px 16px 24px;box-shadow:0 10px 0 #ae7d46,0 15px 0 #694b2f55,0 26px 48px #17351e48}
+.lobby-page .wood-panel-heading h2{font-size:clamp(29px,2.4vw,38px)}
+.lobby-page .wood-panel-heading h2>span{font-size:21px}
+.lobby-page .wood-hint,.lobby-page .settings-access,.lobby-page .roster-note{font-size:15px;line-height:1.55}
+.lobby-page .wood-small-button{font-size:16px;padding:13px 17px;min-height:50px}
+.lobby-page label,.lobby-page .wood-disclosure summary{font-size:16px}
+.lobby-page input,.lobby-page select,.lobby-page textarea{font-size:16px;min-height:49px}
+.lobby-page .room-roster{max-height:700px}
+.lobby-page .room-roster>li{min-height:93px;gap:16px;padding:13px 7px;background:#fff3d747;border:1px solid #bd985e5c;border-radius:13px;margin:8px 0}
+.lobby-page .room-roster .animal-avatar{width:67px;height:67px}
+.lobby-page .person-copy>strong{font-size:19px}
+.lobby-page .person-tags span{font-size:13px;padding:3px 7px}
+.lobby-page .person-copy>select,.lobby-page .person-menu button{font-size:14px}
+.lobby-page .room-launch{background:#f2dbb3f0;padding:24px 30px;border:2px solid #b78c55;border-radius:17px 22px 16px 21px;box-shadow:0 6px 0 #a97946,0 13px 25px #17351e30;margin-top:45px}
+.lobby-page .room-launch strong{font-size:21px}.lobby-page .room-launch p{font-size:16px}
+.lobby-page .wood-primary{font-size:21px;min-height:65px}
+.lobby-world-animals{position:absolute;inset:0;z-index:1;pointer-events:none;overflow:hidden}
+.lobby-world-animal{position:absolute;width:clamp(140px,16vw,240px);aspect-ratio:1;filter:drop-shadow(4px 12px 8px #17351e50);animation:lobby-world-bob 9s ease-in-out infinite alternate}
+.lobby-parrot{top:7%;right:-15px;animation-delay:-2s;transform:rotate(-6deg)}
+.lobby-elephant{top:45%;left:-85px;width:clamp(185px,21vw,320px);animation-delay:-5s}
+.lobby-crocodile{bottom:4%;right:-55px;width:clamp(210px,24vw,365px);animation-delay:-7s}
+.lobby-giraffe{top:20%;right:-45px;width:clamp(130px,15vw,230px);aspect-ratio:2/3;animation-delay:-3s}
+.lobby-giraffe img{width:100%;height:100%;object-fit:contain}
+.lobby-leaves-upper-left{top:12%;bottom:auto;left:-105px;transform:rotate(165deg);width:250px;height:250px;z-index:1}
+.lobby-leaves-upper-right{top:30%;bottom:auto;right:-95px;transform:scaleX(-1) rotate(125deg);width:240px;height:240px;z-index:1}
+.lobby-leaves-upper-left .leaves-cutout{animation-delay:-2s}.lobby-leaves-upper-right .leaves-cutout{animation-delay:-6s}
+@keyframes lobby-world-bob{from{translate:0 0}to{translate:0 -9px}}
+[data-theme=dark] .lobby-page .woodland-scenery{background:linear-gradient(90deg,#071b33aa,#122c4770 28%,#122c4770 73%,#071b33af),url('/assets/jungle-blue-night.png') center top/cover}
+[data-theme=dark] .lobby-page .woodland-title,[data-theme=dark] .lobby-page .room-connection,[data-theme=dark] .lobby-page .woodland-back{background:#173b48dd;color:#f7e7c6}
+[data-theme=dark] .lobby-page .room-invitation,[data-theme=dark] .lobby-page .room-launch{background:#d9bd91f2;color:#2f3c29}
+[data-theme=dark] .lobby-page .wood-panel{filter:none;background-image:url('/assets/wood-cracks.svg'),repeating-linear-gradient(1deg,transparent 0 91px,#ad804327 92px,#fff1cc75 94px,transparent 96px),linear-gradient(100deg,#e7cfa5,#d4b785 70%,#c6a577)}
+.expeditions-page{font-size:17px}.expeditions-intro h1{font-size:clamp(42px,4.5vw,70px);max-width:900px}.expeditions-lead{font-size:20px;max-width:720px}.expedition-create{display:inline-flex;align-items:center;gap:25px;padding:16px 22px;border-radius:14px;background:#f28c28;color:#2f321c!important;box-shadow:0 5px 0 #ab652c;font-size:18px!important;font-weight:800}
+.expedition-card{min-height:clamp(570px,72svh,760px);margin-bottom:80px}.expedition-copy{width:60%}.expedition-copy h2{font-size:clamp(42px,4.5vw,72px)}.expedition-card::after{background:linear-gradient(90deg,#102e20ee,#173b2bdc 35%,#173b2b56 68%,transparent 90%)}.expedition-card:nth-child(even)::after{background:linear-gradient(270deg,#102e20ee,#173b2bdc 35%,#173b2b56 68%,transparent 90%)}
+.course-code-entry{font-size:17px}.course-code-entry input,.course-code-entry button{font-size:16px;min-height:48px}.expeditions-scroll-hint,.expeditions-identity summary{font-size:15px}
+.public-rooms-empty{position:relative;overflow:hidden;max-width:1680px;margin:auto;min-height:500px;border-radius:34px;display:flex;align-items:center;padding:60px;color:#fff1d3;background:#255637;box-shadow:0 8px 0 #173a25,0 24px 40px #173a2538}
+.public-rooms-empty-art{position:absolute;inset:0;background:linear-gradient(90deg,#173c2cf2 0%,#173c2cbf 48%,#173c2c19 100%),url('/assets/relief-background.png') center/cover}
+.public-rooms-empty>div:last-child{position:relative;z-index:1;max-width:600px}.public-rooms-empty .expeditions-eyebrow{color:#f6c445}.public-rooms-empty h2{font-size:clamp(34px,4vw,60px);line-height:1.1}.public-rooms-empty p:not(.expeditions-eyebrow){font-size:20px;margin:22px 0;line-height:1.5}.public-rooms-empty .wood-primary{width:fit-content;font-size:19px}.public-rooms-loading,.public-rooms-error{max-width:1680px;margin:30px auto;padding:22px 35px;font-size:19px}
+@media(max-width:1050px){.lobby-page .lobby-panels{grid-template-columns:1fr;gap:70px}.lobby-page .wood-panel{padding:32px}.lobby-page .lobby-title-row{align-items:stretch;flex-direction:column}.lobby-page .room-invitation{width:min(100%,440px)}.lobby-world-animal{opacity:.82}.lobby-parrot{top:5%}.lobby-elephant{top:37%}.lobby-crocodile{bottom:7%}}
+@media(max-width:800px){.lobby-page .lobby-title-row{flex-direction:column}.lobby-page .room-invitation{width:min(100%,440px)}.lobby-page .woodland-title{max-width:100%}.lobby-page .room-launch{flex-direction:column;align-items:stretch}.lobby-page .room-roster{max-height:440px}.lobby-world-animal{opacity:.55}.lobby-giraffe{display:none}.lobby-leaves-upper-right{top:50%;width:175px;height:175px}.lobby-leaves-upper-left{width:185px;height:185px}.expedition-card{min-height:780px}.expedition-copy{width:100%}.public-rooms-empty{min-height:480px;padding:40px 28px}}
+@media(max-width:550px){.lobby-page{padding:55px 14px 145px}.lobby-page .wood-panel{padding:25px 18px}.lobby-page .woodland-title h1{font-size:39px}.lobby-page .wood-panel-heading h2{font-size:27px}.lobby-page .room-roster .animal-avatar{width:56px;height:56px}.lobby-page .person-copy>strong{font-size:17px}.lobby-page .wood-fields{grid-template-columns:1fr}.lobby-world-animals{opacity:.55}.lobby-page .lobby-title-row{margin-bottom:50px}.lobby-page .room-launch{padding:22px}.expedition-card{min-height:730px;padding:270px 23px 32px;margin-bottom:32px}.expedition-card::after,.expedition-card:nth-child(even)::after{background:linear-gradient(0deg,#102e20f7 0%,#173b2be7 50%,#173b2b43 91%)}.expedition-copy h2{font-size:42px}.expeditions-lead{font-size:17px}.course-code-entry{padding:0 5px}.public-rooms-empty h2{font-size:36px}}
+@media(prefers-reduced-motion:reduce){.lobby-world-animal{animation:none}.lobby-leaves-upper-left .leaves-cutout,.lobby-leaves-upper-right .leaves-cutout{animation:none}}
