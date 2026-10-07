@@ -1,0 +1,58 @@
+.expeditions-page{background:var(--paper);padding:70px 24px 140px}
+.expeditions-intro,.expeditions-toolbar,.expedition-stack,.expeditions-end{max-width:1680px;margin-inline:auto}
+.expeditions-intro{display:flex;align-items:flex-end;justify-content:space-between;gap:36px;padding:0 36px 48px}
+.expeditions-eyebrow{font-size:11px;letter-spacing:2.5px;font-weight:800;color:var(--green);margin-bottom:20px}
+.expeditions-intro h1{font-size:clamp(42px,5vw,76px);line-height:1.08;letter-spacing:-3px;color:var(--ink);font-weight:800}
+.expeditions-intro h1 em{font-family:'Kalam',cursive;font-weight:700;font-style:normal;color:var(--green);letter-spacing:-2px}
+.expeditions-lead{font-size:16px;line-height:1.7;margin-top:22px;color:var(--muted);max-width:560px}
+.expeditions-intro-actions{display:flex;flex-direction:column;align-items:center;gap:17px;padding-bottom:9px;flex-shrink:0}
+.expeditions-intro-actions .button{gap:30px;padding:17px 23px;border-radius:15px;font-size:15px}
+.expeditions-intro-actions>a{font-size:13px;color:var(--green);font-weight:700}
+.expeditions-intro-actions>a span{margin-left:10px}
+.expeditions-toolbar{position:relative;display:flex;align-items:center;justify-content:space-between;gap:15px;border-top:1px solid var(--line);padding:20px 36px 27px}
+.expeditions-scroll-hint{display:flex;align-items:center;gap:12px;font-size:12px;color:var(--muted)}
+.expeditions-scroll-hint>span{display:grid;place-items:center;width:28px;height:28px;border:1px solid var(--line);border-radius:50%;color:var(--green);font-size:17px}
+.expeditions-tools{display:flex;gap:13px;align-items:center}
+.expeditions-identity{position:relative}
+.expeditions-identity summary{cursor:pointer;list-style:none;font-size:12px;font-weight:600;color:var(--green);max-width:220px;overflow-wrap:anywhere}
+.expeditions-identity summary::-webkit-details-marker{display:none}
+.expeditions-identity summary>span{padding-left:9px}
+.expeditions-identity-panel{position:absolute;right:0;top:calc(100% + 15px);z-index:30;width:280px;padding:23px;background:var(--card);border:1px solid var(--line);border-radius:20px;box-shadow:0 12px 40px #17332322}
+.expeditions-refresh{display:grid;place-items:center;width:35px;height:35px;border:1px solid var(--line);border-radius:50%;font-size:19px;color:var(--green)}
+.expedition-stack{position:relative;isolation:isolate;padding-bottom:25px}
+.expedition-card{position:sticky;top:calc(18px + var(--card-index)*18px);z-index:calc(1 + var(--card-index));isolation:isolate;display:flex;align-items:center;min-height:clamp(680px,84svh,960px);padding:clamp(40px,5.5vw,94px);margin-bottom:120px;color:#f7e7c6;background:#2f6b3d;border-radius:34px 40px 32px 38px;overflow:hidden;border:1px solid #2f6b3d55;box-shadow:0 -8px 28px #192f2020,0 8px 0 #183a2230;scroll-margin-top:90px}
+.expedition-card::after{content:'';position:absolute;inset:0;z-index:1;pointer-events:none;background:linear-gradient(90deg,#102e20f5 0%,#173b2be8 30%,#183c2ab0 46%,#173b2b35 67%,transparent 85%)}
+.expedition-card:last-child{margin-bottom:0}
+.expedition-card:focus-within{z-index:20}
+.expedition-copy{position:relative;z-index:2;width:57%;max-width:710px;min-width:0;padding:12px 0;text-shadow:0 2px 14px #102c2040}
+.expedition-topline{display:flex;justify-content:space-between;gap:15px;align-items:center;margin-bottom:36px}
+.expedition-number{font-size:18px;font-weight:800;letter-spacing:2px;font-variant-numeric:tabular-nums}
+.expedition-status{display:inline-flex;align-items:center;gap:10px;border:1px solid #f7e7c678;border-radius:30px;padding:10px 16px;font-size:14px;background:#173b2bbb;white-space:nowrap}
+.expedition-status i{width:8px;height:8px;border-radius:50%;background:#f6c445}
+.expedition-status i.running{background:#5bc0eb}
+.expedition-place{font-size:14px;font-weight:800;text-transform:uppercase;letter-spacing:2.5px;color:#f6c445;margin-bottom:17px}
+.expedition-copy h2{font-size:clamp(46px,5vw,82px);line-height:1.04;letter-spacing:-2px;text-wrap:balance;color:#fff2d4}
+.expedition-description{font-size:clamp(19px,1.6vw,24px);line-height:1.6;max-width:570px;margin-top:26px;color:#f7e7c6}
+.expedition-meta{display:flex;flex-wrap:wrap;gap:12px;margin:30px 0}
+.expedition-meta>span{border:1px solid #f7e7c665;background:#173b2bbd;border-radius:10px;padding:10px 14px;font-size:15px;font-weight:600}
+.expedition-join{display:flex;align-items:center;justify-content:space-between;gap:38px;width:fit-content;min-width:300px;min-height:66px;padding:18px 25px;border-radius:14px 18px 13px 16px;background:#f6c445;color:#203e25;border:2px solid #ffe08b;font-size:20px;font-weight:900;text-shadow:none;box-shadow:0 5px 0 #986329,0 8px 20px #0a201c45;transition:transform .18s,box-shadow .18s}
+.expedition-join>span{font-size:30px;line-height:1}
+.expedition-join:hover{transform:translateY(-3px);box-shadow:0 8px 0 #986329,0 12px 24px #0a201c45}
+.expedition-footnote{display:block;font-size:12px;margin-top:20px;color:#e5dabc}
+.expedition-art{position:absolute;inset:0;z-index:0;pointer-events:none}
+.expedition-art img{display:block;width:100%;height:100%;object-fit:cover;object-position:center}
+.expedition-art-label{position:absolute;bottom:28px;right:28px;display:flex;align-items:center;gap:12px;border:1px solid #f7e7c660;border-radius:30px;background:#173b2be8;color:#f7e7c6;padding:12px 17px;font-size:11px;letter-spacing:1.5px;font-weight:700}
+.expedition-art-label span{font-size:19px;color:#f6c445}
+.expedition-card:nth-child(even){justify-content:flex-end}
+.expedition-card:nth-child(even)::after{background:linear-gradient(270deg,#102e20f5 0%,#173b2be8 30%,#183c2ab0 46%,#173b2b35 67%,transparent 85%)}
+.expedition-card:nth-child(even) .expedition-art-label{right:auto;left:28px}
+.expeditions-end{text-align:center;padding:55px 20px 0;color:var(--green)}
+.expeditions-end>span{font-size:37px;color:#5bae4a}
+.expeditions-end p{font-family:'Kalam',cursive;font-size:25px;margin:12px 0}
+.expeditions-end small{display:block;font-size:11px;color:var(--muted);max-width:540px;margin:auto;line-height:1.7}
+.expeditions-page a:focus-visible,.expeditions-page button:focus-visible,.expeditions-page summary:focus-visible{outline:3px solid #f6c445;outline-offset:5px}
+[data-theme=dark] .expedition-art img{filter:brightness(.7)}
+@media(max-width:1000px){.expeditions-intro,.expeditions-toolbar{padding-inline:15px}.expedition-card{padding:42px;min-height:720px}.expedition-copy{width:66%}.expedition-copy h2{font-size:56px}.expedition-description{font-size:20px}.expedition-topline{margin-bottom:28px}.expedition-status{font-size:12px}.expedition-join{font-size:18px;min-width:270px}}
+@media(max-width:700px){.expeditions-page{padding:45px 12px 100px}.expeditions-intro{flex-direction:column;align-items:flex-start;gap:22px;padding-bottom:30px}.expeditions-intro h1{font-size:45px;letter-spacing:-2px}.expeditions-lead{font-size:15px;margin-top:15px}.expeditions-intro-actions{align-items:flex-start}.expeditions-intro-actions>a{font-size:14px}.expeditions-eyebrow{font-size:11px;margin-bottom:14px}.expeditions-toolbar{padding:16px 4px 23px}.expeditions-scroll-hint{font-size:11px;max-width:160px;gap:7px}.expeditions-identity summary{font-size:11px;max-width:135px}.expeditions-tools{gap:7px}.expedition-card{min-height:900px;padding:290px 25px 35px;align-items:flex-end;border-radius:26px;top:calc(12px + var(--card-index)*12px);margin-bottom:65px}.expedition-copy{width:100%;padding:0}.expedition-card::after,.expedition-card:nth-child(even)::after{background:linear-gradient(0deg,#102e20fc 0%,#173b2bf2 42%,#173b2b90 67%,transparent 90%)}.expedition-art img{object-position:67% top}.expedition-river .expedition-art img{object-position:30% top}.expedition-copy h2{font-size:46px;letter-spacing:-1.5px}.expedition-topline{margin-bottom:23px}.expedition-place{font-size:12px;letter-spacing:1.6px;margin-bottom:13px}.expedition-description{font-size:18px;line-height:1.55;margin-top:20px}.expedition-meta{margin:24px 0;gap:9px}.expedition-meta>span{font-size:13px;padding:9px 11px}.expedition-number{font-size:16px}.expedition-status{font-size:12px;padding:8px 12px}.expedition-join{min-width:0;min-height:62px;width:100%;font-size:18px;padding:16px 18px;gap:12px}.expedition-footnote{font-size:11px;margin-top:18px}.expedition-art-label{display:none}.expeditions-end p{font-size:23px}.expeditions-identity-panel{right:-38px}}
+@media(max-height:780px),(max-width:700px){.expedition-card{position:relative;top:auto;margin-bottom:32px}}
+@media(prefers-reduced-motion:reduce){.expedition-card{position:relative;top:auto;margin-bottom:32px}.expedition-join{transition:none}.expedition-join:hover{transform:none}}

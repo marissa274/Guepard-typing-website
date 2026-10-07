@@ -1,6 +1,6 @@
 # GUÉPARD — React, Next.js et Tailwind CSS
 
-Site React avec serveur de salons Next.js, avec les illustrations, le mode nuit et les animations de la jungle conservés.
+Interface frontend bilingue, avec les illustrations, le mode nuit et les animations de la jungle conservés.
 
 ## Démarrer
 
@@ -18,6 +18,8 @@ npm start     # Serveur de production sur le port 5173
 ```
 
 ## Accueil
+
+La page `/races` présente trois grandes cartes de jungle illustrées (canopée, rivière, clairière dorée), avec paysages en pleine surface, grands textes contrastés, boutons directement sur les cartes et superposition native au défilement via `position: sticky`. Sur les écrans trop courts et avec `prefers-reduced-motion`, les cartes défilent normalement pour préserver la lisibilité. Les courses restent celles de la démonstration existante. Les illustrations et leurs prompts sont documentés dans `public/assets/RACE-PROMPTS.md`.
 
 Un header avec le logo original agrandi, une seule scène de jungle, puis le footer. Le tableau central contient trois liens accessibles : rejoindre une course, créer une course privée, parcourir les courses. Les assets, les animations CSS, les profondeurs et la préférence de réduction des mouvements sont conservés. Tailwind gère les mises en page des nouveaux éléments sans appliquer de reset à la direction artistique existante.
 
@@ -39,7 +41,7 @@ Les chemins `/login`, `/signup`, `/races`, `/private`, `/race/:id`, `/how`, `/st
 
 L’authentification reste explicitement un compte de démonstration. Les courses publiques et les adversaires sont fictifs ; la saisie, la précision, le chronomètre et les résultats sont calculés localement.
 
-La création passe désormais par `/api/lobbies` et ouvre `/lobby/:code`. Le salon est partagé entre les navigateurs qui utilisent la même instance Next.js. Les anciens salons locaux restent consultables sur `/race/:id`. Les cartes de courses de démonstration historiques restent fictives.
+La création d’une course privée utilise à nouveau la démonstration locale : nom, langue et identifiant conservés sur cet appareil. L’écran de lobby partagé et son API ont été retirés à la demande de l’utilisatrice, avant une refonte fondée sur le cahier des charges. Aucun partage multijoueur n’est actuellement proposé.
 
 Les données de démo et préférences sont stockées dans localStorage et peuvent être réinitialisées depuis Confidentialité. Les informations légales et coordonnées restent à compléter avant publication.
 
@@ -68,15 +70,3 @@ Le panneau central comprend trois planches de bois séparées, suspendues à deu
 - Les nouveaux assets et prompts sont documentés dans `public/assets/AUTH-PROMPTS.md`.
 
 Le site utilise React, Next.js et Tailwind CSS. **Vite et Vitest ont été retirés**, y compris des dépendances transitives. Les tests de développement utilisent Jest et React Testing Library. Les fichiers de l’ancienne compilation Vite ne sont plus dans le projet.
-
-## Salons partagés
-
-- `/private` crée un salon et attribue à son créateur un jeton d’hôte ; `/races` permet de saisir un code et liste les vrais salons publics en plus des exemples historiques.
-- `/lobby/:code` affiche participants, rôles joueur/spectateur, bots, paramètres et lancement. Copier le code ou le lien permet de rejoindre le salon depuis un autre navigateur qui accède au même serveur. Sur un autre appareil, utiliser une adresse réseau accessible plutôt que localhost.
-- Synchronisation par requête toutes les secondes, sans chevauchement des requêtes. Les mises à jour obsolètes sont ignorées grâce au numéro de révision.
-- Le serveur vérifie les jetons et réserve paramètres, retrait des participants, départ et retour au salon à l’hôte. Les jetons ne sont jamais exposés dans les listes ; chaque navigateur les garde en sessionStorage. Un participant retiré perd son accès. Un départ volontaire de l’hôte ferme le salon.
-- Les salons semi-publics et privés se rejoignent par code/lien et restent absents de la liste publique. Aucune invitation nominative n’est implémentée.
-- Départ commun après 3 secondes ; texte généré selon les options, mode spectateur, erreurs bloquantes, limite de temps et progression simulée des bots selon leur difficulté. La saisie et les résultats individuels restent locaux : les positions en direct des autres joueurs ne sont pas encore partagées.
-- Stockage **en mémoire du processus Next.js** : expiration après 24 h, perte des salons au redémarrage, maximum 200 salons et 16 places par salon. Pour un déploiement sur plusieurs instances, remplacer ce stockage par une base partagée et ajouter une gestion durable des sessions et de la présence. Fermer un onglet ne retire pas automatiquement son participant.
-- Le nouveau salon est rédigé en français. L’accueil et les pages existantes conservent leurs traductions.
-- Tests : droits hôte/participant, synchronisation, retrait et révocation, visibilité, configuration du texte, contrôle de démarrage et interface en lecture seule.
