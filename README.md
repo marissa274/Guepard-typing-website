@@ -21,7 +21,7 @@ npm start     # Serveur de production sur le port 5173
 
 La page `/races` présente uniquement les salons publics réellement ouverts. Chaque carte utilise le paysage entier associé à l’animal de la course, avec nom, nombre de joueurs, état et action « Rejoindre » ou « Regarder la course ». Quand aucun salon public n’existe, elle affiche un état vide et une action de création. Les cartes se superposent au défilement sur les grands écrans ; avec `prefers-reduced-motion`, elles défilent normalement. Les illustrations et leurs prompts sont documentés dans `public/assets/RACE-PROMPTS.md`.
 
-Un header avec le logo original agrandi, une seule scène de jungle, puis le footer. Le tableau central contient trois liens accessibles : rejoindre rapidement, créer une course privée et parcourir les courses publiques. `/play` rejoint un salon public en attente ou en crée un si nécessaire. Les animations, profondeurs et la préférence de réduction des mouvements sont conservées.
+Un header avec le logo original agrandi, une seule scène de jungle, puis le footer. Le tableau central contient trois liens accessibles : rejoindre rapidement, créer une course et parcourir les courses publiques. `/play` rejoint un salon public en attente ou en crée un si nécessaire. Les animations, profondeurs et la préférence de réduction des mouvements sont conservées.
 
 ## Architecture
 
@@ -35,7 +35,7 @@ Un header avec le logo original agrandi, une seule scène de jungle, puis le foo
 - `src/style.css`, `src/jungle.css` : styles et animations historiques préservés.
 - `public/assets/` : illustrations et documents des prompts.
 
-Les chemins `/login`, `/signup`, `/play`, `/races`, `/private`, `/lobby/:id`, `/race/:id`, `/how`, `/stats` et les pages d’information sont accessibles directement. Les anciens liens `#/…` sont redirigés vers les nouveaux chemins. Les préférences existantes `guepard-*` sont reprises.
+Les chemins `/login`, `/signup`, `/play`, `/races`, `/create`, `/lobby/:id`, `/race/:id`, `/how`, `/stats` et les pages d’information sont accessibles directement. `/private` reste un alias de `/create`. Les anciens liens `#/…` sont redirigés vers les nouveaux chemins. Les préférences existantes `guepard-*` sont reprises.
 
 ## Démonstration et futur backend
 
@@ -73,10 +73,10 @@ Le site utilise React, Next.js et Tailwind CSS. **Vite et Vitest ont été retir
 
 ## Lobby de jungle et identité animale
 
-- `/private` : création d’un salon, avec choix obligatoire parmi guépard, perroquet et crocodile. Le catalogue `src/lib/animals.ts` lie ces animaux aux paysages `race-sun.png`, `race-canopy.png` et `race-river.png`. Aucune image libre n’est requise ni acceptée pour les cartes.
-- `/signup` : choix d’un portrait personnel parmi six animaux, distinct de l’animal et du paysage du salon. Une variante aux yeux fermés apparaît en mode nuit. Le choix est appliqué au compte de démonstration. L’authentification réelle reste à brancher.
+- `/create` : création d’une course publique par défaut, avec choix possible de visibilité semi-publique ou privée. Le choix d’un des six animaux est obligatoire : guépard, perroquet, crocodile, singe, éléphant ou toucan. Chaque animal a son propre paysage illustré dans `public/assets/race-*.png`. Le carrousel de modèles se parcourt au défilement ou avec les flèches.
+- `/signup` : choix défilant d’un portrait personnel parmi six animaux, distinct de l’animal et du paysage du salon. Une variante aux yeux fermés apparaît en mode nuit. Le choix est appliqué au compte de démonstration. L’authentification réelle reste à brancher.
 - Invité : guépard attribué par le serveur ; pseudo et résultats locaux limités à la session.
-- `/lobby/:id` : forêt pleine page, tableaux de bois clair avec veinures et fissures discrètes, réglages dépliables, animaux réutilisés de l’accueil et footer existant. Aucun emoji décoratif ajouté. Animations séparées des contrôles, pause du singe/toucan au focus et respect de la réduction des animations.
+- `/lobby/:id` : disposition en deux panneaux clairs et souples inspirée de l’aperçu fourni, avec grain de feutre, relief doux, joueurs et spectateurs distincts, réglages dépliables, animaux réutilisés de l’accueil et footer existant. Aucun emoji décoratif ajouté. Animations séparées des contrôles, pause du singe/toucan au focus et respect de la réduction des animations.
 - Seul l’hôte configure, désigne les spectateurs, ajoute des bots, choisit leur niveau individuel et retire les participants. Le minimum est deux joueurs, bots inclus ; les spectateurs ne comptent pas. Pas de validation « prêt » ni de plafond fixe de participants. Un groupe de 32 personnes a été testé via l’API.
 - Public : carte visible dans `/races`. Semi-public : code à saisir. Privé : lien généré par l’hôte, valable 30 minutes, consommé atomiquement à la première utilisation. L’hôte peut générer une nouvelle invitation par personne.
 - Synchronisation : flux SSE authentifié par jeton de membre, avec reconnexion automatique. Le serveur relit les données toutes les 600 ms et pousse les révisions ; le navigateur ne recharge pas la page. Jetons dans sessionStorage, jamais inclus dans la liste des participants. Un retrait révoque l’accès ; quitter comme hôte ferme le salon.
