@@ -1,6 +1,6 @@
 # GUÉPARD — React, Next.js et Tailwind CSS
 
-Interface frontend bilingue, avec les illustrations, le mode nuit et les animations de la jungle conservés.
+Application Next.js avec les illustrations, le mode nuit et les animations de la jungle conservés. Les nouveaux salons et leur API utilisent TypeScript ; les anciens composants en JSX restent à migrer.
 
 ## Démarrer
 
@@ -41,13 +41,13 @@ Les chemins `/login`, `/signup`, `/races`, `/private`, `/race/:id`, `/how`, `/st
 
 L’authentification reste explicitement un compte de démonstration. Les courses publiques et les adversaires sont fictifs ; la saisie, la précision, le chronomètre et les résultats sont calculés localement.
 
-La création d’une course privée utilise à nouveau la démonstration locale : nom, langue et identifiant conservés sur cet appareil. L’écran de lobby partagé et son API ont été retirés à la demande de l’utilisatrice, avant une refonte fondée sur le cahier des charges. Aucun partage multijoueur n’est actuellement proposé.
+La création de course ouvre désormais un salon partagé `/lobby/:id`. Les paramètres, participants et départ sont synchronisés entre navigateurs. Les cartes historiques restent des démonstrations lorsqu’aucun salon public n’est ouvert.
 
-Les données de démo et préférences sont stockées dans localStorage et peuvent être réinitialisées depuis Confidentialité. Les informations légales et coordonnées restent à compléter avant publication.
+Les préférences et profils de démonstration utilisent localStorage. L’identité et les résultats d’un invité utilisent sessionStorage et disparaissent à la fin de sa session de navigation. Les informations légales et coordonnées restent à compléter avant publication.
 
 ## Vérifications
 
-Les tests React couvrent la structure de l’accueil, les trois actions, FR/EN, le thème, le compte de démonstration et ses paramètres, les erreurs de frappe, la fin de course, le rejeu et les salons privés persistants. La compilation Next.js est vérifiée. Aucune validation visuelle complète par navigateur automatisé n’est revendiquée.
+Les tests React couvrent la structure de l’accueil, les trois actions, FR/EN, le thème, le compte de démonstration et ses paramètres, les erreurs de frappe, la fin de course, le rejeu et les salons privés persistants. La compilation Next.js est vérifiée. Le nouveau lobby est aussi vérifié dans Chrome avec deux contextes isolés, des captures ordinateur/tablette/jour/nuit et des tests d’invitations à usage unique.
 
 Installation conforme aux documentations officielles :
 - https://nextjs.org/docs/app/getting-started/installation
@@ -70,3 +70,34 @@ Le panneau central comprend trois planches de bois séparées, suspendues à deu
 - Les nouveaux assets et prompts sont documentés dans `public/assets/AUTH-PROMPTS.md`.
 
 Le site utilise React, Next.js et Tailwind CSS. **Vite et Vitest ont été retirés**, y compris des dépendances transitives. Les tests de développement utilisent Jest et React Testing Library. Les fichiers de l’ancienne compilation Vite ne sont plus dans le projet.
+
+## Lobby de jungle et identité animale
+
+- `/private` : création d’un salon, avec choix obligatoire parmi guépard, perroquet et crocodile. Le catalogue `src/lib/animals.ts` lie ces animaux aux paysages `race-sun.png`, `race-canopy.png` et `race-river.png`. Aucune image libre n’est requise ni acceptée pour les cartes.
+- `/signup` : choix d’un avatar personnel distinct de l’animal du salon. Le choix est appliqué au compte de démonstration. L’authentification réelle Discord/GitHub et par mot de passe reste à brancher ; l’interface le précise.
+- Invité : guépard attribué par le serveur ; pseudo et résultats locaux limités à la session.
+- `/lobby/:id` : header existant, deux tableaux de bois clair, réglages dépliables, animaux réutilisés de l’accueil, footer existant. Aucun emoji décoratif ajouté. Animations séparées des contrôles, pause du singe/toucan au focus et respect de la réduction des animations.
+- Seul l’hôte configure, désigne les spectateurs, ajoute des bots, choisit leur niveau individuel et retire les participants. Le minimum est deux joueurs, bots inclus ; les spectateurs ne comptent pas. Pas de validation « prêt » ni de plafond fixe de participants. Un groupe de 32 personnes a été testé via l’API.
+- Public : carte visible dans `/races`. Semi-public : code à saisir. Privé : lien généré par l’hôte, valable 30 minutes, consommé atomiquement à la première utilisation. L’hôte peut générer une nouvelle invitation par personne.
+- Synchronisation : flux SSE authentifié par jeton de membre, avec reconnexion automatique. Le serveur relit les données toutes les 600 ms et pousse les révisions ; le navigateur ne recharge pas la page. Jetons dans sessionStorage, jamais inclus dans la liste des participants. Un retrait révoque l’accès ; quitter comme hôte ferme le salon.
+- Départ commun après 4 secondes, texte aléatoire conforme aux options, progression partagée, bots avec variations et erreurs simulées, abandon après inactivité de frappe, résultats simples et retour au salon. La saisie en cours est restaurée après rechargement. Une arrivée après le départ est spectatrice jusqu’à la prochaine course.
+- La nouvelle interface du lobby est actuellement en français ; le header conserve son sélecteur FR/EN. La traduction intégrale de ce nouvel écran, les bonus de jeu et les statistiques avancées/heatmaps du cahier des charges restent des travaux distincts.
+
+## Stockage et futur PostgreSQL
+
+Sans base configurée, `.data/rooms.json` conserve les salons entre redémarrages. Le fichier est ignoré par Git. Ce mode est destiné à une seule instance Node locale. Les salons expirent après 24 h et sont nettoyés lors d’une nouvelle création.
+
+Pour PostgreSQL : copier `.env.example` vers `.env.local`, renseigner `DATABASE_URL`, redémarrer Next.js. Le serveur crée la table `guepard_rooms` et utilise des transactions avec verrou pour sérialiser les changements et consommer les invitations une seule fois. Le branchement est implémenté, mais aucune base PostgreSQL n’était disponible pour le tester. Le stockage local n’est pas migré automatiquement.
+
+Le serveur Next.js doit rester actif et accessible aux participants. Sur un autre appareil, ouvrir l’adresse réseau du serveur plutôt que `localhost`. Les droits sur un salon reposent sur un jeton de session anonyme, indépendamment de la future authentification des comptes.
+
+## Tests du lobby
+
+```sh
+npm test
+npm run typecheck
+npm run test:e2e
+npm run build
+```
+
+Les tests Playwright utilisent Chrome installé sur macOS s’il est présent, ou le navigateur Playwright par défaut. `PLAYWRIGHT_CHROME_PATH` permet de préciser un autre exécutable ; ailleurs, installer Chromium avec `npx playwright install chromium`. Les tests créent des salons temporaires sur le serveur local. Les captures de vérification sont enregistrées sous `/tmp/guepard-lobby-*.png`.

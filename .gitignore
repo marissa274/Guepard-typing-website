@@ -2,3 +2,9 @@ node_modules/
 dist/
 .DS_Store
 .next/
+.data/
+.env*
+!.env.example
+*.tsbuildinfo
+test-results/
+playwright-report/

@@ -1,0 +1,9 @@
+import {transaction} from './room-store';
+import {createRoom,authenticate,joinRoom,act,snapshot,tick,RoomError} from './room-engine';
+import type {Room} from '../lib/room-types';
+function find(data:Record<string,Room>,id:string){const r=data[id];if(!r||Date.now()-r.createdAt>86400000)throw new RoomError('Ce salon est fermé ou introuvable.',404);return r}
+export async function listRooms(){return transaction(data=>Object.values(data).filter(r=>r.settings.visibility==='public'&&Date.now()-r.createdAt<86400000).map(r=>({id:r.id,name:{fr:r.name,en:r.name},animal:r.animal,language:r.settings.language,players:r.people.filter(p=>p.role==='player').length,state:r.phase==='waiting'?'waiting':'running',live:true})),false)}
+export async function create(body:any){return transaction(data=>{for(const [id,r]of Object.entries(data))if(Date.now()-r.createdAt>86400000)delete data[id];const result=createRoom(body);data[result.room.id]=result.room;return {room:snapshot(result.room,result.person),token:result.person.token}})}
+export async function resolveCode(code:string){return transaction(data=>{const r=Object.values(data).find(r=>r.code===code.toUpperCase()&&r.settings.visibility==='semi'&&Date.now()-r.createdAt<86400000);if(!r)throw new RoomError('Code introuvable.',404);return {id:r.id}},false)}
+export async function get(id:string,token:string){return transaction(data=>{const r=find(data,id),p=authenticate(r,token);tick(r);return snapshot(r,p)})}
+export async function mutate(id:string,token:string,body:any){return transaction(data=>{const r=find(data,id);if(body.action==='join'){const p=joinRoom(r,body);return {room:snapshot(r,p),token:p.token}}const p=authenticate(r,token);if(body.action==='leave'){if(p.id===r.hostId)delete data[id];else{r.people=r.people.filter(x=>x.id!==p.id);r.revision++;tick(r)}return {left:true}}const result=act(r,p,body);return {...result,room:snapshot(r,p)}})}
