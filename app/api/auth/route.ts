@@ -1,3 +1,4 @@
+import {isAllowedOrigin} from '../../../src/server/request-origin';
 import {NextResponse} from 'next/server';
 import {cookies} from 'next/headers';
 import {currentUser,login,logout,signup,AuthError,sessionMaxAge} from '../../../src/server/auth-store';
@@ -13,8 +14,7 @@ export async function GET(request:Request){
  catch{return NextResponse.json({user:null,error:'La base de données est indisponible.'},{status:503})}
 }
 export async function POST(request:Request){
- const origin=request.headers.get('origin');
- if(origin&&origin!==new URL(request.url).origin)return NextResponse.json({error:'Origine non autorisée.'},{status:403});
+ if(!isAllowedOrigin(request))return NextResponse.json({error:'Origine non autorisée.'},{status:403});
  try{
   const body=await request.json();
   if(body?.action==='logout'){

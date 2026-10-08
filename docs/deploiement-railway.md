@@ -33,6 +33,8 @@ Le script `start` écoute `0.0.0.0` sur le port `PORT` fourni par Railway. Ne pa
 
 Dans le service web : **Settings → Networking → Public Networking → Generate Domain**. Ouvrir l'adresse `https://…up.railway.app` créée par Railway. Railway fournit automatiquement le certificat HTTPS pour ce domaine.
 
+Dans les variables du **service web**, définir `APP_URL` avec cette adresse publique complète, par exemple `https://guepard-typing-website-production.up.railway.app`, puis redéployer. Le contrôle d’origine reconnaît aussi automatiquement `RAILWAY_PUBLIC_DOMAIN` lorsqu’il est fourni par Railway. Cela évite de comparer l’origine HTTPS du navigateur à l’adresse HTTP interne de Next.js derrière le proxy. Ne pas désactiver ce contrôle ni autoriser tous les domaines.
+
 ## 6. Vérifier les parcours
 
 1. Ouvrir l'accueil et `/signup`, puis créer un compte de test.
