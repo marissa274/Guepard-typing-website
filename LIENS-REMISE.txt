@@ -1,0 +1,4 @@
+GUÉPARD — Remise du checkpoint #1
+
+Dépôt GitHub : https://github.com/marissa274/Guepard-typing-website.git
+Site web : https://guepard-typing-website-production.up.railway.app/
