@@ -6,6 +6,8 @@ import '../src/woodland.css';
 import '../src/race-tracks.css';
 import '../src/lobby-compact.css';
 import '../src/play-experience.css';
+import '../src/results.css';
+import '../src/results-reference.css';
 import './globals.css';
 import { SiteProvider } from '../src/components/SiteContext';
 export const metadata = {title:'GUÉPARD — Typing at full speed.',description:'Courses de frappe dans une jungle illustrée. Rejoignez une course ou créez un salon privé de démonstration.'};

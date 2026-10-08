@@ -42,3 +42,9 @@
 .race-podium::before,.race-podium::after{content:'';position:absolute;bottom:10px;width:95px;height:95px;background:url('/assets/relief-foliage.png') left center/200% 100%;pointer-events:none;opacity:.8}.race-podium::before{left:-10px}.race-podium::after{right:-10px;transform:scaleX(-1)}
 .lobby-page.lobby-active .lobby-giraffe{bottom:70px}.lobby-page .lobby-giraffe::after{height:12%;bottom:-2%;border-radius:60% 60% 0 0;background:radial-gradient(ellipse at 50% 0,#8a9865,#586d41 55%,#3a5933);box-shadow:none}
 .lobby-page.lobby-active{padding-bottom:150px}
+/* Keep the complete felt tortoise in view. Its atlas poses touch the cell edge,
+   so crawl the uncropped portrait instead of switching to the clipped gait row. */
+.race-runner.runner-tortoise[data-motion=running]{background-image:url('/assets/race-runners.png');background-size:300% 200%;background-position:100% 100%;animation:tortoise-crawl 1.35s ease-in-out infinite}
+.race-lane.is-bot .lane-position{transition:left .7s linear}
+@keyframes tortoise-crawl{0%,100%{transform:translateY(0) rotate(-1deg)}50%{transform:translateY(-3px) rotate(2deg)}}
+@media(prefers-reduced-motion:reduce){.race-runner.runner-tortoise[data-motion=running]{animation:none}.race-lane.is-bot .lane-position{transition:none}}

@@ -1,0 +1,4 @@
+import type {RoomView} from './room-types';
+import {rankRacers,speciesForRank} from './race-ranking';
+/** One reference used by podium, table, personal metrics and session history. */
+export function raceResults(room:RoomView){return rankRacers(room.people).map(({person,rank,tied},_,all)=>{const end=person.finishedAt||room.endedAt||room.serverNow;const seconds=Math.max(1,(end-(room.startedAt||end))/1000);return {person,rank,tied,species:speciesForRank(rank,all.length),speed:Math.round(person.progress*12/seconds),accuracy:person.typed?Math.min(100,Math.round(person.progress/person.typed*100)):null,score:null as number|null,status:person.abandoned?'Abandon':person.finishedAt?'Terminé':'Temps écoulé'}})}
