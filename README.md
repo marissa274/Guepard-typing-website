@@ -1,6 +1,6 @@
 # GUÉPARD — React, Next.js et Tailwind CSS
 
-Application Next.js avec les illustrations, le mode nuit et les animations de la jungle conservés. Les nouveaux salons et leur API utilisent TypeScript ; les anciens composants en JSX restent à migrer.
+Application Next.js en TypeScript/TSX avec les illustrations, le mode nuit et les animations de la jungle conservés. La configuration PostCSS est en JSON, conformément aux formats reconnus par Next.js.
 
 ## Démarrer
 
@@ -31,12 +31,12 @@ Les livrables du checkpoint sont rassemblés dans le [moodboard](docs/design/moo
 
 Versions PDF : [moodboard](docs/design/moodboard.pdf), [direction artistique](docs/design/direction-artistique.pdf), [schéma de données](docs/architecture/schema-donnees.pdf), [machine à états](docs/architecture/machine-etats.pdf), [ADR temps réel](docs/architecture/adr-0001-temps-reel-sse.pdf), [matrice des exigences](docs/exigences/matrice-checkpoint-1.pdf). Pour les régénérer après une modification des Markdown : `python3 scripts/render-checkpoint-pdfs.py` (nécessite WeasyPrint).
 
-- `app/layout.jsx` : document Next.js et état partagé.
-- `app/[[...path]]/page.jsx` : point d’entrée App Router ; navigation avec `next/link`.
+- `app/layout.tsx` : document Next.js et état partagé.
+- `app/[[...path]]/page.tsx` : point d’entrée App Router ; navigation avec `next/link`.
 - `src/components/` : composants React de la scène, du header, du footer, des courses, du jeu et des fenêtres de démonstration.
-- `src/hooks/useParallax.js` : parallaxe bornée, avec nettoyage des événements et respect de `prefers-reduced-motion`.
-- `src/data.js` : adaptateur des anciens parcours de démonstration ; les salons publics et privés utilisent l’API `/api/rooms`.
-- `src/i18n.js` : traductions partagées.
+- `src/hooks/useParallax.ts` : parallaxe bornée, avec nettoyage des événements et respect de `prefers-reduced-motion`.
+- `src/data.ts` : adaptateur des anciens parcours de démonstration ; les salons publics et privés utilisent l’API `/api/rooms`.
+- `src/i18n.ts` : traductions partagées.
 - `app/globals.css` : Tailwind CSS et ajustements de la pancarte/logo.
 - `src/style.css`, `src/jungle.css` : styles et animations historiques préservés.
 - `public/assets/` : illustrations et documents des prompts.
@@ -97,13 +97,13 @@ Tous partent en guépards. Les espèces suivent ensuite le rang : guépard, gaze
 
 L’atlas transparent `public/assets/race-runners.png` a été généré pour ce projet : six animaux de profil tournés vers la droite, volumes arrondis, texture de feutre et crayon, contours artisanaux, grille 3 × 2 (guépard, gazelle, lièvre / renard, panda, tortue), marge autour de chaque silhouette. Les positions et transformations restent des éléments d’interface indépendants.
 
-Le test `tests/e2e/visual-race.spec.ts` vérifie les dépassements, égalités, pistes fixes, podium, revanche et largeur mobile. `tests/race-ranking.test.jsx` couvre les règles de classement et de transformation.
+Le test `tests/e2e/visual-race.spec.ts` vérifie les dépassements, égalités, pistes fixes, podium, revanche et largeur mobile. `tests/race-ranking.test.tsx` couvre les règles de classement et de transformation.
 
 ## Stockage PostgreSQL
 
 Sans base configurée, `.data/rooms.json` conserve les salons entre redémarrages. Le fichier est ignoré par Git. Ce mode est destiné à une seule instance Node locale. Les salons expirent après 24 h et sont nettoyés lors d’une nouvelle création.
 
-En local, `docker compose up -d db` démarre PostgreSQL 16 sur `127.0.0.1:5433` avec un volume persistant. Copier `.env.example` vers `.env.local` puis redémarrer Next.js : `DATABASE_URL` active la base. Le mot de passe d’exemple est réservé au développement local ; pour un autre environnement, définir `GUEPARD_DB_PASSWORD` dans Compose et utiliser le même mot de passe dans `DATABASE_URL`. Le serveur crée la table `guepard_rooms` et sérialise les modifications des salons. `node --env-file=.env.local scripts/migrate-rooms-to-postgres.mjs` importe les anciens salons de `.data/rooms.json` sans remplacer ceux déjà présents. Pour arrêter la base : `docker compose stop db` ; `docker compose down` conserve le volume.
+En local, `docker compose up -d db` démarre PostgreSQL 16 sur `127.0.0.1:5433` avec un volume persistant. Copier `.env.example` vers `.env.local` puis redémarrer Next.js : `DATABASE_URL` active la base. Le mot de passe d’exemple est réservé au développement local ; pour un autre environnement, définir `GUEPARD_DB_PASSWORD` dans Compose et utiliser le même mot de passe dans `DATABASE_URL`. Le serveur crée la table `guepard_rooms` et sérialise les modifications des salons. `node --env-file=.env.local scripts/migrate-rooms-to-postgres.ts` importe les anciens salons de `.data/rooms.json` sans remplacer ceux déjà présents. Pour arrêter la base : `docker compose stop db` ; `docker compose down` conserve le volume.
 
 Les commandes courtes sont `npm run db:up`, `npm run db:stop` et `npm run db:migrate`. Après `npm run db:up`, lancer `npm run dev`, puis ouvrir `http://localhost:5173/login` ou `/signup`. Pour voir les tables : `docker compose exec db psql -U guepard -d guepard -c '\dt'`. Les tables `guepard_users`, `guepard_sessions` et `guepard_rooms` sont créées automatiquement. Pour héberger le site ailleurs, `localhost` ne suffit pas : il faut une base PostgreSQL accessible au serveur déployé et sa variable `DATABASE_URL`.
 

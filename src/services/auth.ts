@@ -1,5 +1,5 @@
-export function validateCredentials({username,password,confirmation},mode){
- const errors={};
+export function validateCredentials({username,password,confirmation}:{username:string;password:string;confirmation?:string},mode:string){
+ const errors:Record<string,string>={};
  if(!username.trim())errors.username='required';
  else if(mode==='signup'&&username.trim().length<3)errors.username='usernameShort';
  if(!password)errors.password='required';
@@ -7,7 +7,7 @@ export function validateCredentials({username,password,confirmation},mode){
  if(mode==='signup'&&confirmation!==password)errors.confirmation='mismatch';
  return errors;
 }
-async function request(body){
+async function request(body:Record<string,unknown>){
  const response=await fetch('/api/auth',{method:'POST',headers:{'Content-Type':'application/json'},credentials:'same-origin',body:JSON.stringify(body)});
  const result=await response.json();
  if(!response.ok)throw new Error(result.error||'La connexion a échoué.');

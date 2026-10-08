@@ -10,8 +10,8 @@
     "preview": "next start -p 5173",
     "db:up": "docker compose up -d db",
     "db:stop": "docker compose stop db",
-    "db:migrate": "node --env-file=.env.local scripts/migrate-rooms-to-postgres.mjs",
-    "test": "jest --runInBand",
+    "db:migrate": "node --env-file=.env.local scripts/migrate-rooms-to-postgres.ts",
+    "test": "jest --config jest.config.json --runInBand",
     "test:e2e": "playwright test",
     "typecheck": "tsc --noEmit"
   },
