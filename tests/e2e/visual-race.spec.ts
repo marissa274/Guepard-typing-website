@@ -1,4 +1,16 @@
 import {test,expect} from '@playwright/test';
+test('three racers all start as cheetahs before the third becomes a hare',async({page,request})=>{
+ const {room,token}=await (await request.post('/api/rooms',{data:{name:'Trois pistes',nickname:'A',animal:'cheetah',visibility:'public'}})).json();
+ const members=[{token}];for(const nickname of ['B','C'])members.push(await (await request.post('/api/rooms/'+room.id,{data:{action:'join',nickname}})).json());
+ const headers={Authorization:'Bearer '+token};
+ try{
+  await page.goto('/');await page.evaluate(({id,token})=>sessionStorage.setItem('guepard-room-'+id,token),{id:room.id,token});await page.goto('/lobby/'+room.id);await page.getByRole('button',{name:'Lancer la course',exact:true}).click();
+  await expect(page.locator('.race-lane .runner-cheetah')).toHaveCount(3);
+  const running=(await (await request.get('/api/rooms/'+room.id,{headers})).json()).room;
+  for(const [index,fraction] of [.7,.5,.2].entries()){const value=running.text.slice(0,Math.floor(running.text.length*fraction));await request.post('/api/rooms/'+room.id,{headers:{Authorization:'Bearer '+members[index].token},data:{action:'progress',value,typed:value.length}})}
+  await expect(page.locator('.race-lane').nth(2).locator('.runner-hare')).toBeVisible();
+ }finally{await request.post('/api/rooms/'+room.id,{headers,data:{action:'leave'}})}
+});
 test('bot continues to run during rapid typing and the tortoise remains complete',async({page,request})=>{
  const created=await (await request.post('/api/rooms',{data:{name:'Bot continu',nickname:'Testeur',animal:'cheetah',visibility:'public'}})).json();
  const {room,token}=created,headers={Authorization:'Bearer '+token};
@@ -19,7 +31,7 @@ test('bot continues to run during rapid typing and the tortoise remains complete
   const lane=page.locator('.race-lane[data-player-id="'+botId+'"]');
   await expect(lane.locator('.race-runner')).toHaveAttribute('data-motion','running');
   await expect(page.locator('.race-runner.runner-tortoise[data-motion="running"]')).toBeVisible();
-  expect(await page.locator('.runner-tortoise').first().evaluate(el=>getComputedStyle(el).backgroundImage)).toContain('race-gaits.png');
+  expect(await page.locator('.runner-tortoise').first().evaluate(el=>getComputedStyle(el).backgroundImage)).toContain('race-gaits.webp');
   await page.screenshot({path:'/tmp/guepard-tortoise-fixed.png'});
  }finally{await request.post('/api/rooms/'+room.id,{headers,data:{action:'leave'}})}
 });
@@ -31,7 +43,7 @@ test('fixed lanes, stable transformations, final podium and rematch',async({page
  for(const [i,f]of [.7,.6,.45,.3].entries())await progress(i,f);
  await expect(page.locator('.race-lane').nth(1).locator('.runner-gazelle')).toBeVisible();await expect(page.locator('.race-lane').nth(3).locator('.runner-tortoise')).toBeVisible();await progress(3,.45);await expect(page.locator('.race-lane').nth(3).locator('.runner-tortoise')).toBeVisible();await progress(3,.5);await expect(page.locator('.race-lane').nth(3).locator('.runner-hare')).toBeVisible();expect(await page.locator('.race-lane').evaluateAll(nodes=>nodes.map(n=>n.getAttribute('data-player-id')))).toEqual(initialOrder);
  await progress(0,.75);const runner=page.locator('.race-lane').first().locator('.race-runner');await expect(runner).toHaveAttribute('data-motion','running');
- const poses=await runner.evaluate(el=>{const animation=el.getAnimations().find(a=>(a as CSSAnimation).animationName==='gait-cycle')!;animation.pause();animation.currentTime=10;const first=getComputedStyle(el).backgroundPositionX;animation.currentTime=350;const second=getComputedStyle(el).backgroundPositionX;animation.play();return [first,second]});expect(poses[0]).not.toBe(poses[1]);
+ const poses=await runner.evaluate(el=>{const animation=el.getAnimations().find(a=>(a as CSSAnimation).animationName==='cheetah-gait')!;animation.pause();animation.currentTime=10;const first=getComputedStyle(el).backgroundPositionX;animation.currentTime=350;const second=getComputedStyle(el).backgroundPositionX;animation.play();return [first,second]});expect(poses[0]).not.toBe(poses[1]);
  await runner.screenshot({path:'/tmp/guepard-gait-frame.png'});
  await page.screenshot({path:'/tmp/guepard-visual-race.png',fullPage:true});for(let i=0;i<4;i++)await progress(i,1);await expect(page.getByRole('heading',{name:'Bravo à tous !'})).toBeVisible();await expect(page.locator('.podium-place')).toHaveCount(3);await page.setViewportSize({width:1536,height:1024});await expect(page.locator('.results-panels')).toBeHidden();await page.screenshot({path:'/tmp/guepard-celebration.png',fullPage:true});await page.setViewportSize({width:390,height:844});expect(await page.locator('body').evaluate(el=>el.scrollWidth)).toBe(390);await page.screenshot({path:'/tmp/guepard-celebration-mobile.png',fullPage:true});await page.setViewportSize({width:1536,height:1024});await page.getByRole('button',{name:'Voir mes statistiques'}).click();await expect(page.locator('.results-table tbody tr')).toHaveCount(4);await page.setViewportSize({width:1536,height:1024});await page.screenshot({path:'/tmp/guepard-podium.png',fullPage:true});await page.getByRole('button',{name:'Lancer une revanche'}).click();await expect(page.locator('.race-lane .runner-cheetah')).toHaveCount(4);await page.setViewportSize({width:390,height:844});await expect(page.locator('body')).toHaveJSProperty('scrollWidth',390);await page.screenshot({path:'/tmp/guepard-race-mobile.png',fullPage:true});
  }finally{await request.post('/api/rooms/'+room.id,{headers,data:{action:'leave'}})}

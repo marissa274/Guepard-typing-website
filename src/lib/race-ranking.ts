@@ -9,7 +9,7 @@ export function compareRacers(a:Person,b:Person){
 }
 export function rankRacers(people:Person[]){const sorted=people.filter(p=>p.role==='player').slice().sort(compareRacers);return sorted.map((person,index)=>({person,rank:sorted.findIndex(p=>compareRacers(p,person)===0)+1,tied:sorted.some(p=>p.id!==person.id&&compareRacers(p,person)===0)}))}
 export function speciesForRank(rank:number,total:number):RunnerSpecies{
- if(rank===1)return 'cheetah';if(rank===total)return 'tortoise';if(rank===2)return 'gazelle';if(rank===3)return 'hare';
+ if(rank===1)return 'cheetah';if(total===2&&rank===2)return 'tortoise';if(total===3&&rank===3)return 'hare';if(rank===total)return 'tortoise';if(rank===2)return 'gazelle';if(rank===3)return 'hare';
  return (rank-4)/Math.max(1,total-4)<.5?'fox':'panda';
 }
 export type Appearance={species:RunnerSpecies;candidate?:RunnerSpecies;since?:number};

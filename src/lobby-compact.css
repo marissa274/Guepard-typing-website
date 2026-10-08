@@ -27,10 +27,10 @@
 .lobby-page .lobby-toucan{left:0;right:auto;top:25%;width:calc(var(--side-space)*.92);height:auto;aspect-ratio:491/512;z-index:1}
 .lobby-page .lobby-giraffe{right:0;top:7%;width:calc(var(--side-space)*.94);aspect-ratio:2/3}.lobby-page .lobby-parrot{right:0;top:auto;bottom:15%;width:calc(var(--side-space)*.9)}
 .lobby-page .lobby-elephant{left:0;top:auto;bottom:13%;width:calc(var(--side-space)*.85)}.lobby-page .lobby-crocodile{right:0;bottom:0;width:calc(var(--side-space)*.95);aspect-ratio:610/512}
-.lobby-page .lobby-sleeping-cheetah{position:absolute;pointer-events:none;left:0;bottom:-12px;width:calc(var(--side-space)*1.08);aspect-ratio:1;background:url('/assets/cheetahs-3d-marker.png') left center/200% 100%;z-index:3}
+.lobby-page .lobby-sleeping-cheetah{position:absolute;pointer-events:none;left:0;bottom:-12px;width:calc(var(--side-space)*1.08);aspect-ratio:1;background:url('/assets/cheetahs-3d-marker.webp') left center/200% 100%;z-index:3}
 .lobby-page .lobby-leaves{z-index:1;width:var(--side-space);height:auto;aspect-ratio:1}.lobby-page .lobby-leaves-upper-left{left:0;top:8%}.lobby-page .lobby-leaves-upper-right{right:0;top:35%}
 [data-theme=dark] .lobby-page .woodland-shell{background:linear-gradient(#173747ee,#173747ee) padding-box,repeating-linear-gradient(3deg,#684629 0 2px,#926a3f 3px 5px,#bb915d 6px,#72502f 8px,#926739 12px) border-box}
-[data-theme=dark] .lobby-page .lobby-sleeping-cheetah{background-image:url('/assets/cheetahs-night.png')}
+[data-theme=dark] .lobby-page .lobby-sleeping-cheetah{background-image:url('/assets/cheetahs-night.webp')}
 @media(max-width:1600px) and (min-width:1101px){.lobby-page{--side-space:11vw}.lobby-page .room-invitation{width:265px}.lobby-page .woodland-shell{padding:14px 16px}}
 @media(max-width:1100px){.lobby-page{--side-space:45px;padding-top:35px;padding-bottom:140px}.lobby-page .lobby-panels{grid-template-columns:1fr}.lobby-page .lobby-title-row{flex-direction:column;align-items:stretch}.lobby-page .room-invitation{width:100%}.lobby-page .participants-scroll{max-height:380px}.lobby-page .lobby-world-animal,.lobby-page .lobby-monkey,.lobby-page .lobby-toucan{width:100px;opacity:1;z-index:1}.lobby-page .lobby-sleeping-cheetah{width:160px}.lobby-page .lobby-monkey{top:0;left:0}.lobby-page .lobby-giraffe{display:block}.lobby-page .lobby-toucan{top:30%}}
 @media(max-width:650px){.lobby-page{--side-space:10px}.lobby-page .woodland-shell{padding:12px 10px;border-width:9px}.lobby-page .lobby-topbar{flex-wrap:wrap;gap:4px}.lobby-page .wood-panel{padding:14px 10px}.lobby-page .wood-panel-heading h2{font-size:23px}.lobby-page .wood-small-button{font-size:13px}.lobby-page .room-settings-controls>.wood-fields>div{display:grid;grid-template-columns:minmax(95px,.8fr) minmax(0,1fr)}.lobby-page .room-settings-controls>.wood-fields label{font-size:14px;margin:0}.lobby-page .bot-level{flex-basis:96px;width:96px;font-size:12px}.lobby-page .room-roster>li{padding:7px 5px;gap:6px}.lobby-page .person-copy>strong{font-size:16px}.lobby-page .person-tags span{font-size:12px}.lobby-page .room-launch{padding:12px}.lobby-page .room-launch .wood-primary{min-width:0}.lobby-page .lobby-world-animals{opacity:1}.lobby-page .lobby-monkey{top:-24px;width:75px;left:auto;right:0}}
@@ -54,8 +54,8 @@
 #app:has(>.lobby-page)>.canopy-header,#app:has(>.lobby-page)>.compact-footer{flex-shrink:0;width:100%;margin:0}
 #app:has(>.lobby-page)>.lobby-page{flex:1 0 auto;margin:0}
 .lobby-page{overflow:clip}
-.lobby-page .woodland-scenery{background-image:url('/assets/relief-background.png');background-position:center center;background-size:cover}
-[data-theme=dark] .lobby-page .woodland-scenery{background-image:url('/assets/jungle-blue-night.png');background-position:center center;background-size:cover}
+.lobby-page .woodland-scenery{background-image:url('/assets/relief-background.webp');background-position:center center;background-size:cover}
+[data-theme=dark] .lobby-page .woodland-scenery{background-image:url('/assets/jungle-blue-night.webp');background-position:center center;background-size:cover}
 /* The giraffe stands farther back, its feet behind the undergrowth. */
 .lobby-page .lobby-giraffe{top:13%;right:1.5%;width:calc(var(--side-space)*.72);animation:none;z-index:0}
 .lobby-page .lobby-parrot{bottom:12%;right:0;z-index:2;animation:none}
