@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <title>GUÉPARD - Moodboard</title>
+  <style>
+    @page { size: A4 landscape; margin: 0; }
+    * { box-sizing: border-box; }
+    body { margin: 0; width: 297mm; height: 210mm; background: #f7e7c6; color: #244a2f; font-family: Arial, sans-serif; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .sheet { height: 100%; padding: 11mm 13mm 9mm; display: flex; flex-direction: column; gap: 5mm; background: radial-gradient(circle at 50% 25%, #fff7e5, #f7e7c6 72%); }
+    header { display: flex; align-items: end; justify-content: space-between; border-bottom: 2px solid #2f6b3d; padding-bottom: 4mm; }
+    .eyebrow { margin: 0 0 1mm; color: #2f6b3d; font-size: 9pt; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; }
+    h1 { font-size: 28pt; line-height: 1; margin: 0; letter-spacing: .3px; }
+    .lead { margin: 2mm 0 0; font-size: 10pt; }
+    .version { font-size: 8pt; white-space: nowrap; }
+    .gallery { display: grid; grid-template-columns: 1.65fr 1fr 1fr; grid-template-rows: 82mm 34mm; gap: 4mm; flex: 1; min-height: 0; }
+    figure { position: relative; margin: 0; border-radius: 6mm; overflow: hidden; border: 1.5px solid #b78950; box-shadow: 0 2mm 4mm #674a2f33; background: #d9e7cb; }
+    figure img { width: 100%; height: 100%; display: block; object-fit: cover; }
+    figcaption { position: absolute; bottom: 0; left: 0; right: 0; color: white; font-weight: 700; font-size: 9pt; padding: 7mm 3mm 2mm; background: linear-gradient(transparent, #193c25d9); }
+    .scene { grid-column: 1 / 3; }
+    .logo { grid-column: 3; background: #d9d5c3; }
+    .logo img { object-fit: contain; }
+    .animals { grid-column: 1; }
+    .animals img { object-fit: cover; object-position: center 38%; }
+    .celebration { grid-column: 2 / 4; }
+    .palette { display: flex; align-items: center; gap: 3mm; }
+    .palette b { font-size: 9pt; margin-right: 1mm; }
+    .swatch { flex: 1; height: 16mm; border-radius: 3mm; padding: 2.5mm; border: 1px solid #183d2840; display: flex; flex-direction: column; justify-content: end; font-size: 7.7pt; line-height: 1.2; font-weight: 700; }
+    .swatch small { font-size: 6.8pt; font-weight: 400; }
+    .dark { color: white; }
+    footer { display: flex; align-items: center; justify-content: space-between; gap: 8mm; border-top: 1px solid #a8a887; padding-top: 2.5mm; font-size: 8pt; }
+    footer p { margin: 0; }
+    .credit { max-width: 130mm; }
+  </style>
+</head>
+<body>
+  <main class="sheet">
+    <header>
+      <div>
+        <p class="eyebrow">Direction artistique · GUÉPARD</p>
+        <h1>Une course au cœur de la jungle</h1>
+        <p class="lead">Animaux expressifs, relief 3D mat et traces de feutre visibles.</p>
+      </div>
+      <div class="version">Moodboard évolutif · 7 octobre 2026</div>
+    </header>
+    <section class="gallery" aria-label="Références visuelles du prototype">
+      <figure class="scene"><img src="../../public/assets/relief-background.png" alt="Clairière de jungle" /><figcaption>01 · Clairière immersive, centre lisible</figcaption></figure>
+      <figure class="logo"><img src="../../public/assets/guepard-logo.png" alt="Logo GUÉPARD fourni" /><figcaption>02 · Logo fourni</figcaption></figure>
+      <figure class="animals"><img src="../../public/assets/relief-animals.png" alt="Animaux du décor" /><figcaption>03 · Animaux 3D colorés au feutre</figcaption></figure>
+      <figure class="celebration"><img src="../../public/assets/results-celebration-jungle-v3.png" alt="Décor des résultats" /><figcaption>04 · Célébration, fleurs et feuillage</figcaption></figure>
+    </section>
+    <section class="palette" aria-label="Palette de couleurs">
+      <b>Palette</b>
+      <div class="swatch" style="background:#F7E7C6">Sable <small>#F7E7C6</small></div>
+      <div class="swatch dark" style="background:#5BAE4A">Feuille <small>#5BAE4A</small></div>
+      <div class="swatch dark" style="background:#2F6B3D">Forêt <small>#2F6B3D</small></div>
+      <div class="swatch" style="background:#F28C28">Mangue <small>#F28C28</small></div>
+      <div class="swatch" style="background:#F6C445">Soleil <small>#F6C445</small></div>
+      <div class="swatch" style="background:#5BC0EB">Rivière <small>#5BC0EB</small></div>
+    </section>
+    <footer>
+      <p><strong>Typographie :</strong> Nunito · DM Sans · Kalam &nbsp; <strong>Mots-clés :</strong> accueillant · artisanal · vivant</p>
+      <p class="credit">Concept et idées d'interface : porteuse du projet. ChatGPT a aidé à conceptualiser les visuels. Le design peut évoluer.</p>
+    </footer>
+  </main>
+</body>
+</html>
