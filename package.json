@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "next dev --webpack -p 5173",
     "build": "next build --webpack",
-    "start": "next start -p 5173",
+    "start": "next start -p ${PORT:-5173} -H 0.0.0.0",
     "preview": "next start -p 5173",
     "db:up": "docker compose up -d db",
     "db:stop": "docker compose stop db",

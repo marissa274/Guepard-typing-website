@@ -4,6 +4,8 @@ Application Next.js avec les illustrations, le mode nuit et les animations de la
 
 ## Démarrer
 
+Pour la mise en ligne, suivre le [guide Railway pas à pas](docs/deploiement-railway.md).
+
 ```sh
 npm install
 npm run dev
