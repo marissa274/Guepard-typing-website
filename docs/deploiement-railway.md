@@ -44,6 +44,19 @@ Dans le service web : **Settings → Networking → Public Networking → Genera
 
 Le flux SSE du lobby maintient une connexion ouverte ; si Railway signale des erreurs de connexion ou si les mises à jour cessent, examiner les journaux du service web et les limites de l'offre utilisée.
 
+## Option : accompagnement direct dans Codex
+
+Railway propose un CLI et un serveur MCP officiel pour Codex. Sur ce Mac, le CLI Railway n'est pas encore installé et aucune session Railway n'est connectée à l'assistant. Pour l'activer vous-même :
+
+```sh
+brew install railway
+railway login --browserless
+railway whoami
+railway mcp install --agent codex
+```
+
+La commande de connexion affiche une URL et un code de jumelage. Ouvrir l'URL dans votre navigateur, entrer le code **sur le site Railway**, puis revenir au terminal. Ne pas envoyer le code ou un jeton dans la conversation. Après l'installation MCP, rouvrir Codex si la connexion n'apparaît pas immédiatement ; l'assistant pourra alors lire le projet Railway auquel le compte donne accès et guider la configuration directement. On peut aussi utiliser `railway link` dans le dossier du projet après avoir créé le projet sur le site.
+
 ## Sources officielles
 
 - [Déployer Next.js et PostgreSQL sur Railway](https://docs.railway.com/guides/nextjs)
@@ -52,3 +65,5 @@ Le flux SSE du lobby maintient une connexion ouverte ; si Railway signale des er
 - [Variables de référence](https://docs.railway.com/variables/reference)
 - [Domaine et HTTPS](https://docs.railway.com/networking/public-networking)
 - [Port et adresse d'écoute](https://docs.railway.com/networking/troubleshooting/application-failed-to-respond)
+- [CLI et connexion Railway](https://docs.railway.com/cli)
+- [MCP Railway pour Codex](https://docs.railway.com/cli/mcp)
