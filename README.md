@@ -27,6 +27,8 @@ Un header avec le logo original agrandi, une seule scène de jungle, puis le foo
 
 Les livrables du checkpoint sont rassemblés dans le [moodboard](docs/design/moodboard.md), la [direction artistique](docs/design/direction-artistique.md), le [schéma de données](docs/architecture/schema-donnees.md), la [machine à états](docs/architecture/machine-etats.md), l'[ADR du temps réel](docs/architecture/adr-0001-temps-reel-sse.md) et la [matrice des exigences](docs/exigences/matrice-checkpoint-1.md). La CI est définie dans `.github/workflows/ci.yml`.
 
+Versions PDF : [moodboard](docs/design/moodboard.pdf), [direction artistique](docs/design/direction-artistique.pdf), [schéma de données](docs/architecture/schema-donnees.pdf), [machine à états](docs/architecture/machine-etats.pdf), [ADR temps réel](docs/architecture/adr-0001-temps-reel-sse.pdf), [matrice des exigences](docs/exigences/matrice-checkpoint-1.pdf). Pour les régénérer après une modification des Markdown : `python3 scripts/render-checkpoint-pdfs.py` (nécessite WeasyPrint).
+
 - `app/layout.jsx` : document Next.js et état partagé.
 - `app/[[...path]]/page.jsx` : point d’entrée App Router ; navigation avec `next/link`.
 - `src/components/` : composants React de la scène, du header, du footer, des courses, du jeu et des fenêtres de démonstration.
