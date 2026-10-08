@@ -19,7 +19,7 @@ test('bot continues to run during rapid typing and the tortoise remains complete
   const lane=page.locator('.race-lane[data-player-id="'+botId+'"]');
   await expect(lane.locator('.race-runner')).toHaveAttribute('data-motion','running');
   await expect(page.locator('.race-runner.runner-tortoise[data-motion="running"]')).toBeVisible();
-  expect(await page.locator('.runner-tortoise').first().evaluate(el=>getComputedStyle(el).backgroundImage)).toContain('race-runners.png');
+  expect(await page.locator('.runner-tortoise').first().evaluate(el=>getComputedStyle(el).backgroundImage)).toContain('race-gaits.png');
   await page.screenshot({path:'/tmp/guepard-tortoise-fixed.png'});
  }finally{await request.post('/api/rooms/'+room.id,{headers,data:{action:'leave'}})}
 });

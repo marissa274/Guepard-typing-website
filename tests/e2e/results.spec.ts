@@ -15,7 +15,7 @@ test('a single eligible finisher keeps a compact podium and excludes an abandonm
   await request.post('/api/rooms/'+room.id,{headers,data:{action:'start'}});
   await request.post('/api/rooms/'+room.id,{headers:{Authorization:'Bearer '+guest.token},data:{action:'abandon'}});
   const current=(await (await request.get('/api/rooms/'+room.id,{headers})).json()).room;
-  await request.post('/api/rooms/'+room.id,{headers,data:{action:'progress',value:current.text,typed:current.text.length}});
+  expect(current.phase).toBe('finished');
   await page.goto('/');await page.evaluate(({id,token})=>sessionStorage.setItem('guepard-room-'+id,token),{id:room.id,token});await page.goto('/lobby/'+room.id);
   await expect(page.locator('.results-place')).toHaveCount(1);expect((await page.locator('.results-place').boundingBox())!.width).toBeLessThanOrEqual(310);
   await page.getByRole('button',{name:'Voir mes statistiques'}).click();await expect(page.locator('.results-table tbody tr')).toHaveCount(2);await expect(page.locator('.results-table')).toContainText('Abandon');

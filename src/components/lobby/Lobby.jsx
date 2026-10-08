@@ -1,0 +1,81 @@
+'use client';
+import { useEffect, useRef, useState } from 'react';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { useSite } from '../SiteContext';
+import { AnimalAvatar } from '../AnimalAvatar';
+import { roomRequest, subscribeRoom, tokenFor } from '../../lib/room-client';
+import RoomSettings from './RoomSettings';
+import VisualRace from './VisualRace';
+const levels = { beginner: 'Débutant', medium: 'Intermédiaire', expert: 'Expert', impossible: 'Impossible' };
+export default function Lobby({ id }) {
+    const { state } = useSite(), router = useRouter(), [room, setRoom] = useState(null), [needsJoin, setNeedsJoin] = useState(false), [closed, setClosed] = useState(false), [error, setError] = useState(''), [busy, setBusy] = useState(false), [connected, setConnected] = useState(false), [name, setName] = useState(null), [code, setCode] = useState(''), [invitation, setInvitation] = useState(''), [notice, setNotice] = useState(''), [joinVersion, setJoinVersion] = useState(0);
+    const revision = useRef(-1);
+    function accept(next) { if (next.revision >= revision.current) {
+        revision.current = next.revision;
+        setRoom(next);
+    } }
+    useEffect(() => { if (!tokenFor(id)) {
+        setNeedsJoin(true);
+        return;
+    } const controller = new AbortController(); let stopped = false; async function connect() { while (!controller.signal.aborted && !stopped) {
+        try {
+            await subscribeRoom(id, controller.signal, r => { accept(r); setConnected(true); setError(''); setNeedsJoin(false); }, () => { stopped = true; setClosed(true); setConnected(false); sessionStorage.removeItem('guepard-room-' + id); });
+        }
+        catch {
+            if (!controller.signal.aborted) {
+                setConnected(false);
+                setError('Connexion interrompue. Reconnexion automatique…');
+            }
+        }
+        if (!controller.signal.aborted && !stopped)
+            await new Promise(resolve => setTimeout(resolve, 1500));
+    } } connect(); const heartbeat = setInterval(() => { roomRequest(id, { action: 'heartbeat' }).catch(() => { }); }, 15000); return () => { controller.abort(); clearInterval(heartbeat); }; }, [id, joinVersion]);
+    async function act(body) { setBusy(true); setError(''); try {
+        const result = await roomRequest(id, body);
+        if (result.room)
+            accept(result.room);
+        if (body.action === 'rematch')
+            router.replace('/lobby/' + id, { scroll: false });
+        if (body.action === 'join') {
+            const url = new URL(window.location.href);
+            url.search = '';
+            window.history.replaceState(null, '', url);
+            setNeedsJoin(false);
+            setJoinVersion(v => v + 1);
+        }
+        if (result.left) {
+            sessionStorage.removeItem('guepard-room-' + id);
+            router.push('/races');
+        }
+        if (result.invitation) {
+            setInvitation(window.location.origin + '/lobby/' + id + '?invite=' + result.invitation.token);
+            setNotice('Invitation créée : une utilisation, valable 30 minutes.');
+        }
+        return result;
+    }
+    catch (e) {
+        setError(e.message);
+    }
+    finally {
+        setBusy(false);
+    } }
+    async function copy(text) { try {
+        await navigator.clipboard.writeText(text);
+        setNotice('Copié !');
+    }
+    catch {
+        setNotice('Sélectionne le texte pour le copier.');
+    } }
+    const decor = <><div className="lobby-toucan" aria-hidden="true"><div className="animal-cutout animal-toucan"/></div><div className="lobby-sleeping-cheetah" aria-hidden="true"/><div className="woodland-scenery" aria-hidden="true"/><div className="lobby-world-animals" aria-hidden="true"><div className="lobby-world-animal lobby-parrot"><div className="animal-cutout animal-parrot"/></div><div className="lobby-world-animal lobby-elephant"><div className="animal-cutout animal-elephant"/></div><div className="lobby-world-animal lobby-crocodile"><div className="animal-cutout animal-crocodile"/></div><div className="lobby-world-animal lobby-giraffe"><img src={state.dark ? '/assets/giraffe-night.png' : '/assets/giraffe-full.png'} alt=""/></div></div><div className="lobby-monkey" aria-hidden="true"><span className="monkey-vine"/><div className="animal-cutout animal-monkey"/></div><div className="lobby-leaves lobby-leaves-left" aria-hidden="true"><div className="leaves-cutout"/></div><div className="lobby-leaves lobby-leaves-right" aria-hidden="true"><div className="leaves-cutout"/></div><div className="lobby-leaves lobby-leaves-upper-left" aria-hidden="true"><div className="leaves-cutout"/></div><div className="lobby-leaves lobby-leaves-upper-right" aria-hidden="true"><div className="leaves-cutout"/></div></>;
+    if (closed)
+        return <main className="woodland-page">{decor}<div className="room-entry wood-panel"><h1>Le salon n’est plus accessible.</h1><p>L’hôte a fermé le salon ou t’a retiré de la course.</p><Link className="wood-primary" href="/races">Parcourir les courses</Link></div></main>;
+    if (!room)
+        return <main className="woodland-page">{decor}<div className="room-entry wood-panel"><p className="woodland-eyebrow">TA TROUPE T’ATTEND</p><h1>Rejoindre le salon</h1>{error && <p className="wood-error" role="alert">{error}</p>}{needsJoin ? <form onSubmit={e => { e.preventDefault(); const query = new URLSearchParams(window.location.search); act({ action: 'join', nickname: name?.trim() || state.name, avatar: state.avatar, kind: state.user ? 'demo' : 'guest', code: code.trim().toUpperCase() || query.get('code'), invite: query.get('invite') }); }}><AnimalAvatar animal={state.user ? state.avatar : 'cheetah'}/><label htmlFor="join-name">Ton pseudo</label><input id="join-name" maxLength={40} required value={name ?? state.name} onChange={e => setName(e.target.value)}/><label htmlFor="join-code">Code du salon <small>(si semi-public)</small></label><input id="join-code" value={code} onChange={e => setCode(e.target.value.toUpperCase())} maxLength={8} placeholder="Code reçu de l’hôte"/><p className="wood-hint">Si la course a déjà commencé, tu entres comme spectateur. Les invités reçoivent un avatar guépard.</p><button className="wood-primary" disabled={busy}>Entrer dans le salon <span aria-hidden="true">→</span></button></form> : <p role="status">Connexion au salon…</p>}<Link className="woodland-back" href="/races">Retour aux courses</Link></div></main>;
+    const host = room.isHost, waiting = room.phase === 'waiting', mine = room.people.find(p => p.id === room.me), enabled = host && waiting && !busy;
+    const renderPerson = (p) => <li key={p.id}><AnimalAvatar animal={p.animal}/><div className="person-copy"><strong>{p.name}{p.id === room.me && <small> (toi)</small>}</strong><div className="person-tags"><span>{p.role === 'spectator' ? 'Spectateur' : 'Joueur'}</span>{p.kind === 'guest' && <span>Invité</span>}{p.kind === 'demo' && <span>Compte</span>}{p.kind === 'bot' && <span>Bot</span>}{p.id === room.hostId && <span className="host-tag">Hôte</span>}{p.abandoned && <span>Abandon</span>}</div>{!waiting && p.role === 'player' && <progress max={room.text?.length || 1} value={p.progress} aria-label={'Progression de ' + p.name}/>}</div>{p.kind === 'bot' && <select className="bot-level" aria-label={'Difficulté de ' + p.name} value={p.difficulty} disabled={!enabled} onChange={e => act({ action: 'difficulty', personId: p.id, difficulty: e.target.value })}>{Object.entries(levels).map(([value, label]) => <option value={value} key={value}>{label}</option>)}</select>}{host && <details className="person-menu"><summary aria-label={'Actions pour ' + p.name}>⋯</summary><div>{waiting && <button disabled={busy} onClick={() => act({ action: 'role', personId: p.id, role: p.role === 'player' ? 'spectator' : 'player' })}>{p.role === 'player' ? 'Passer en spectateur' : 'Passer en joueur'}</button>}{p.id !== room.hostId && <button disabled={busy} onClick={() => act({ action: 'kick', personId: p.id })}>Retirer du salon</button>}</div></details>}</li>;
+    return <main className={"woodland-page lobby-page " + (waiting ? "lobby-waiting" : room.phase === 'finished' ? "lobby-active lobby-results" : "lobby-active")}>{decor}<div className="woodland-shell"><div className="lobby-topbar"><button className="woodland-back" onClick={() => act({ action: 'leave' })} disabled={busy}>← Quitter le salon</button><span className={'room-connection ' + (connected ? 'connected' : '')}><i />{connected ? 'Salon synchronisé' : 'Reconnexion…'}</span></div><div className="lobby-title-row"><div className="woodland-title"><div className="room-heading-meta"><span className="room-status">{waiting ? 'En attente' : room.phase === 'running' ? 'Course en cours' : 'Course terminée'}</span>{host && <span className="room-host">Vous êtes l’hôte</span>}</div><h1>{room.name}</h1></div><aside className="room-invitation" aria-label="Invitation"><span className="woodland-eyebrow">{room.settings.visibility === 'public' ? 'SALON PUBLIC' : room.settings.visibility === 'semi' ? 'INVITER AVEC UN CODE' : 'INVITATION PRIVÉE'}</span>{room.settings.visibility === 'semi' ? <><strong className="room-code">{room.code}</strong><button onClick={() => copy(room.code)}>Copier le code</button></> : room.settings.visibility === 'private' ? host ? <><p>Un lien pour une personne.<br />Il expire après 30 minutes.</p><button disabled={busy} onClick={() => act({ action: 'invite' })}>Créer une invitation</button>{invitation && <div className="invitation-result"><input aria-label="Lien d’invitation à usage unique" value={invitation} readOnly onFocus={e => e.target.select()}/><button onClick={() => copy(invitation)}>Copier le lien</button></div>}</> : <p>Seul l’hôte peut créer les invitations.</p> : <><p>Visible dans les courses publiques.</p><button onClick={() => copy(window.location.origin + '/lobby/' + id)}>Copier le lien</button></>}<small role="status">{notice}</small></aside></div>{error && <p className="wood-error" role="alert">{error}</p>}
+ {waiting ? <div className="lobby-panels"><section className="wood-panel participants-board" aria-labelledby="participants-title"><div className="wood-panel-heading"><div><span className="woodland-eyebrow">LA TROUPE</span><h2 id="participants-title">Joueurs <span>· {room.people.filter(p => p.role === 'player').length}</span></h2></div>{enabled && <button className="wood-small-button" onClick={() => act({ action: 'bot' })}>Ajouter un bot</button>}</div><p className="wood-hint">{room.players} joueur{room.players > 1 ? 's' : ''} · {room.people.filter(p => p.role === 'spectator').length} spectateur{room.people.filter(p => p.role === 'spectator').length > 1 ? 's' : ''}</p><div className="participants-scroll" tabIndex={0} role="region" aria-label="Liste des participants"><ul className="room-roster">{room.people.filter(p => p.role === 'player').map(renderPerson)}</ul>{room.people.some(p => p.role === 'spectator') && <div className="spectator-group"><h3>Spectateurs · {room.people.filter(p => p.role === 'spectator').length}</h3><ul className="room-roster">{room.people.filter(p => p.role === 'spectator').map(renderPerson)}</ul></div>}</div></section>
+ <section className="wood-panel settings-board" aria-labelledby="settings-title"><div className="wood-panel-heading"><div><span className="woodland-eyebrow">LE PARCOURS</span><h2 id="settings-title">{waiting ? 'Paramètres de course' : room.phase === 'running' ? 'La course' : 'Résultats'}</h2></div><span className="settings-access">{enabled ? 'Modification par l’hôte' : 'Lecture seule'}</span></div>{waiting ? <><p className="wood-hint">{host ? 'Choisis le rythme de votre aventure.' : 'Les réglages de l’hôte se mettent à jour ici en direct.'}</p><RoomSettings settings={room.settings} disabled={!enabled} onChange={settings => act({ action: 'settings', settings })}/></> : null}</section></div> : <section className="wood-panel race-board"><VisualRace key={room.startedAt} room={room} connected={connected} onError={setError}/></section>}
+ <div className="room-launch">{room.phase === 'finished' && host && <span className="results-host-label">Vous êtes l’hôte</span>}{host && room.phase === 'finished' && <button className="woodland-back" onClick={() => act({ action: 'leave' })}>Fermer le salon</button>}<div><strong>{room.players} joueur{room.players > 1 ? 's' : ''} dans la course</strong><p>{waiting ? (room.players < 2 ? 'Il faut au moins deux joueurs pour commencer.' : 'Tout le monde partira au même instant.') : mine?.role === 'spectator' ? 'Tu observes la course.' : 'Garde le rythme et amuse-toi.'}</p></div>{host ? waiting ? <button className="wood-primary" disabled={busy || room.players < 2} onClick={() => act({ action: 'start' })}>Lancer la course <span aria-hidden="true">→</span></button> : <button className="wood-primary" disabled={busy} onClick={() => act({ action: room.phase === 'finished' ? 'rematch' : 'reset' })}>{room.phase === 'finished' ? 'Lancer une revanche' : 'Retour au salon'}</button> : <div className="guest-end-actions">{room.phase === 'finished' && <button className="woodland-back" disabled={busy} onClick={() => act({ action: 'leave' })}>Quitter le salon</button>}<p className="room-wait" role="status">{waiting ? 'En attente du départ par l’hôte' : room.phase === 'finished' ? 'En attente de la revanche par l’hôte' : 'La course est en cours'}</p></div>}</div></div></main>;
+}

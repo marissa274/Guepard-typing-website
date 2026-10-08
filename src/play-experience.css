@@ -32,8 +32,8 @@
 @media(max-width:700px){.how-banner{padding:45px 24px 25px;gap:15px;flex-direction:column;text-align:center}.how-banner img{width:65%;max-width:300px}.how-cards{grid-template-columns:1fr;padding:0 15px;gap:25px;margin-top:30px}.how-card-copy{padding:20px}.how-card-copy h2{font-size:27px}.how-ready>div{flex-direction:column;gap:20px}.how-ready h2{font-size:30px}.how-illustration{height:220px}.lane-position .race-runner{width:68px;height:68px}.race-lane-road{height:76px}.race-podium{padding:10px 0 20px;gap:8px}.podium-place .race-runner{width:80px;height:80px}.podium-plaque{padding:6px 3px;font-size:11px}.keyboard-heatmap{grid-template-columns:repeat(7,minmax(0,1fr))}.lobby-page .room-launch{flex-wrap:wrap}.lobby-page .lobby-sleeping-cheetah{width:145px}}
 @media(prefers-reduced-motion:reduce){.race-runner[data-motion],.podium-place .race-runner,.lobby-page .lobby-sleeping-cheetah,.sleeping-cheetah,.podium-confetti i{animation:none!important}}
 [data-theme=dark] .lobby-page .lobby-sleeping-cheetah{background-image:url('/assets/sleeping-tail.png')}
-/* The extended gallop uses a slightly wider atlas window for the complete muzzle. */
-@keyframes gait-cycle{0%,100%{background-position:0 var(--gait-row);background-size:400% 600%}25%{background-position:33.333333% var(--gait-row);background-size:400% 600%}50%{background-position:69.565217% var(--gait-row);background-size:355.555556% 600%}75%{background-position:100% var(--gait-row);background-size:457.142857% 600%}}
+/* Every pose uses the same atlas window, so the animal keeps a consistent size. */
+@keyframes gait-cycle{0%,100%{background-position:0 var(--gait-row)}25%{background-position:33.333333% var(--gait-row)}50%{background-position:66.666667% var(--gait-row)}75%{background-position:100% var(--gait-row)}}
 @media(min-width:1101px){.lobby-page{padding-top:18px}}
 /* Rest and podium use the complete original portraits; the running atlas is reserved for the gait. */
 .race-runner:not([data-motion=running]){background-image:url('/assets/race-runners.png');background-size:300% 200%}
@@ -42,9 +42,9 @@
 .race-podium::before,.race-podium::after{content:'';position:absolute;bottom:10px;width:95px;height:95px;background:url('/assets/relief-foliage.png') left center/200% 100%;pointer-events:none;opacity:.8}.race-podium::before{left:-10px}.race-podium::after{right:-10px;transform:scaleX(-1)}
 .lobby-page.lobby-active .lobby-giraffe{bottom:70px}.lobby-page .lobby-giraffe::after{height:12%;bottom:-2%;border-radius:60% 60% 0 0;background:radial-gradient(ellipse at 50% 0,#8a9865,#586d41 55%,#3a5933);box-shadow:none}
 .lobby-page.lobby-active{padding-bottom:150px}
-/* Keep the complete felt tortoise in view. Its atlas poses touch the cell edge,
-   so crawl the uncropped portrait instead of switching to the clipped gait row. */
-.race-runner.runner-tortoise[data-motion=running]{background-image:url('/assets/race-runners.png');background-size:300% 200%;background-position:100% 100%;animation:tortoise-crawl 1.35s ease-in-out infinite}
-.race-lane.is-bot .lane-position{transition:left .7s linear}
-@keyframes tortoise-crawl{0%,100%{transform:translateY(0) rotate(-1deg)}50%{transform:translateY(-3px) rotate(2deg)}}
-@media(prefers-reduced-motion:reduce){.race-runner.runner-tortoise[data-motion=running]{animation:none}.race-lane.is-bot .lane-position{transition:none}}
+/* The tortoise uses the four drawn walking poses, like the other racers. */
+.race-runner.runner-tortoise[data-motion=running]{background-image:url('/assets/race-gaits.png');background-size:400% 600%;animation:tortoise-gait 1.15s steps(1,end) infinite}
+@keyframes tortoise-gait{0%,100%{background-position:0 100%;transform:translateY(0) rotate(-1deg)}25%{background-position:33.333333% 100%;transform:translateY(-2px) rotate(0)}50%{background-position:66.666667% 100%;transform:translateY(-3px) rotate(1deg)}75%{background-position:100% 100%;transform:translateY(-1px) rotate(0)}}
+.lane-position{transition:left .65s linear;will-change:left}
+.race-lane.is-bot .lane-position{transition:left .65s linear}
+@media(prefers-reduced-motion:reduce){.race-runner.runner-tortoise[data-motion=running]{animation:none;background-image:url('/assets/race-runners.png');background-size:300% 200%;background-position:100% 100%}.lane-position,.race-lane.is-bot .lane-position{transition:none}}
