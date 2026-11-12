@@ -34,6 +34,10 @@ jobs:
         with:
           node-version: '22'
           cache: npm
+      - name: Show Node and npm versions
+        run: |
+          node --version
+          npm --version
       - run: npm ci
       - run: npm run typecheck
       - run: npm test -- --silent
