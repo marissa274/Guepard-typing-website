@@ -43,13 +43,13 @@ Versions PDF : [moodboard](docs/design/moodboard.pdf), [direction artistique](do
 
 Les chemins `/login`, `/signup`, `/play`, `/races`, `/create`, `/lobby/:id`, `/race/:id`, `/how`, `/stats` et les pages d’information sont accessibles directement. `/private` reste un alias de `/create`. Les anciens liens `#/…` sont redirigés vers les nouveaux chemins. Les préférences existantes `guepard-*` sont reprises.
 
-## Démonstration et futur backend
+## Comptes, salons et stockage
 
 La connexion par nom d’utilisateur et mot de passe utilise PostgreSQL. Les anciens parcours `/race/:id` restent locaux ; les salons `/lobby/:id` sont partagés entre navigateurs.
 
 La création de course ouvre un salon partagé `/lobby/:id`. Les paramètres, participants et départ sont synchronisés entre navigateurs. La page des courses publiques n’affiche aucun salon fictif.
 
-Les préférences et profils de démonstration utilisent localStorage. L’identité et les résultats d’un invité utilisent sessionStorage et disparaissent à la fin de sa session de navigation. Les informations légales et coordonnées restent à compléter avant publication.
+Les préférences de langue et de thème utilisent localStorage. Le compte et ses résultats sont restaurés depuis PostgreSQL ; les résultats de compte ne sont pas enregistrés dans le stockage du navigateur. L’identité et les résultats d’un invité utilisent sessionStorage et disparaissent à la fin de sa session de navigation. Les informations légales et coordonnées restent à compléter avant publication.
 
 ## Vérifications
 
@@ -80,13 +80,13 @@ Le site utilise React, Next.js et Tailwind CSS. **Vite et Vitest ont été retir
 ## Lobby de jungle et identité animale
 
 - `/create` : création d’une course publique par défaut, avec choix possible de visibilité semi-publique ou privée. Le choix d’un des six animaux est obligatoire : guépard, perroquet, crocodile, singe, éléphant ou toucan. Chaque animal a son propre paysage illustré dans `public/assets/race-*.png`. Le carrousel de modèles se parcourt au défilement ou avec les flèches.
-- `/signup` : choix défilant d’un portrait personnel parmi six animaux, distinct de l’animal et du paysage du salon. Une variante aux yeux fermés apparaît en mode nuit. Le choix est appliqué au compte de démonstration. L’authentification réelle reste à brancher.
+- `/signup` : choix défilant d’un portrait personnel parmi six animaux, distinct de l’animal et du paysage du salon. Une variante aux yeux fermés apparaît en mode nuit. Le choix est enregistré dans le compte PostgreSQL et restauré à la connexion.
 - Invité : guépard attribué par le serveur ; pseudo et résultats locaux limités à la session.
 - `/lobby/:id` : disposition en deux panneaux clairs et souples inspirée de l’aperçu fourni, avec grain de feutre, relief doux, joueurs et spectateurs distincts, réglages dépliables, animaux réutilisés de l’accueil et footer existant. Aucun emoji décoratif ajouté. Animations séparées des contrôles, pause du singe/toucan au focus et respect de la réduction des animations.
 - Seul l’hôte configure, désigne les spectateurs, ajoute des bots, choisit leur niveau individuel et retire les participants. Le minimum est deux joueurs, bots inclus ; les spectateurs ne comptent pas. Pas de validation « prêt » ni de plafond fixe de participants. Un groupe de 32 personnes a été testé via l’API.
 - Public : carte visible dans `/races`. Semi-public : code à saisir. Privé : lien généré par l’hôte, valable 30 minutes, consommé atomiquement à la première utilisation. L’hôte peut générer une nouvelle invitation par personne.
 - Synchronisation : flux SSE authentifié par jeton de membre, avec reconnexion automatique. Le serveur relit les données toutes les 600 ms et pousse les révisions ; le navigateur ne recharge pas la page. Jetons dans sessionStorage, jamais inclus dans la liste des participants. Un retrait révoque l’accès ; quitter comme hôte ferme le salon.
-- Départ commun immédiat, texte aléatoire conforme aux options, progression partagée, bots avec variations et erreurs simulées, abandon après inactivité de frappe, résultats simples et retour au salon. La saisie en cours est restaurée après rechargement. Une arrivée après le départ est spectatrice jusqu’à la prochaine course.
+- Départ commun immédiat, texte aléatoire conforme aux options, progression partagée, bots déterministes à cinq niveaux, avec variations et erreurs simulées, abandon après inactivité de frappe, résultats simples et retour au salon. La saisie en cours est restaurée après rechargement. Une arrivée après le départ est spectatrice jusqu’à la prochaine course.
 - La nouvelle interface du lobby est actuellement en français ; le header conserve son sélecteur FR/EN. La traduction intégrale de ce nouvel écran, les bonus de jeu et les statistiques avancées/heatmaps du cahier des charges restent des travaux distincts.
 
 ## Pistes et podium du salon partagé
@@ -107,7 +107,7 @@ En local, `docker compose up -d db` démarre PostgreSQL 16 sur `127.0.0.1:5433` 
 
 Les commandes courtes sont `npm run db:up`, `npm run db:stop` et `npm run db:migrate`. Après `npm run db:up`, lancer `npm run dev`, puis ouvrir `http://localhost:5173/login` ou `/signup`. Pour voir les tables : `docker compose exec db psql -U guepard -d guepard -c '\dt'`. Les tables `guepard_users`, `guepard_sessions` et `guepard_rooms` sont créées automatiquement. Pour héberger le site ailleurs, `localhost` ne suffit pas : il faut une base PostgreSQL accessible au serveur déployé et sa variable `DATABASE_URL`.
 
-Le serveur Next.js doit rester actif et accessible aux participants. Sur un autre appareil, ouvrir l’adresse réseau du serveur plutôt que `localhost`. Les droits sur un salon reposent sur un jeton de session anonyme, indépendamment de la future authentification des comptes.
+Le serveur Next.js doit rester actif et accessible aux participants. Sur un autre appareil, ouvrir l’adresse réseau du serveur plutôt que `localhost`. Les droits sur un salon reposent sur un jeton de membre. Le serveur associe les participants connectés à leur compte pour enregistrer leurs résultats, sans exposer cet identifiant dans les snapshots partagés.
 
 ## Tests du lobby
 
@@ -124,7 +124,7 @@ Les tests Playwright utilisent Chrome installé sur macOS s’il est présent, o
 
 `/how` présente quatre étapes illustrées, une navigation active et les liens vers le jeu rapide et la création. Les sprites `race-gaits.png` contiennent quatre poses distinctes par espèce ; `sleeping-tail.png` anime la queue du guépard endormi. Les prompts et les références sont dans `public/assets/PLAY-EXPERIENCE-PROMPTS.md`. Les foulées cessent à l’arrêt et respectent la réduction des animations. Elles ne modifient jamais la progression serveur.
 
-Le podium du salon partagé affiche vitesse et précision. Le score reste non calculé : sa formule et le départage définitif sont à définir. Le classement indicatif conserve l’ordre d’arrivée puis la progression, avec égalités partagées. L’heure de fin est enregistrée par le serveur. La revanche est une action atomique réservée à l’hôte. Les résultats personnels alimentent les statistiques locales ; la heatmap compte les touches attendues et les erreurs de saisie sur cet appareil et cette session. Aucun historique de frappes distantes n’est inventé.
+Le podium du salon partagé affiche vitesse et précision. Le score reste non calculé : sa formule et le départage définitif sont à définir. Le classement indicatif conserve l’ordre d’arrivée puis la progression, avec égalités partagées. L’heure de fin est enregistrée par le serveur. La revanche est une action atomique réservée à l’hôte. Une arrivée après l’échéance est refusée ; le moteur arrête les bots exactement à cette échéance. Les résultats personnels alimentent l’historique PostgreSQL des comptes et les statistiques de session des invités ; la heatmap compte les touches attendues et les erreurs de saisie sur cet appareil et cette session. Aucun historique de frappes distantes n’est inventé.
 
 ## Écran Résultats
 
@@ -133,3 +133,15 @@ Le podium du salon partagé affiche vitesse et précision. Le score reste non ca
 ### Démonstration du podium
 
 Ouvre `/demo/podium` pour comparer la composition avec quatre participants fictifs, clairement indiqués comme tels. Le podium d’une vraie course utilise toujours ses propres résultats.
+
+
+## Fonctionnalités poursuivies
+
+Les lots et leurs limites sont décrits dans [le plan fonctionnel](docs/fonctionnalites/plan-fonctionnel.md). La [matrice des exigences](docs/EXIGENCES.md) distingue les fonctions complètes, partielles et absentes.
+
+- **Compte** : les paramètres enregistrent pseudo et avatar en base. Le pseudo modifié sert aussi à la connexion. Le changement de mot de passe vérifie le mot de passe actuel et révoque les autres sessions ; la session courante reste active.
+- **Bots** : cinq niveaux, cadence variable, hésitations et temps de correction ; une graine serveur rend le parcours indépendant de la fréquence des mises à jour. Les règles sont dans [la documentation des bots](docs/fonctionnalites/bots.md).
+- **Mesures** : MPM net et précision en course ; MPM brut, erreurs, durée et statut dans les résultats. L’abandon demande confirmation. Les valeurs sont dérivées de la même référence de calcul, sans score ni bonus inventé.
+- **Historique** : chaque résultat d’un humain connecté est enregistré automatiquement dans `guepard_results`, dans la transaction de fin de course, avec une contrainte d’unicité par compte/salon/départ. `/stats` affiche moyennes, victoires, progression entre courses et pagination. Un lien `/history/:id` rouvre le résultat même si le salon a été fermé. L’API `/api/results` est authentifiée et ne permet de lire que ses propres résultats.
+
+La table de résultats est créée automatiquement, comme les tables existantes. Cela ne remplace pas encore un ensemble complet de migrations et un seed versionnés. Les séries temporelles de MPM pendant une course, les bonus, OAuth, les photos téléversées et plusieurs règles de salle du cahier des charges restent à développer. La heatmap reste limitée aux frappes réellement enregistrées sur cet appareil ; elle n’est pas reconstruite depuis le résultat sauvegardé.
