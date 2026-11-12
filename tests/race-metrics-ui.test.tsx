@@ -48,3 +48,11 @@ test('a guest victory records the rank and win in session history only once',()=
  const update=mockSave.mock.calls.find(call=>call[0]==='results')[1],saved=update([]);
  expect(saved).toHaveLength(1);expect(saved[0]).toMatchObject({rank:1,won:true});expect(update(saved)).toEqual(saved);
 });
+
+test('the typing field receives focus when the connection becomes ready after mounting',async()=>{
+ const running={...room,phase:'running',endedAt:undefined};
+ const {rerender}=render(<VisualRace room={running} connected={false} onError={jest.fn()}/>);
+ await waitFor(()=>expect(HTMLElement.prototype.scrollIntoView).toHaveBeenCalled());
+ rerender(<VisualRace room={running} connected onError={jest.fn()}/>);
+ await waitFor(()=>expect(document.activeElement).toBe(screen.getByLabelText('Texte de la course')));
+});

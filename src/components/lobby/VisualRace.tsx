@@ -13,7 +13,7 @@ export default function VisualRace({room,connected,onError}:{room:RoomView;conne
  const {save}=useSite();
  const [confirmAbandon,setConfirmAbandon]=useState(false);
  const me=room.people.find(p=>p.id===room.me)!,[value,setValue]=useState(me.input||''),[now,setNow]=useState(Date.now()),[appearances,setAppearances]=useState<Record<string,Appearance>>({});
- useEffect(()=>{if(room.phase!=='running')return;const frame=requestAnimationFrame(()=>{const field=document.querySelector<HTMLTextAreaElement>('.race-typing textarea');(document.querySelector('.race-typing')||document.querySelector('.race-lanes'))?.scrollIntoView({block:'center',behavior:'instant'});field?.focus({preventScroll:true})});return()=>cancelAnimationFrame(frame)},[room.startedAt]);
+ useEffect(()=>{if(room.phase!=='running')return;const frame=requestAnimationFrame(()=>{const field=document.querySelector<HTMLTextAreaElement>('.race-typing textarea');(document.querySelector('.race-typing')||document.querySelector('.race-lanes'))?.scrollIntoView({block:'center',behavior:'instant'});if(field&&!field.disabled)field.focus({preventScroll:true})});return()=>cancelAnimationFrame(frame)},[room.startedAt,room.phase,connected]);
  const activity=useRef<Record<string,{progress:number;at:number}>>({});
  const heatKey='guepard-heat-'+room.id+'-'+room.startedAt;
  const heat=useRef<Record<string,{hits:number;errors:number}>>({});
