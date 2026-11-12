@@ -8,7 +8,7 @@ import {roomRequest,subscribeRoom,tokenFor} from '../../lib/room-client';
 import type {RoomView} from '../../lib/room-types';
 import RoomSettings from './RoomSettings';
 import VisualRace from './VisualRace';
-const levels={beginner:'Débutant',medium:'Intermédiaire',expert:'Expert',impossible:'Impossible'};
+const levels={noob:'Noob',beginner:'Débutant',medium:'Intermédiaire',expert:'Expert',impossible:'Impossible'};
 export default function Lobby({id}:{id:string}){
  const {state}=useSite(),router=useRouter(),[room,setRoom]=useState<RoomView|null>(null),[needsJoin,setNeedsJoin]=useState(false),[closed,setClosed]=useState(false),[error,setError]=useState(''),[busy,setBusy]=useState(false),[connected,setConnected]=useState(false),[name,setName]=useState<string|null>(null),[code,setCode]=useState(''),[invitation,setInvitation]=useState(''),[notice,setNotice]=useState(''),[joinVersion,setJoinVersion]=useState(0);const revision=useRef(-1);
  function accept(next:RoomView){if(next.revision>=revision.current){revision.current=next.revision;setRoom(next)}}
