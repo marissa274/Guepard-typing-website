@@ -57,3 +57,8 @@ test('account ownership is internal and never appears in room snapshots',()=>{
  const guest=joinRoom(r,{nickname:'Sam',code:r.code,userId:'forged-account'});expect(guest.userId).toBeUndefined();
  expect(JSON.stringify(snapshot(r,h))).not.toContain('account-123');expect(JSON.stringify(snapshot(r,guest))).not.toContain('userId');
 });
+test('replacing a wrong character preserves its error and counts the correction',()=>{
+ const {room:r,person:h}=room();joinRoom(r,{nickname:'Sam',code:r.code});act(r,h,{action:'start'});r.text='abc def ghi';
+ act(r,h,{action:'progress',value:'axc',typed:3});expect(h.progress).toBe(2);expect(h.errors).toBe(1);
+ act(r,h,{action:'progress',value:'abc',typed:3});expect(h.progress).toBe(3);expect(h.typed).toBe(4);expect(h.errors).toBe(1);
+});

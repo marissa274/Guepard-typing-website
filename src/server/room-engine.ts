@@ -1,6 +1,7 @@
 import {randomUUID,randomInt} from 'node:crypto';
 import {isAnimal,isProfileAnimal} from '../lib/animals';
 import {botState,botProfiles} from './bot-engine';
+import {typingEdit} from '../lib/typing-edits';
 import {defaultSettings, type Room,type Person,type RoomView,type Settings,type Difficulty} from '../lib/room-types';
 export class RoomError extends Error{constructor(message:string,public status=400){super(message)}}
 function requireValue(condition:unknown,message:string,status=400):asserts condition{if(!condition)throw new RoomError(message,status)}
@@ -46,7 +47,7 @@ export function act(room:Room,p:Person,body:any):any{
   requireValue(room.phase==='running'&&room.startedAt&&Date.now()>=room.startedAt&&p.role==='player'&&!p.abandoned&&!p.finishedAt,'Vous ne pouvez pas taper maintenant.');
   requireValue(typeof body.value==='string','Saisie invalide.');
   requireValue(body.typed===undefined||Number.isSafeInteger(body.typed)&&body.typed>=0,'Le nombre de frappes est invalide.');
-  const input=body.value.slice(0,room.text!.length),added=Math.max(0,input.length-(p.input?.length||0));
+  const input=body.value.slice(0,room.text!.length),added=typingEdit(p.input||'',input).inserted.length;
   if(room.settings.blockErrors)requireValue(room.text!.startsWith(input),'Corrigez les erreurs avant de continuer.');
   const typed=Math.max(p.typed+added,body.typed??0);
   requireValue(Number.isSafeInteger(typed),'Le nombre de frappes est invalide.');

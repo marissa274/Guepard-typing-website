@@ -8,3 +8,9 @@ test('zero-progress humans remain ranked beside bots at the time limit',()=>{
  const people=[{...room.people[0],id:'bot',kind:'bot',finishedAt:undefined,progress:200},{...room.people[0],id:'human',finishedAt:undefined,progress:0,typed:0}];
  const rows=raceResults({...room,people});expect(rows.map(r=>r.person.id)).toEqual(['bot','human']);expect(rows[1]).toMatchObject({rank:2,species:'tortoise',status:'Temps écoulé',speed:0});
 });
+
+test('results expose gross speed, elapsed time and error count from the same server data',()=>{
+ const rows=raceResults(room);
+ expect(rows[0]).toMatchObject({speed:50,grossSpeed:50,seconds:60,errors:0});
+ expect(rows[1]).toMatchObject({speed:40,grossSpeed:50,seconds:60,errors:50});
+});
