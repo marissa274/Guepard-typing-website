@@ -60,5 +60,36 @@ export async function currentUser(token:string|undefined){
  const result=await pool.query('SELECT u.id,u.username,u.avatar FROM guepard_sessions s JOIN guepard_users u ON u.id=s.user_id WHERE s.token_hash=$1 AND s.expires_at>now()',[tokenHash(token)]);
  return (result.rows[0] as Account|undefined)||null;
 }
+async function requireAccount(token:string|undefined){
+ const account=await currentUser(token);
+ if(!account)throw new AuthError('Reconnectez-vous pour modifier votre compte.',401);
+ return account;
+}
+export async function updateProfile(token:string|undefined,body:any){
+ const account=await requireAccount(token),username=cleanUsername(body?.username);
+ if(!isProfileAnimal(body?.avatar))throw new AuthError('Choisissez un animal.');
+ const {pool}=database();
+ try{
+  const result=await pool.query('UPDATE guepard_users SET username=$1,username_key=$2,avatar=$3 WHERE id=$4 RETURNING id,username,avatar',[username,username.toLocaleLowerCase('fr'),body.avatar,account.id]);
+  if(!result.rows[0])throw new AuthError('Compte introuvable.',401);
+  return result.rows[0] as Account;
+ }catch(error){if((error as {code?:string}).code==='23505')throw new AuthError('Ce nom d’utilisateur est déjà pris.',409);throw error}
+}
+export async function changePassword(token:string|undefined,body:any){
+ const account=await requireAccount(token),password=cleanPassword(body?.password);
+ if(body?.confirmation!==password)throw new AuthError('Les mots de passe ne correspondent pas.');
+ if(typeof body?.currentPassword!=='string'||!body.currentPassword||body.currentPassword.length>128)throw new AuthError('Le mot de passe actuel est incorrect.',401);
+ const {pool}=database(),stored=await pool.query('SELECT password_hash FROM guepard_users WHERE id=$1',[account.id]);
+ const previousHash=stored.rows[0]?.password_hash;
+ if(!previousHash||!await checkPassword(body.currentPassword,previousHash))throw new AuthError('Le mot de passe actuel est incorrect.',401);
+ const hash=await hashPassword(password);
+ // Comparing the old hash prevents simultaneous password changes from overwriting each other.
+ const result=await pool.query(`WITH changed AS (
+  UPDATE guepard_users SET password_hash=$1 WHERE id=$2 AND password_hash=$3 RETURNING id
+ ), revoked AS (
+  DELETE FROM guepard_sessions WHERE user_id IN (SELECT id FROM changed) AND token_hash<>$4
+ ) SELECT id FROM changed`,[hash,account.id,previousHash,tokenHash(token!)]);
+ if(!result.rows[0])throw new AuthError('Le compte a changé. Réessayez.',409);
+}
 export async function logout(token:string|undefined){if(!token)return;const {pool,ready}=database();await ready;await pool.query('DELETE FROM guepard_sessions WHERE token_hash=$1',[tokenHash(token)])}
 export const sessionMaxAge=Math.floor(lifetime/1000);

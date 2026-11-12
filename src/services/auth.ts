@@ -14,6 +14,8 @@ async function request(body:Record<string,unknown>){
  return result;
 }
 export const authService={
+ updateProfile:({username,avatar}:{username:string;avatar:string})=>request({action:'profile',username,avatar}),
+ changePassword:({currentPassword,password,confirmation}:{currentPassword:string;password:string;confirmation:string})=>request({action:'password',currentPassword,password,confirmation}),
  submit:({username,password,confirmation,avatar},mode)=>request({action:mode,username,password,confirmation,avatar}),
  logout:()=>request({action:'logout'}),
  async current(){const response=await fetch('/api/auth',{credentials:'same-origin',cache:'no-store'});if(!response.ok)throw new Error('Compte indisponible.');return response.json()},

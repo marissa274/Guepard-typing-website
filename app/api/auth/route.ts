@@ -1,7 +1,7 @@
 import {isAllowedOrigin} from '../../../src/server/request-origin';
 import {NextResponse} from 'next/server';
 import {cookies} from 'next/headers';
-import {currentUser,login,logout,signup,AuthError,sessionMaxAge} from '../../../src/server/auth-store';
+import {currentUser,login,logout,signup,updateProfile,changePassword,AuthError,sessionMaxAge} from '../../../src/server/auth-store';
 
 export const runtime='nodejs';
 export const dynamic='force-dynamic';
@@ -17,6 +17,14 @@ export async function POST(request:Request){
  if(!isAllowedOrigin(request))return NextResponse.json({error:'Origine non autorisée.'},{status:403});
  try{
   const body=await request.json();
+  if(body?.action==='profile'){
+   const token=(await cookies()).get(cookieName)?.value;
+   return NextResponse.json({user:await updateProfile(token,body)});
+  }
+  if(body?.action==='password'){
+   const token=(await cookies()).get(cookieName)?.value;
+   await changePassword(token,body);return NextResponse.json({ok:true});
+  }
   if(body?.action==='logout'){
    const token=(await cookies()).get(cookieName)?.value;
    await logout(token);const response=NextResponse.json({user:null});response.cookies.delete(cookieName);return response;
