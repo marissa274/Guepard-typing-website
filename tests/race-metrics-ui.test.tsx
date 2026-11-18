@@ -26,7 +26,7 @@ test('results include gross speed, errors, time, status and earned bonus count',
 test('a running racer sees speed and precision and confirms before abandoning',()=>{
  render(<VisualRace room={{...room,phase:'running',endedAt:undefined}} connected onError={jest.fn()}/>);
  expect(screen.getByLabelText('Vitesse de frappe').textContent).toContain('4 mots/min');
- expect(screen.getByLabelText('Précision de frappe').textContent).toContain('80 %');
+ expect(screen.getByLabelText('Précision de frappe').textContent).toContain(new Intl.NumberFormat('fr',{style:'percent'}).format(.8));
  fireEvent.click(screen.getByRole('button',{name:'Abandonner la course'}));
  expect(mockRequest).not.toHaveBeenCalled();
  fireEvent.click(screen.getByRole('button',{name:'Continuer la course'}));

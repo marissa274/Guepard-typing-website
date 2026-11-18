@@ -9,15 +9,15 @@
 .jungle-menu{position:relative;isolation:isolate;transform:rotate(-2deg);filter:drop-shadow(0 10px 0 #78512d38);padding:25px 40px;min-height:250px}
 .jungle-menu .sign-board{z-index:-1;pointer-events:none}
 .board-action{position:relative;display:flex;align-items:center;justify-content:space-between;gap:14px;width:100%;min-height:60px;padding:13px 8px;color:#3c351c;font:900 clamp(18px,1.8vw,28px)/1.25 'Nunito',sans-serif;text-align:left;transition:transform .18s}
-.board-action+.board-action{border-top:1px dashed #78512d70}.board-action:first-of-type{font-size:clamp(22px,2.3vw,34px)}.board-action:hover{transform:translateX(3px);filter:none}.board-action:focus-visible{outline:3px solid #2f6b3d;outline-offset:3px;border-radius:7px}.board-action span[aria-hidden]{font-size:24px}
-.private-form select{font:inherit;color:var(--ink);background:var(--paper);border:1px solid var(--line);border-radius:9px;padding:13px 16px;min-height:48px;width:100%}.private-form{background:var(--card);border:1px solid var(--line)}.private-code{font-size:24px;letter-spacing:3px;color:var(--green);font-weight:700}.private-notice{font-size:13px;line-height:1.8;color:var(--muted)}.private-panel{background:var(--paper);border:1px dashed var(--line)}
+.board-action+.board-action{border-top:1px dashed #78512d70}.board-action:first-of-type{font-size:clamp(22px,2.3vw,34px)}.board-action:hover{transform:translateX(3px);filter:none}.board-action:focus-visible{outline:4px solid #fff4d8;outline-offset:0;box-shadow:0 0 0 7px #2f6b3d;border-radius:7px}.board-action span[aria-hidden]{font-size:24px}
+.private-form select{font:inherit;color:var(--ink);background:var(--paper);border:1px solid var(--line-ui);border-radius:9px;padding:13px 16px;min-height:48px;width:100%}.private-form{background:var(--card);border:1px solid var(--line)}.private-code{font-size:24px;letter-spacing:3px;color:var(--green);font-weight:700}.private-notice{font-size:13px;line-height:1.8;color:var(--muted)}.private-panel{background:var(--paper);border:1px dashed var(--line)}
 @media(max-width:1250px){.canopy-header .brand img{width:88px;height:65px}.canopy-header{gap:12px}}
 @media(max-width:1000px){.jungle-clearing{width:55vw}.canopy-header .brand img{width:88px;height:58px}}
 @media(max-width:700px){.canopy-header .brand img{width:65px;height:49px}.canopy-header .brand{gap:4px}.jungle-clearing{width:83%;top:49%}.jungle-menu{padding:20px 27px;min-height:215px}.board-action{font-size:18px;min-height:57px;padding:10px 4px}.board-action:first-of-type{font-size:22px}.board-action span[aria-hidden]{font-size:20px}}
 @media(max-width:380px){.canopy-header .brand img{width:50px;height:43px}.canopy-header .brand{font-size:20px}.jungle-menu{padding:20px 22px}.board-action{font-size:16px}.board-action:first-of-type{font-size:20px}}
 @media(prefers-reduced-motion:reduce){.board-action{transition:none}.board-action:hover{transform:none}}
 /* Three individual wooden planks, hung on two continuous ropes like the reference. */
-.hanging-boards.jungle-menu{padding:0;min-height:0;transform:none;filter:none;transform-origin:50% -65px;animation:wooden-sign-sway 6s ease-in-out infinite alternate}
+.hanging-boards.jungle-menu{padding:0;min-height:0;transform:none;filter:none;transform-origin:50% -65px;animation:wooden-sign-sway 6s ease-in-out 3 alternate}
 .board-planks{position:relative;gap:25px}
 .board-ropes{position:absolute;inset:-65px 0 -16px;pointer-events:none;z-index:-1}
 .board-ropes::before,.board-ropes::after{content:'';position:absolute;top:0;bottom:0;width:7px;border:1px solid #49351e;border-radius:4px;background:repeating-linear-gradient(28deg,#72552e 0 4px,#cfac74 4px 7px,#987341 7px 10px);box-shadow:2px 2px 2px #243b2328}

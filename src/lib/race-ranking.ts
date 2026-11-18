@@ -1,6 +1,5 @@
 import type {Person} from './room-types';
 export type RunnerSpecies='cheetah'|'gazelle'|'hare'|'fox'|'panda'|'tortoise';
-export const speciesLabels:Record<RunnerSpecies,string>={cheetah:'Guépard',gazelle:'Gazelle',hare:'Lièvre',fox:'Renard',panda:'Panda',tortoise:'Tortue'};
 export function compareRacers(a:Person,b:Person){
  if(a.abandoned!==b.abandoned)return a.abandoned?1:-1;
  if(!!a.finishedAt!==!!b.finishedAt)return a.finishedAt?-1:1;

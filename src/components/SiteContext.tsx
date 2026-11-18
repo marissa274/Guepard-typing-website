@@ -17,7 +17,7 @@ export function SiteProvider({children,initialLang='fr',initialDark=false}:{chil
  const refreshResults=useCallback(async()=>{
   const id=account.current,generation=sessionGeneration.current;if(!id)return;
   try{const page=await resultService.list();if(account.current===id&&sessionGeneration.current===generation){setState(previous=>({...previous,results:page.results,summary:page.summary}));setResultsError('')}}
-  catch(error){if(account.current===id&&sessionGeneration.current===generation)setResultsError(error instanceof Error?error.message:'Historique indisponible.')}
+  catch(error){if(account.current===id&&sessionGeneration.current===generation)setResultsError(error instanceof Error?error.message:copy[document.documentElement.lang==='en'?'en':'fr'].historyUnavailable)}
  },[]);
  useEffect(()=>{
   let active=true;const generation=sessionGeneration.current;

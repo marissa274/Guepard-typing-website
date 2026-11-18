@@ -37,11 +37,15 @@ Lighthouse 13.6.0 a été exécuté sur la compilation de production locale, ave
 | État mesuré | Performance | Accessibilité | Bonnes pratiques | SEO |
 | --- | ---: | ---: | ---: | ---: |
 | Avant optimisation des ressources | 35 | 100 | 96 | 92 |
-| Version finale | 74 | 100 | 100 | 92 |
+| Avant PERF-01 (thème sombre) | 74 | 100 | 100 | 92 |
+| Version finale, thème sombre (médiane de 3) | 91 | 100 | 100 | 100 |
+| Version finale, thème clair (médiane de 3) | 93 | 100 | 100 | 100 |
 
-Les images servies via l’optimisation Next.js et les polices locales ont ramené le transfert de 8 660 Kio à 1 343 Kio, soit environ 84 % de moins. La version finale charge un seul fond adapté au thème. Le rapport final mesure un LCP simulé de 8,9 secondes et un temps de blocage total de 129 ms : **le seuil de 90 en performance mobile n’est pas atteint**. L’exigence `PERF-01` reste partielle ; les scores intermédiaires plus favorables ne remplacent pas ce résultat final.
+Les images servies via l’optimisation Next.js et les polices locales avaient ramené le transfert de 8 660 Kio à 1 343 Kio. Le rapport à 74 mesurait un LCP simulé de 8,9 secondes : le fond du ciel attendait près de 1 Mio de planches décoratives en CSS (animaux, feuillage, guépard, branche, guépard du pied de page servi en WebP brut de 1,5 Mio en thème clair) et tout le JavaScript de l’application.
 
-Le [rapport JSON archivé](verification/lighthouse-accueil.json) conserve les paramètres et résultats détaillés. Le rapport HTML de la session est disponible localement dans `/tmp/guepard-lighthouse-theme.report.html`.
+Corrections `PERF-01` : formats AVIF puis WebP pour `/_next/image`, largeurs des planches CSS adaptées au téléphone, guépard du pied de page passé par l’optimiseur, planches décoratives chargées seulement après l’affichage du fond (`data-decor` dans `app/layout.tsx`, rendu final inchangé), vues autres que l’accueil chargées à la demande avec `next/dynamic`, et `robots.txt` valide. Mesures du 18 novembre 2026 sur `next start -p 5199`, commande ci-dessous avec `--form-factor=mobile` (le thème clair est forcé par `--blink-settings=preferredColorScheme=1`) : performance 93, 90 et 91 en thème sombre, 92, 93 et 94 en thème clair ; LCP simulé de 3,1 à 3,4 s, TBT de 60 à 160 ms, CLS 0, transfert de 629 Kio. **Le seuil de 90 est atteint localement** ; la marge reste faible et doit être confirmée sur le déploiement public.
+
+Le [rapport JSON archivé](verification/lighthouse-accueil.json) conserve les paramètres et résultats détaillés. Il correspond à la mesure médiane du thème sombre (91).
 
 ## Reproduire les contrôles
 
