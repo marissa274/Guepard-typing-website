@@ -5,9 +5,9 @@ export function compareRacers(a:Person,b:Person){
  if(a.abandoned!==b.abandoned)return a.abandoned?1:-1;
  if(!!a.finishedAt!==!!b.finishedAt)return a.finishedAt?-1:1;
  if(a.finishedAt&&b.finishedAt)return a.finishedAt-b.finishedAt;
- return b.progress-a.progress;
+ return b.progress*Math.max(1,a.targetText?.length||1)-a.progress*Math.max(1,b.targetText?.length||1);
 }
-export function rankRacers(people:Person[]){const sorted=people.filter(p=>p.role==='player').slice().sort(compareRacers);return sorted.map((person,index)=>({person,rank:sorted.findIndex(p=>compareRacers(p,person)===0)+1,tied:sorted.some(p=>p.id!==person.id&&compareRacers(p,person)===0)}))}
+export function rankRacers(people:Person[]){const sorted=people.filter(p=>p.role==='player').slice().sort(compareRacers);return sorted.map(person=>({person,rank:sorted.findIndex(p=>compareRacers(p,person)===0)+1,tied:sorted.some(p=>p.id!==person.id&&compareRacers(p,person)===0)}))}
 export function speciesForRank(rank:number,total:number):RunnerSpecies{
  if(rank===1)return 'cheetah';if(total===2&&rank===2)return 'tortoise';if(total===3&&rank===3)return 'hare';if(rank===total)return 'tortoise';if(rank===2)return 'gazelle';if(rank===3)return 'hare';
  return (rank-4)/Math.max(1,total-4)<.5?'fox':'panda';

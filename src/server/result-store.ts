@@ -17,8 +17,8 @@ function database(){
 }
 
 function privateSnapshot(room:Room,me:string):RoomView{
- const {invites,...rest}=room;
- return {...rest,code:'',people:room.people.map(({token,userId,input,...person})=>person),me,isHost:false,players:room.people.filter(p=>p.role==='player').length,serverNow:room.endedAt!};
+ const {invites,bannedIdentities,bannedIpHashes,...rest}=room;
+ return {...rest,code:'',people:room.people.map(({token,userId,input,identityKey,ipHash,lastProgressAt,typingBudget,heatmap,...person})=>({...person,...(person.id===me?{heatmap}:{} )})),me,isHost:false,players:room.people.filter(p=>p.role==='player').length,serverNow:room.endedAt!};
 }
 
 export function collectFinishedResults(rooms:Room[]){
@@ -34,7 +34,12 @@ export function collectFinishedResults(rooms:Room[]){
 
 /** Called inside the same PostgreSQL transaction as the final room state. */
 export async function saveFinishedResults(client:Pick<PoolClient,'query'>,rooms:Room[]){
- for(const entry of collectFinishedResults(rooms))await client.query('INSERT INTO guepard_results(id,user_id,room_id,started_at,ended_at,result,snapshot) VALUES($1,$2,$3,$4,$5,$6,$7) ON CONFLICT(user_id,room_id,started_at) DO NOTHING',[entry.result.id,entry.userId,entry.room.id,entry.room.startedAt,entry.result.date,JSON.stringify(entry.result),JSON.stringify(entry.room)]);
+ for(const entry of collectFinishedResults(rooms)){
+  const previous=await client.query("SELECT MAX((result->>'speed')::numeric) AS best_speed FROM guepard_results WHERE user_id=$1 AND id<>$2",[entry.userId,entry.result.id]);
+  entry.result.personalBest=entry.result.speed>Number(previous.rows[0]?.best_speed||0);
+  entry.room.personalBest=entry.result.personalBest;
+  await client.query('INSERT INTO guepard_results(id,user_id,room_id,started_at,ended_at,result,snapshot) VALUES($1,$2,$3,$4,$5,$6,$7) ON CONFLICT(user_id,room_id,started_at) DO NOTHING',[entry.result.id,entry.userId,entry.room.id,entry.room.startedAt,entry.result.date,JSON.stringify(entry.result),JSON.stringify(entry.room)]);
+ }
 }
 
 export async function listResults(userId:string,page=1,pageSize=10):Promise<ResultPage>{

@@ -3,7 +3,7 @@ import {defaultSettings} from '../src/lib/room-types';
 import {Pool} from 'pg';
 jest.mock('pg',()=>({Pool:jest.fn()}));
 
-const player={id:'p1',userId:'user1',name:'Alice',animal:'cheetah',kind:'demo',role:'player',late:false,token:'secret',input:'secret-input',seen:61000,progress:250,typed:250,errors:0,finishedAt:61000,abandoned:false};
+const player={id:'p1',userId:'user1',identityKey:'secret-identity',ipHash:'secret-ip',heatmap:{a:{hits:3,errors:1}},name:'Alice',animal:'cheetah',kind:'demo',role:'player',late:false,token:'secret',input:'secret-input',seen:61000,progress:250,typed:250,errors:0,finishedAt:61000,abandoned:false};
 const room={id:'room1',name:'Jungle',animal:'cheetah',code:'SECRET',hostId:'p1',people:[player,{...player,id:'guest',userId:undefined,kind:'guest',finishedAt:undefined,progress:20},{...player,id:'spectator',role:'spectator'}],settings:defaultSettings,phase:'finished',createdAt:1000,startedAt:1000,endedAt:61000,revision:3,invites:[{token:'invite-secret',expires:99000,used:false}]};
 
 test('only authenticated racers receive authoritative results and private snapshots omit credentials',()=>{
@@ -15,6 +15,8 @@ test('only authenticated racers receive authoritative results and private snapsh
  expect(serialized).not.toContain('user1');
  expect(entries[0].room.code).toBe('');
  expect(entries[0].room.me).toBe('p1');
+ expect(entries[0].room.people[0].heatmap).toEqual({a:{hits:3,errors:1}});
+ expect(entries[0].room.people[1].heatmap).toBeUndefined();
  expect(collectFinishedResults([{...room,phase:'running'}])).toEqual([]);
 });
 
@@ -22,10 +24,22 @@ test('finalized races use a stable unique identity and are saved idempotently',a
  const query=jest.fn().mockResolvedValue({rows:[]});
  await saveFinishedResults({query},[room]);
  await saveFinishedResults({query},[room]);
- expect(query).toHaveBeenCalledTimes(2);
- expect(query.mock.calls[0][0]).toContain('ON CONFLICT');
- expect(query.mock.calls[0][1]).toEqual(query.mock.calls[1][1]);
+ const inserts=query.mock.calls.filter(([sql])=>sql.startsWith('INSERT'));
+ expect(inserts).toHaveLength(2);
+ expect(inserts[0][0]).toContain('ON CONFLICT');
+ expect(inserts[0][1]).toEqual(inserts[1][1]);
  expect(collectFinishedResults([{...room,startedAt:2000}])[0].result.id).not.toBe(collectFinishedResults([room])[0].result.id);
+});
+
+test('a personal best is compared with earlier server results and preserved in its private archive',async()=>{
+ const query=jest.fn(async sql=>({rows:sql.startsWith('SELECT MAX')?[{best_speed:'49'}]:[]}));
+ await saveFinishedResults({query},[room]);
+ const insert=query.mock.calls.find(([sql])=>sql.startsWith('INSERT'));
+ expect(JSON.parse(insert[1][5]).personalBest).toBe(true);
+ expect(JSON.parse(insert[1][6]).personalBest).toBe(true);
+ query.mockClear();query.mockImplementation(async sql=>({rows:sql.startsWith('SELECT MAX')?[{best_speed:'50'}]:[]}));
+ await saveFinishedResults({query},[room]);
+ expect(JSON.parse(query.mock.calls.find(([sql])=>sql.startsWith('INSERT'))[1][5]).personalBest).toBe(false);
 });
 
 test('pagination and archived snapshots are selected only for the authenticated account',async()=>{

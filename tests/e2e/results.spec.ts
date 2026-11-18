@@ -1,55 +1,98 @@
 import {test,expect} from '@playwright/test';
-test('two real finishers, spectator privacy, keyboard details and mobile results',async({page,browser,request})=>{
- const {room,token}=await (await request.post('/api/rooms',{data:{name:'Les deux explorateurs',nickname:'Hôte',animal:'cheetah',visibility:'public'}})).json(),headers={Authorization:'Bearer '+token};
- const guest=await (await request.post('/api/rooms/'+room.id,{data:{action:'join',nickname:'Ami'}})).json();const watcher=await browser.newContext();
- try{await page.goto('/');await page.evaluate(({id,token})=>sessionStorage.setItem('guepard-room-'+id,token),{id:room.id,token});await page.goto('/lobby/'+room.id);await page.getByRole('button',{name:'Lancer la course',exact:true}).click();const spectator=await (await request.post('/api/rooms/'+room.id,{data:{action:'join',nickname:'Observatrice'}})).json();const view=await watcher.newPage();await view.goto('/');await view.evaluate(({id,token})=>sessionStorage.setItem('guepard-room-'+id,token),{id:room.id,token:spectator.token});await view.goto('/lobby/'+room.id);await expect(page.getByLabel('Texte de la course')).toBeEnabled({timeout:10000});const current=(await (await request.get('/api/rooms/'+room.id,{headers})).json()).room;await page.getByLabel('Texte de la course').fill(current.text);await expect(page.getByText('Terminé ! Tu peux suivre les autres pistes.')).toBeVisible();await request.post('/api/rooms/'+room.id,{headers:{Authorization:'Bearer '+guest.token},data:{action:'progress',value:current.text,typed:current.text.length}});
- await expect(page.getByRole('heading',{name:'Bravo à tous !'})).toBeVisible();await expect(page.locator('.results-place')).toHaveCount(2);await expect(page.locator('.results-place .runner-tortoise')).toHaveCount(1);await page.getByRole('button',{name:'Voir mes statistiques'}).click();await expect(page.locator('.results-table tbody tr')).toHaveCount(2);await expect(page.locator('.heat-clean').first()).toBeVisible();await page.getByLabel('Disposition').selectOption('QWERTY');await page.locator('.heat-key').first().focus();await expect(page.locator('.heat-detail')).toContainText('1 :');await view.getByRole('button',{name:'Voir mes statistiques'}).click();await expect(view.getByText('Tu as suivi cette course')).toBeVisible();await expect(view.locator('.personal-metrics')).toHaveCount(0);await expect(view.getByRole('button',{name:'Lancer une revanche'})).toHaveCount(0);expect((await request.post('/api/rooms/'+room.id,{headers:{Authorization:'Bearer '+spectator.token},data:{action:'rematch'}})).status()).toBe(403);
- await page.screenshot({path:'/tmp/guepard-results-two.png',fullPage:true});await page.setViewportSize({width:390,height:844});expect(await page.locator('body').evaluate(el=>el.scrollWidth)).toBe(390);await page.screenshot({path:'/tmp/guepard-results-mobile.png',fullPage:true});await page.emulateMedia({reducedMotion:'reduce'});expect(await page.locator('.results-place .race-runner').first().evaluate(el=>getComputedStyle(el).animationName)).toBe('none');
- }finally{await watcher.close();await request.post('/api/rooms/'+room.id,{headers,data:{action:'leave'}})}
+import {closeRoom,configureShortRace,createTestRoom,guestContext,memberHeaders,openLobby,readRoom,roomCommand,sendProgress,waitForRace} from './helpers';
+
+function idOfResult(id:string,startedAt:number,personId:string){return `${id}-${startedAt}-${personId}`}
+
+test('real finishers retain private keyboard data, time series, record and spectator results',async({page,browser,playwright,baseURL})=>{
+ const {room,token}=await createTestRoom(page.request,{name:'Les deux explorateurs'}),guest=await guestContext(playwright,baseURL,room.id,'Ami');
+ const spectator=await browser.newContext({baseURL,locale:'fr-CA'}),late=await playwright.request.newContext({baseURL});
+ try{
+  const joined=await spectator.request.post('/api/rooms/'+room.id,{data:{action:'join',nickname:'Observatrice',role:'spectator'}});expect(joined.ok()).toBeTruthy();
+  const watch=await joined.json(),view=await spectator.newPage();
+  await configureShortRace(page.request,room.id,token);
+  await openLobby(page,room.id,token);await openLobby(view,room.id,watch.token);
+  await page.getByRole('button',{name:'Lancer la course',exact:true}).click();
+  expect((await late.post('/api/rooms/'+room.id,{data:{action:'join',nickname:'Retardataire'}})).status()).toBe(409);
+  const running=await waitForRace(page.request,room.id,token);
+  await expect(page.getByLabel('Texte de la course')).toBeEnabled();
+  await expect(view.getByLabel('Texte de la course')).toHaveCount(0);
+  await page.getByLabel('Texte de la course').pressSequentially(running.text!,{delay:65});
+  await expect(page.getByText('Terminé ! Tu peux suivre les autres pistes.')).toBeVisible();
+  await sendProgress(guest.request,room.id,guest.token,running.text!);
+  await expect(page.getByRole('heading',{name:'Bravo à tous !'})).toBeVisible();
+  await expect(page.locator('.results-place')).toHaveCount(2);
+  await page.getByRole('button',{name:'Voir mes statistiques'}).click();
+  await expect(page.locator('.results-table tbody tr')).toHaveCount(2);
+  await expect(page.locator('.race-timeline svg polyline')).toHaveCount(2);
+  await expect(page.locator('.heat-clean').first()).toBeVisible();
+  await expect(page.getByText('Nouveau record personnel !')).toBeVisible();
+  await page.getByLabel('Disposition').selectOption('QWERTY');
+  await page.locator('.heat-key').first().focus();await expect(page.locator('.heat-detail')).toContainText('1 :');
+  await view.getByRole('button',{name:'Voir mes statistiques'}).click();
+  await expect(view.getByText('Tu as suivi cette course')).toBeVisible();
+  await expect(view.locator('.personal-metrics')).toHaveCount(0);
+  await expect(view.getByRole('button',{name:'Lancer une revanche'})).toHaveCount(0);
+  expect((await spectator.request.post('/api/rooms/'+room.id,{headers:memberHeaders(watch.token),data:{action:'rematch'}})).status()).toBe(403);
+  const archive=await page.request.get('/api/results/'+idOfResult(room.id,running.startedAt!,room.me));expect(archive.ok()).toBeTruthy();
+  const archived=(await archive.json()).room;
+  expect(archived.personalBest).toBe(true);
+  expect(archived.people.find((person:{id:string})=>person.id===room.me).heatmap).toBeTruthy();
+  expect(archived.people.find((person:{id:string})=>person.id===guest.room.me).heatmap).toBeUndefined();
+  await page.setViewportSize({width:390,height:844});expect(await page.locator('body').evaluate(element=>element.scrollWidth)).toBe(390);
+  await page.emulateMedia({reducedMotion:'reduce'});expect(await page.locator('.results-place .race-runner').first().evaluate(element=>getComputedStyle(element).animationName)).toBe('none');
+ }finally{await closeRoom(page.request,room.id,token);await guest.request.dispose();await spectator.close();await late.dispose()}
 });
 
-test('a single eligible finisher keeps a compact podium and excludes an abandonment',async({page,request})=>{
- const {room,token}=await (await request.post('/api/rooms',{data:{name:'Un seul finaliste',nickname:'Hôte',animal:'cheetah',visibility:'public'}})).json(),headers={Authorization:'Bearer '+token};
- const guest=await (await request.post('/api/rooms/'+room.id,{data:{action:'join',nickname:'Ami'}})).json();
+test('one abandonment does not end the race and a later finisher keeps the compact podium',async({page,playwright,baseURL})=>{
+ const {room,token}=await createTestRoom(page.request,{name:'Un seul finaliste'}),guest=await guestContext(playwright,baseURL,room.id,'Ami');
  try{
-  await request.post('/api/rooms/'+room.id,{headers,data:{action:'start'}});
-  await request.post('/api/rooms/'+room.id,{headers:{Authorization:'Bearer '+guest.token},data:{action:'abandon'}});
-  const current=(await (await request.get('/api/rooms/'+room.id,{headers})).json()).room;
-  expect(current.phase).toBe('finished');
-  await page.goto('/');await page.evaluate(({id,token})=>sessionStorage.setItem('guepard-room-'+id,token),{id:room.id,token});await page.goto('/lobby/'+room.id);
+  await configureShortRace(page.request,room.id,token);await roomCommand(page.request,room.id,token,{action:'start'});
+  const running=await waitForRace(page.request,room.id,token);
+  await roomCommand(guest.request,room.id,guest.token,{action:'abandon'});
+  const afterAbandon=await readRoom(page.request,room.id,token);expect(afterAbandon.phase).toBe('running');
+  const abandonedAt=afterAbandon.people.find(person=>person.id===guest.room.me)!.abandonedAt;expect(abandonedAt).toBeGreaterThan(running.startedAt!);
+  await sendProgress(page.request,room.id,token,running.text!);
+  const complete=await readRoom(page.request,room.id,token);expect(complete.phase).toBe('finished');expect(complete.people.find(person=>person.id===guest.room.me)!.abandonedAt).toBe(abandonedAt);
+  await openLobby(page,room.id,token);
   await expect(page.locator('.results-place')).toHaveCount(1);expect((await page.locator('.results-place').boundingBox())!.width).toBeLessThanOrEqual(310);
   await page.getByRole('button',{name:'Voir mes statistiques'}).click();await expect(page.locator('.results-table tbody tr')).toHaveCount(2);await expect(page.locator('.results-table')).toContainText('Abandon');
- }finally{await request.post('/api/rooms/'+room.id,{headers,data:{action:'leave'}})}
+ }finally{await closeRoom(page.request,room.id,token);await guest.request.dispose()}
 });
 
-test('three ranked players stay grounded and results survive a finisher leaving',async({page,request})=>{
- const {room,token}=await (await request.post('/api/rooms',{data:{name:'La clairière des rapides',nickname:'Marissa',animal:'cheetah',visibility:'public'}})).json(),headers={Authorization:'Bearer '+token};
- const members=[{token}];for(const nickname of ['Mathis','Léa'])members.push(await (await request.post('/api/rooms/'+room.id,{data:{action:'join',nickname}})).json());
+test('three finishers keep their result order and archived podium after a finisher leaves',async({page,playwright,baseURL})=>{
+ const {room,token}=await createTestRoom(page.request,{name:'La clairière des rapides'}),guests:Awaited<ReturnType<typeof guestContext>>[]=[];
  try{
-  await request.post('/api/rooms/'+room.id,{headers,data:{action:'start'}});const running=(await (await request.get('/api/rooms/'+room.id,{headers})).json()).room;
-  for(const member of members)await request.post('/api/rooms/'+room.id,{headers:{Authorization:'Bearer '+member.token},data:{action:'progress',value:running.text,typed:running.text.length}});
-  await page.goto('/');await page.evaluate(({id,token})=>sessionStorage.setItem('guepard-room-'+id,token),{id:room.id,token});await page.goto('/lobby/'+room.id);
-  await expect(page.locator('.results-place')).toHaveCount(3);
-  await request.post('/api/rooms/'+room.id,{headers:{Authorization:'Bearer '+members[1].token},data:{action:'leave'}});
+  for(const nickname of ['Mathis','Léa'])guests.push(await guestContext(playwright,baseURL,room.id,nickname));
+  await configureShortRace(page.request,room.id,token);await roomCommand(page.request,room.id,token,{action:'start'});
+  const running=await waitForRace(page.request,room.id,token);
+  for(const member of [{request:page.request,token},...guests])await sendProgress(member.request,room.id,member.token,running.text!);
+  await roomCommand(guests[0].request,room.id,guests[0].token,{action:'leave'});
+  await openLobby(page,room.id,token);await expect(page.locator('.results-place')).toHaveCount(3);
   for(const size of [{width:2688,height:1680},{width:1024,height:768}]){
    await page.setViewportSize(size);await expect(page.locator('.results-place')).toHaveCount(3);
-   const ground=await page.locator('.results-wood-block').evaluateAll(nodes=>nodes.map(n=>n.getBoundingClientRect().bottom));expect(Math.max(...ground)-Math.min(...ground)).toBeLessThan(2);
-   const pole=await page.locator('.celebration-sign-post').boundingBox();expect(Math.abs(pole!.y+pole!.height-ground[0])).toBeLessThan(2);
-   expect(await page.locator('body').evaluate(el=>el.scrollWidth)).toBe(size.width);
-   await page.screenshot({path:size.width===2688?'/tmp/guepard-podium-corrected-2688.png':'/tmp/guepard-podium-tablet.png',fullPage:true});
+   const ground=await page.locator('.results-wood-block').evaluateAll(nodes=>nodes.map(node=>node.getBoundingClientRect().bottom));expect(Math.max(...ground)-Math.min(...ground)).toBeLessThan(2);
+   expect(await page.locator('body').evaluate(element=>element.scrollWidth)).toBe(size.width);
   }
-  const podium=await page.locator('.results-place').evaluateAll(nodes=>nodes.map(n=>({id:n.getAttribute('data-player-id'),rank:Number(n.getAttribute('data-rank'))})).sort((a,b)=>a.rank-b.rank));
-  await page.getByRole('button',{name:'Voir mes statistiques'}).click();await expect(page).toHaveURL(/view=results/);await expect(page.locator('.celebration-stage')).toBeHidden();await expect(page.locator('.results-table tbody tr')).toHaveCount(3);
-  expect(await page.locator('.results-table tbody tr').evaluateAll(nodes=>nodes.map(n=>n.getAttribute('data-player-id')))).toEqual(podium.map(p=>p.id));
-  await expect(page.locator('.main-navigation a[aria-current="page"]')).toHaveCount(0);
- }finally{await request.post('/api/rooms/'+room.id,{headers,data:{action:'leave'}})}
+  const podium=await page.locator('.results-place').evaluateAll(nodes=>nodes.map(node=>({id:node.getAttribute('data-player-id'),rank:Number(node.getAttribute('data-rank'))})).sort((a,b)=>a.rank-b.rank));
+  await page.getByRole('button',{name:'Voir mes statistiques'}).click();await expect(page).toHaveURL(/view=results/);await expect(page.locator('.celebration-stage')).toBeHidden();
+  expect(await page.locator('.results-table tbody tr').evaluateAll(nodes=>nodes.map(node=>node.getAttribute('data-player-id')))).toEqual(podium.map(person=>person.id));
+ }finally{await closeRoom(page.request,room.id,token);for(const guest of guests)await guest.request.dispose()}
 });
 
-test('a human with no keystrokes remains on the time-limit podium',async({page,request})=>{
- const {room,token}=await (await request.post('/api/rooms',{data:{name:'Les explorateurs patients',nickname:'Humain sans frappe',animal:'cheetah',visibility:'public'}})).json(),headers={Authorization:'Bearer '+token};
+test('a connected human with no keystrokes stays eligible at the minimum thirty-second time limit',async({page})=>{
+ test.setTimeout(60000);
+ const {room,token}=await createTestRoom(page.request,{name:'Les explorateurs patients'});
  try{
-  await request.post('/api/rooms/'+room.id,{headers,data:{action:'bot'}});await request.post('/api/rooms/'+room.id,{headers,data:{action:'settings',settings:{timeLimit:1,inactiveAfter:600}}});await request.post('/api/rooms/'+room.id,{headers,data:{action:'start'}});
-  await page.goto('/');await page.evaluate(({id,token})=>sessionStorage.setItem('guepard-room-'+id,token),{id:room.id,token});await page.goto('/lobby/'+room.id);
-  await expect(page.locator('.results-place')).toHaveCount(2);await expect(page.locator('.results-podium')).toContainText('Humain sans frappe');
- }finally{await request.post('/api/rooms/'+room.id,{headers,data:{action:'leave'}})}
+  await configureShortRace(page.request,room.id,token);
+  await roomCommand(page.request,room.id,token,{action:'bot',difficulty:'impossible'});
+  await openLobby(page,room.id,token);
+  await page.getByRole('button',{name:'Lancer la course',exact:true}).click();
+  await waitForRace(page.request,room.id,token);
+  await expect(page.getByRole('heading',{name:'Bravo à tous !'})).toBeVisible({timeout:35000});
+  await expect(page.locator('.results-place')).toHaveCount(2);
+  const complete=await readRoom(page.request,room.id,token),human=complete.people.find(person=>person.id===room.me)!;
+  expect(complete.endedAt!-complete.startedAt!).toBe(30000);expect(human.progress).toBe(0);expect(human.abandoned).toBe(false);
+  await page.getByRole('button',{name:'Voir mes statistiques'}).click();
+  await expect(page.locator('.results-table tbody tr[data-player-id="'+room.me+'"]')).toContainText('Temps écoulé');
+ }finally{await closeRoom(page.request,room.id,token)}
 });

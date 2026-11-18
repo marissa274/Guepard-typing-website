@@ -3,10 +3,12 @@ import {useEffect,useRef,useState} from 'react';
 import Link from 'next/link';
 import {useRouter} from 'next/navigation';
 import {useSite} from '../SiteContext';
-import {roomRequest} from '../../lib/room-client';
-
+import {roomRequest,RoomRequestError} from '../../lib/room-client';
+import MembershipConflict from './MembershipConflict';
 export default function QuickJoin(){
- const {state,ready}=useSite(),router=useRouter(),started=useRef(false),[error,setError]=useState('');
- useEffect(()=>{if(!ready||started.current)return;started.current=true;roomRequest(null,{action:'quick',nickname:state.name?.trim()||'GuépardCurieux',avatar:state.avatar,kind:state.user?'demo':'guest'}).then(({room})=>router.replace('/lobby/'+room.id)).catch(e=>setError(e.message))},[ready,router,state.name,state.avatar,state.user]);
- return <main className="woodland-page quick-join-page"><div className="woodland-scenery" aria-hidden="true"/><div className="room-entry wood-panel"><p className="woodland-eyebrow">LA JUNGLE T’ATTEND</p><h1>Rejoindre rapidement</h1>{error?<><p className="wood-error" role="alert">{error}</p><Link className="wood-primary" href="/races">Parcourir les courses</Link></>:<p role="status">Nous cherchons une course en attente. S’il n’y en a pas, nous créons ton salon.</p>}</div></main>
+ const {state,ready,fr,save}=useSite(),router=useRouter(),started=useRef(false),[error,setError]=useState<Error|null>(null),[busy,setBusy]=useState(false),[nickname,setNickname]=useState(state.name);
+ async function join(){setBusy(true);setError(null);try{const result=await roomRequest(null,{action:'quick',nickname:state.user?state.name:nickname});if(!result.room)throw new Error(fr?'Salon indisponible.':'Lobby unavailable.');if(!state.user)save('name',nickname);router.replace('/lobby/'+result.room.id)}catch(cause){setError(cause instanceof Error?cause:new Error('Erreur serveur.'))}finally{setBusy(false)}}
+ useEffect(()=>{if(!ready||!state.user||started.current)return;started.current=true;void join()},[ready,state.user]);
+ const empty=error instanceof RoomRequestError&&error.code==='QUICK_JOIN_EMPTY';
+ return <main className="woodland-page quick-join-page"><div className="woodland-scenery" aria-hidden="true"/><div className="room-entry wood-panel"><h1>{fr?'Rejoindre rapidement':'Quick race'}</h1>{!ready||busy?<p role="status">{fr?'Recherche d’un salon disponible…':'Finding an available lobby…'}</p>:!state.user&&!error?<form onSubmit={event=>{event.preventDefault();void join()}}><label htmlFor="quick-nickname">{fr?'Ton pseudo invité':'Guest nickname'}</label><input id="quick-nickname" minLength={3} maxLength={20} required value={nickname} onChange={event=>setNickname(event.target.value)}/><button className="wood-primary">{fr?'Chercher une course':'Find a race'}</button></form>:null}{error&&<p role={empty?'status':'alert'}>{error.message}</p>}{empty&&state.user&&<Link className="wood-primary" href="/create">{fr?'Créer un salon public':'Create a public lobby'}</Link>}{empty&&!state.user&&<p>{fr?'Aucune salle n’a été créée. Reviens plus tard ou connecte-toi pour créer un salon.':'No lobby was created. Try later or log in to create one.'}</p>}{error instanceof RoomRequestError&&error.code==='ROOM_MEMBERSHIP_CONFLICT'&&<MembershipConflict error={error} onLeft={()=>void join()}/>}<Link className="woodland-back" href="/races">{fr?'Parcourir les courses':'Browse races'}</Link></div></main>
 }

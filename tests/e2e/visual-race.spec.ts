@@ -1,50 +1,89 @@
 import {test,expect} from '@playwright/test';
-test('three racers all start as cheetahs before the third becomes a hare',async({page,request})=>{
- const {room,token}=await (await request.post('/api/rooms',{data:{name:'Trois pistes',nickname:'A',animal:'cheetah',visibility:'public'}})).json();
- const members=[{token}];for(const nickname of ['B','C'])members.push(await (await request.post('/api/rooms/'+room.id,{data:{action:'join',nickname}})).json());
- const headers={Authorization:'Bearer '+token};
+import {closeRoom,configureShortRace,createTestRoom,guestContext,memberHeaders,openLobby,readRoom,roomCommand,sendProgress,waitForRace} from './helpers';
+
+const trackText='La jungle offre un chemin calme et lumineux aux amis qui traversent la rivière.';
+
+test('three racers start as cheetahs after the synchronized countdown before their ranks evolve',async({page,playwright,baseURL})=>{
+ const {room,token}=await createTestRoom(page.request,{name:'Trois pistes'});
+ const guests:Awaited<ReturnType<typeof guestContext>>[]=[];
  try{
-  await page.goto('/');await page.evaluate(({id,token})=>sessionStorage.setItem('guepard-room-'+id,token),{id:room.id,token});await page.goto('/lobby/'+room.id);await page.getByRole('button',{name:'Lancer la course',exact:true}).click();
-  await expect(page.locator('.race-lane .runner-cheetah')).toHaveCount(3);
-  const running=(await (await request.get('/api/rooms/'+room.id,{headers})).json()).room;
-  for(const [index,fraction] of [.7,.5,.2].entries()){const value=running.text.slice(0,Math.floor(running.text.length*fraction));await request.post('/api/rooms/'+room.id,{headers:{Authorization:'Bearer '+members[index].token},data:{action:'progress',value,typed:value.length}})}
-  await expect(page.locator('.race-lane').nth(2).locator('.runner-hare')).toBeVisible();
- }finally{await request.post('/api/rooms/'+room.id,{headers,data:{action:'leave'}})}
-});
-test('bot continues to run during rapid typing and the tortoise remains complete',async({page,request})=>{
- const created=await (await request.post('/api/rooms',{data:{name:'Bot continu',nickname:'Testeur',animal:'cheetah',visibility:'public'}})).json();
- const {room,token}=created,headers={Authorization:'Bearer '+token};
- try{
-  await request.post('/api/rooms/'+room.id,{headers,data:{action:'bot',difficulty:'medium'}});
-  await page.goto('/');
-  await page.evaluate(({id,token})=>sessionStorage.setItem('guepard-room-'+id,token),{id:room.id,token});
-  await page.goto('/lobby/'+room.id);
+  for(const nickname of ['Bastien','Camille'])guests.push(await guestContext(playwright,baseURL,room.id,nickname));
+  await configureShortRace(page.request,room.id,token,trackText);
+  await openLobby(page,room.id,token);
   await page.getByRole('button',{name:'Lancer la course',exact:true}).click();
-  const field=page.getByLabel('Texte de la course');
-  await expect(field).toBeEnabled();
-  const initial=await (await request.get('/api/rooms/'+room.id,{headers})).json();
-  const text=initial.room.text,botId=initial.room.people.find((p:{kind:string})=>p.kind==='bot').id;
-  for(let i=1;i<=18;i++){await field.fill(text.slice(0,i));await page.waitForTimeout(110)}
-  const later=await (await request.get('/api/rooms/'+room.id,{headers})).json();
-  const bot=later.room.people.find((p:{id:string})=>p.id===botId);
-  expect(bot.progress).toBeGreaterThan(0);
-  const lane=page.locator('.race-lane[data-player-id="'+botId+'"]');
-  await expect(lane.locator('.race-runner')).toHaveAttribute('data-motion','running');
-  await expect(page.locator('.race-runner.runner-tortoise[data-motion="running"]')).toBeVisible();
-  expect(await page.locator('.runner-tortoise').first().evaluate(el=>getComputedStyle(el).backgroundImage)).toContain('race-gaits.webp');
-  await page.screenshot({path:'/tmp/guepard-tortoise-fixed.png'});
- }finally{await request.post('/api/rooms/'+room.id,{headers,data:{action:'leave'}})}
+  await expect(page.getByLabel('Texte de la course')).toBeDisabled();
+  await expect(page.locator('.race-lane .runner-cheetah')).toHaveCount(3);
+  const current=await waitForRace(page.request,room.id,token);
+  await expect(page.getByLabel('Texte de la course')).toBeEnabled();
+  const jump=await page.request.post('/api/rooms/'+room.id,{headers:memberHeaders(token),data:{action:'progress',value:current.text,typed:current.text!.length}});
+  expect(jump.status()).toBe(400);expect((await jump.json()).error).toContain('rapide');
+  expect((await readRoom(page.request,room.id,token)).people.find(person=>person.id===room.me)!.progress).toBe(0);
+  const racers=[{request:page.request,token},...guests];
+  for(const [index,fraction] of [.7,.5,.2].entries())await sendProgress(racers[index].request,room.id,racers[index].token,current.text!.slice(0,Math.floor(current.text!.length*fraction)));
+  await expect(page.locator('.race-lane').nth(2).locator('.runner-hare')).toBeVisible();
+  expect((await readRoom(page.request,room.id,token)).people.map(person=>person.progress)).toEqual([.7,.5,.2].map(fraction=>Math.floor(current.text!.length*fraction)));
+ }finally{await closeRoom(page.request,room.id,token);for(const guest of guests)await guest.request.dispose()}
 });
-test('fixed lanes, stable transformations, final podium and rematch',async({page,request})=>{
- const created=await (await request.post('/api/rooms',{data:{name:'La course des animaux',nickname:'Marissa',animal:'cheetah',visibility:'public'}})).json();const {room,token}=created,headers={Authorization:'Bearer '+token};
- const members=[{id:room.me,token}];for(const nickname of ['Mathis','Léa','Noah']){const r=await (await request.post('/api/rooms/'+room.id,{data:{action:'join',nickname}})).json();members.push({id:r.room.me,token:r.token})}
- try{await page.goto('/');await page.evaluate(({id,token})=>sessionStorage.setItem('guepard-room-'+id,token),{id:room.id,token});await page.goto('/lobby/'+room.id);await page.getByRole('button',{name:'Lancer la course',exact:true}).click();await expect(page.locator('.race-lane')).toHaveCount(4);await expect(page.locator('.race-lane .runner-cheetah')).toHaveCount(4);const initialOrder=await page.locator('.race-lane').evaluateAll(nodes=>nodes.map(n=>n.getAttribute('data-player-id')));await expect(page.getByLabel('Texte de la course')).toBeEnabled({timeout:2000});await expect(page.getByLabel('Texte de la course')).toBeFocused();const current=await (await request.get('/api/rooms/'+room.id,{headers})).json();const text=current.room.text;
- const progress=async(i:number,fraction:number)=>{const value=text.slice(0,Math.floor(text.length*fraction));expect((await request.post('/api/rooms/'+room.id,{headers:{Authorization:'Bearer '+members[i].token},data:{action:'progress',value,typed:value.length}})).ok()).toBeTruthy()};
- for(const [i,f]of [.7,.6,.45,.3].entries())await progress(i,f);
- await expect(page.locator('.race-lane').nth(1).locator('.runner-gazelle')).toBeVisible();await expect(page.locator('.race-lane').nth(3).locator('.runner-tortoise')).toBeVisible();await progress(3,.45);await expect(page.locator('.race-lane').nth(3).locator('.runner-tortoise')).toBeVisible();await progress(3,.5);await expect(page.locator('.race-lane').nth(3).locator('.runner-hare')).toBeVisible();expect(await page.locator('.race-lane').evaluateAll(nodes=>nodes.map(n=>n.getAttribute('data-player-id')))).toEqual(initialOrder);
- await progress(0,.75);const runner=page.locator('.race-lane').first().locator('.race-runner');await expect(runner).toHaveAttribute('data-motion','running');
- const poses=await runner.evaluate(el=>{const animation=el.getAnimations().find(a=>(a as CSSAnimation).animationName==='cheetah-gait')!;animation.pause();animation.currentTime=10;const first=getComputedStyle(el).backgroundPositionX;animation.currentTime=350;const second=getComputedStyle(el).backgroundPositionX;animation.play();return [first,second]});expect(poses[0]).not.toBe(poses[1]);
- await runner.screenshot({path:'/tmp/guepard-gait-frame.png'});
- await page.screenshot({path:'/tmp/guepard-visual-race.png',fullPage:true});for(let i=0;i<4;i++)await progress(i,1);await expect(page.getByRole('heading',{name:'Bravo à tous !'})).toBeVisible();await expect(page.locator('.podium-place')).toHaveCount(3);await page.setViewportSize({width:1536,height:1024});await expect(page.locator('.results-panels')).toBeHidden();await page.screenshot({path:'/tmp/guepard-celebration.png',fullPage:true});await page.setViewportSize({width:390,height:844});expect(await page.locator('body').evaluate(el=>el.scrollWidth)).toBe(390);await page.screenshot({path:'/tmp/guepard-celebration-mobile.png',fullPage:true});await page.setViewportSize({width:1536,height:1024});await page.getByRole('button',{name:'Voir mes statistiques'}).click();await expect(page.locator('.results-table tbody tr')).toHaveCount(4);await page.setViewportSize({width:1536,height:1024});await page.screenshot({path:'/tmp/guepard-podium.png',fullPage:true});await page.getByRole('button',{name:'Lancer une revanche'}).click();await expect(page.locator('.race-lane .runner-cheetah')).toHaveCount(4);await page.setViewportSize({width:390,height:844});await expect(page.locator('body')).toHaveJSProperty('scrollWidth',390);await page.screenshot({path:'/tmp/guepard-race-mobile.png',fullPage:true});
- }finally{await request.post('/api/rooms/'+room.id,{headers,data:{action:'leave'}})}
+
+test('a bot keeps progressing during human typing and mobile recommends a physical keyboard',async({page})=>{
+ const {room,token}=await createTestRoom(page.request,{name:'Bot continu'});
+ try{
+  await configureShortRace(page.request,room.id,token,trackText);
+  await roomCommand(page.request,room.id,token,{action:'bot',difficulty:'medium'});
+  await openLobby(page,room.id,token);
+  await page.getByRole('button',{name:'Lancer la course',exact:true}).click();
+  const current=await waitForRace(page.request,room.id,token),field=page.getByLabel('Texte de la course');
+  await expect(field).toBeEnabled();
+  await field.pressSequentially(current.text!.slice(0,18),{delay:100});
+  const later=await readRoom(page.request,room.id,token),bot=later.people.find(person=>person.kind==='bot')!;
+  expect(bot.progress).toBeGreaterThan(0);
+  await expect(page.locator('.race-lane[data-player-id="'+bot.id+'"] .race-runner')).toHaveAttribute('data-motion','running');
+  await expect(page.locator('.runner-tortoise[data-motion="running"]')).toBeVisible();
+  expect(await page.locator('.runner-tortoise').first().evaluate(element=>getComputedStyle(element).backgroundImage)).toContain('race-gaits.webp');
+  await page.setViewportSize({width:390,height:844});
+  await expect(page.getByText(/Pour participer à une course, utilise un ordinateur avec un clavier physique/)).toBeVisible();
+  await expect(field).toBeHidden();
+  expect(await page.locator('body').evaluate(element=>element.scrollWidth)).toBe(390);
+ }finally{await closeRoom(page.request,room.id,token)}
+});
+
+test('fixed lanes retain stable transformations, complete results and a reset rematch',async({page,playwright,baseURL})=>{
+ const {room,token}=await createTestRoom(page.request,{name:'La course des animaux'});
+ const guests:Awaited<ReturnType<typeof guestContext>>[]=[];
+ try{
+  for(const nickname of ['Mathis','Léa','Noah'])guests.push(await guestContext(playwright,baseURL,room.id,nickname));
+  await configureShortRace(page.request,room.id,token,trackText);
+  await openLobby(page,room.id,token);
+  await page.getByRole('button',{name:'Lancer la course',exact:true}).click();
+  await expect(page.locator('.race-lane .runner-cheetah')).toHaveCount(4);
+  const order=await page.locator('.race-lane').evaluateAll(nodes=>nodes.map(node=>node.getAttribute('data-player-id')));
+  const running=await waitForRace(page.request,room.id,token),text=running.text!;
+  await expect(page.getByLabel('Texte de la course')).toBeFocused();
+  const members=[{request:page.request,token},...guests],sent=members.map(()=> '');
+  async function progress(index:number,fraction:number){const next=text.slice(0,Math.floor(text.length*fraction));await sendProgress(members[index].request,room.id,members[index].token,next,sent[index]);sent[index]=next}
+  for(const [index,fraction]of [.7,.6,.45,.3].entries())await progress(index,fraction);
+  await expect(page.locator('.race-lane').nth(1).locator('.runner-gazelle')).toBeVisible();
+  await expect(page.locator('.race-lane').nth(3).locator('.runner-tortoise')).toBeVisible();
+  await progress(3,.45);
+  await expect(page.locator('.race-lane').nth(3).locator('.runner-tortoise')).toBeVisible();
+  await progress(3,.5);
+  await expect(page.locator('.race-lane').nth(3).locator('.runner-hare')).toBeVisible();
+  expect(await page.locator('.race-lane').evaluateAll(nodes=>nodes.map(node=>node.getAttribute('data-player-id')))).toEqual(order);
+  await progress(0,.75);
+  const runner=page.locator('.race-lane').first().locator('.race-runner');
+  await expect(runner).toHaveAttribute('data-motion','running');
+  const poses=await runner.evaluate(element=>{const animation=element.getAnimations().find(item=>(item as CSSAnimation).animationName==='cheetah-gait');if(!animation)throw new Error('Running gait missing');animation.pause();animation.currentTime=10;const first=getComputedStyle(element).backgroundPositionX;animation.currentTime=350;const second=getComputedStyle(element).backgroundPositionX;animation.play();return [first,second]});
+  expect(poses[0]).not.toBe(poses[1]);
+  for(let index=0;index<members.length;index++)await progress(index,1);
+  await expect(page.getByRole('heading',{name:'Bravo à tous !'})).toBeVisible();
+  await expect(page.locator('.podium-place')).toHaveCount(3);
+  await page.getByRole('button',{name:'Voir mes statistiques'}).click();
+  await expect(page.locator('.results-table tbody tr')).toHaveCount(4);
+  await expect(page.locator('.race-timeline svg polyline')).toHaveCount(4);
+  await expect(page.getByRole('columnheader',{name:'Bonus reçus'})).toBeVisible();
+  await page.getByRole('button',{name:'Lancer une revanche'}).click();
+  await expect(page.locator('.race-lane .runner-cheetah')).toHaveCount(4);
+  await expect(page.getByLabel('Texte de la course')).toBeDisabled();
+  expect((await readRoom(page.request,room.id,token)).people.every(person=>person.progress===0&&person.typed===0)).toBe(true);
+ }finally{await closeRoom(page.request,room.id,token);for(const guest of guests)await guest.request.dispose()}
 });

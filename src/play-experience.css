@@ -10,7 +10,7 @@
 @keyframes finish-nod{50%{transform:rotate(-7deg) translateY(-3px)}}
 .lane-position,.lane-travel{height:90px}.race-lane-road{height:96px}
 /* Complete sleeping silhouette with independently redrawn tail poses. */
-.lobby-page .lobby-sleeping-cheetah,.sleeping-cheetah{background:url('/assets/sleeping-tail.webp') 0 0/200% 200% no-repeat;aspect-ratio:1;animation:sleeping-tail 6s steps(1,end) infinite}
+.lobby-page .lobby-sleeping-cheetah,.sleeping-cheetah{background:url('/_next/image?url=%2Fassets%2Fsleeping-tail.webp&w=1080&q=75') 0 0/200% 200% no-repeat;aspect-ratio:1;animation:sleeping-tail 6s steps(1,end) infinite}
 .lobby-page .lobby-sleeping-cheetah{left:12px;bottom:0;width:calc(var(--side-space) - 16px)}
 @keyframes sleeping-tail{0%,65%,100%{background-position:0 0}72%{background-position:100% 0}80%{background-position:0 100%}90%{background-position:100% 100%}}
 .lobby-page .lobby-giraffe{top:auto;bottom:32%;right:1.5%;width:calc(var(--side-space)*.73)}
@@ -34,7 +34,7 @@
 @media(max-width:1100px){.lobby-page .lobby-giraffe{width:85px}.lobby-page .lobby-sleeping-cheetah{width:155px;left:8px}.monkey-vine{width:8px}}
 @media(max-width:700px){.how-banner{padding:45px 24px 25px;gap:15px;flex-direction:column;text-align:center}.how-banner img{width:65%;max-width:300px}.how-cards{grid-template-columns:1fr;padding:0 15px;gap:25px;margin-top:30px}.how-card-copy{padding:20px}.how-card-copy h2{font-size:27px}.how-ready>div{flex-direction:column;gap:20px}.how-ready h2{font-size:30px}.how-illustration{height:220px}.lane-position .race-runner{width:68px;height:68px}.race-lane-road{height:76px}.race-podium{padding:10px 0 20px;gap:8px}.podium-place .race-runner{width:80px;height:80px}.podium-plaque{padding:6px 3px;font-size:11px}.keyboard-heatmap{grid-template-columns:repeat(7,minmax(0,1fr))}.lobby-page .room-launch{flex-wrap:wrap}.lobby-page .lobby-sleeping-cheetah{width:145px}}
 @media(prefers-reduced-motion:reduce){.race-runner[data-motion],.podium-place .race-runner,.lobby-page .lobby-sleeping-cheetah,.sleeping-cheetah,.podium-confetti i{animation:none!important}}
-[data-theme=dark] .lobby-page .lobby-sleeping-cheetah{background-image:url('/assets/sleeping-tail.webp')}
+[data-theme=dark] .lobby-page .lobby-sleeping-cheetah{background-image:url('/_next/image?url=%2Fassets%2Fsleeping-tail.webp&w=1080&q=75')}
 /* Every pose uses the same atlas window, so the animal keeps a consistent size. */
 @keyframes gait-cycle{0%,100%{background-position:0 var(--gait-row)}25%{background-position:33.333333% var(--gait-row)}50%{background-position:66.666667% var(--gait-row)}75%{background-position:100% var(--gait-row)}}
 @media(min-width:1101px){.lobby-page{padding-top:18px}}
@@ -42,7 +42,7 @@
 .race-runner:not([data-motion=running]){background-image:url('/assets/race-runners.webp');background-size:300% 200%}
 .runner-cheetah:not([data-motion=running]){background-position:0 0}.runner-gazelle:not([data-motion=running]){background-position:50% 0}.runner-hare:not([data-motion=running]){background-position:100% 0}.runner-fox:not([data-motion=running]){background-position:0 100%}.runner-panda:not([data-motion=running]){background-position:50% 100%}.runner-tortoise:not([data-motion=running]){background-position:100% 100%}
 .podium-place>.race-runner{order:0;margin-bottom:-12px;z-index:1}.podium-place>.podium-step{order:1}.podium-place>strong{order:2;margin-top:20px}.podium-place>span{order:3}.podium-place>.podium-plaque{order:4}
-.race-podium::before,.race-podium::after{content:'';position:absolute;bottom:10px;width:95px;height:95px;background:url('/assets/relief-foliage.webp') left center/200% 100%;pointer-events:none;opacity:.8}.race-podium::before{left:-10px}.race-podium::after{right:-10px;transform:scaleX(-1)}
+.race-podium::before,.race-podium::after{content:'';position:absolute;bottom:10px;width:95px;height:95px;background:url('/_next/image?url=%2Fassets%2Frelief-foliage.webp&w=1200&q=75') left center/200% 100%;pointer-events:none;opacity:.8}.race-podium::before{left:-10px}.race-podium::after{right:-10px;transform:scaleX(-1)}
 .lobby-page.lobby-active .lobby-giraffe{bottom:70px}.lobby-page .lobby-giraffe::after{height:12%;bottom:-2%;border-radius:60% 60% 0 0;background:radial-gradient(ellipse at 50% 0,#8a9865,#586d41 55%,#3a5933);box-shadow:none}
 .lobby-page.lobby-active{padding-bottom:150px}
 /* The tortoise uses the four drawn walking poses, like the other racers. */

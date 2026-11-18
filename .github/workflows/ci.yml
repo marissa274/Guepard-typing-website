@@ -27,6 +27,7 @@ jobs:
           --health-retries 12
     env:
       DATABASE_URL: postgresql://guepard:guepard_ci_only@127.0.0.1:5433/guepard
+      AUTH_SECRET: guepard-ci-only-secret-change-outside-tests
       CI: true
     steps:
       - uses: actions/checkout@v4
@@ -39,8 +40,11 @@ jobs:
           node --version
           npm --version
       - run: npm ci
+      - run: npm run lint
       - run: npm run typecheck
       - run: npm test -- --silent
+      - run: npm run db:migrate:sql
+      - run: npm run db:seed
       - run: npm run build
       - run: npx playwright install --with-deps chromium
       - run: npm run test:e2e

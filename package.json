@@ -10,15 +10,19 @@
     "preview": "next start -p 5173",
     "db:up": "docker compose up -d db",
     "db:stop": "docker compose stop db",
-    "db:migrate": "node --env-file=.env.local scripts/migrate-rooms-to-postgres.ts",
+    "db:migrate": "node --env-file-if-exists=.env.local scripts/migrate-rooms-to-postgres.ts",
     "test": "jest --config jest.config.json --runInBand",
     "test:e2e": "playwright test",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint app src scripts tests *.ts --max-warnings 0",
+    "db:migrate:sql": "node --env-file-if-exists=.env.local scripts/db-migrate.ts",
+    "db:seed": "node --env-file-if-exists=.env.local scripts/db-seed.ts"
   },
   "devDependencies": {
     "@babel/preset-env": "^7.29.7",
     "@babel/preset-react": "^7.29.7",
     "@babel/preset-typescript": "^7.29.7",
+    "@eslint/js": "^10.0.1",
     "@playwright/test": "^1.63.0",
     "@testing-library/react": "^16.3.3",
     "@testing-library/user-event": "^14.6.7",
@@ -27,18 +31,23 @@
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
     "babel-jest": "^30.5.2",
+    "eslint": "^10.14.0",
     "jest": "^30.5.2",
     "jest-environment-jsdom": "^30.5.2",
+    "jiti": "^2.7.0",
     "jsdom": "^29.1.1",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.72.2"
   },
   "dependencies": {
     "@tailwindcss/postcss": "^4.3.3",
-    "next": "^16.3.8",
+    "drizzle-orm": "^0.45.4",
+    "next": "16.4.6",
     "pg": "^8.23.1",
     "postcss": "^8.5.28",
     "react": "^19.3.0",
     "react-dom": "^19.3.0",
+    "sharp": "0.35.5",
     "tailwindcss": "^4.3.3"
   }
 }
