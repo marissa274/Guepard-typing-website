@@ -34,8 +34,8 @@ test('eleven real completed races retain private measurements, paginate and reop
   expect((await page.request.get('/api/rooms/'+room.id,{headers:memberHeaders(token)})).status()).toBe(404);expect((await page.request.get('/api/results/'+firstId)).ok()).toBeTruthy();
   await page.request.post('/api/auth',{data:{action:'logout'}});expect((await page.request.get('/api/results')).status()).toBe(401);
   expect((await page.request.post('/api/auth',{data:{action:'login',username,password}})).ok()).toBeTruthy();
-  await page.goto('/stats');await expect(page.getByRole('heading',{name:'Historique des courses'})).toBeVisible();await expect(page.locator('.history > div')).toHaveCount(10);
-  await page.getByRole('button',{name:'Suivante'}).click();await expect(page.locator('.history > div')).toHaveCount(1);
+  await page.goto('/stats');await expect(page.getByRole('heading',{name:'Historique des courses'})).toBeVisible();await expect(page.locator('.history > li')).toHaveCount(10);
+  await page.getByRole('button',{name:'Suivante'}).click();await expect(page.locator('.history > li')).toHaveCount(1);
   await page.getByRole('link',{name:/Voir les résultats/}).click();await expect(page.getByRole('heading',{name:'Résultats de la course',exact:true})).toBeVisible();
   await expect(page.locator('.results-table tbody tr')).toHaveCount(2);await expect(page.locator('.race-timeline svg polyline')).toHaveCount(2);await expect(page.locator('.heat-clean').first()).toBeVisible();await expect(page.getByText('Nouveau record personnel !')).toBeVisible();
  }finally{if(!closed)await closeRoom(page.request,room.id,token);await guest.request.dispose();await other.dispose()}

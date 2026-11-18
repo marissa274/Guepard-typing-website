@@ -119,3 +119,5 @@
 [data-theme=dark] .lobby-page .room-invitation>small{color:#35583e}
 .course-code-entry select{font-size:16px;min-height:48px}
 .woodland-page ::placeholder{color:#6b6250}
+/* Host controls stay focusable while a request is pending (A11Y-04). */
+.woodland-page button[aria-disabled=true]{cursor:progress}.room-settings-controls .wood-error{grid-column:1/-1;margin:6px 0 0}

@@ -25,7 +25,7 @@ test('three racers start as cheetahs after the synchronized countdown before the
  }finally{await closeRoom(page.request,room.id,token);for(const guest of guests)await guest.request.dispose()}
 });
 
-test('a bot keeps progressing during human typing and mobile recommends a physical keyboard',async({page})=>{
+test('a bot keeps progressing during human typing and mobile recommends a physical keyboard',async({page,browser,baseURL})=>{
  const {room,token}=await createTestRoom(page.request,{name:'Bot continu'});
  try{
   await configureShortRace(page.request,room.id,token,trackText);
@@ -40,10 +40,18 @@ test('a bot keeps progressing during human typing and mobile recommends a physic
   await expect(page.locator('.race-lane[data-player-id="'+bot.id+'"] .race-runner')).toHaveAttribute('data-motion','running');
   await expect(page.locator('.runner-tortoise[data-motion="running"]')).toBeVisible();
   expect(await page.locator('.runner-tortoise').first().evaluate(element=>getComputedStyle(element).backgroundImage)).toContain('race-gaits.webp');
+  // A narrow desktop window (zoom, split screen) keeps the race playable: WCAG 1.4.10 reflow.
   await page.setViewportSize({width:390,height:844});
-  await expect(page.getByText(/Pour participer à une course, utilise un ordinateur avec un clavier physique/)).toBeVisible();
-  await expect(field).toBeHidden();
+  await expect(field).toBeVisible();
   expect(await page.locator('body').evaluate(element=>element.scrollWidth)).toBe(390);
+  // Only a touch device without a hover-capable pointer gets the physical keyboard recommendation.
+  const mobile=await browser.newContext({baseURL,viewport:{width:390,height:844},isMobile:true,hasTouch:true});
+  try{
+   const phone=await mobile.newPage();await openLobby(phone,room.id,token);
+   await expect(phone.getByText(/Pour participer à une course, utilise un ordinateur avec un clavier physique/)).toBeVisible();
+   await expect(phone.getByLabel('Texte de la course')).toBeHidden();
+   expect(await phone.locator('body').evaluate(element=>element.scrollWidth)).toBe(390);
+  }finally{await mobile.close()}
  }finally{await closeRoom(page.request,room.id,token)}
 });
 
