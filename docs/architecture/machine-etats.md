@@ -1,33 +1,25 @@
-# GUÉPARD - Machine à états du salon
+# Machine à états du salon
 
-Ce diagramme représente les transitions réellement autorisées par le moteur. L'écran de résultats apparaît lorsque le salon est `finished`. La fermeture supprime le salon et révoque son accès ; `closed` est donc un état conceptuel, pas une valeur stockée dans `Room.phase`.
+Les transitions courantes et les règles de sécurité sont détaillées dans [l’architecture](../ARCHITECTURE.md). La fermeture supprime le salon ; `closed` est un état conceptuel.
 
 ```mermaid
 stateDiagram-v2
-    [*] --> waiting: création du salon
-    waiting --> running: hôte lance, au moins 2 joueurs dont 1 humain
+    [*] --> waiting: création authentifiée
+    waiting --> countdown: hôte lance, deux joueurs dont un humain
+    countdown --> running: départ commun après trois secondes
     running --> finished: tous terminés ou abandonnés
-    running --> finished: limite de temps atteinte
-    running --> waiting: hôte revient au salon
-    finished --> waiting: hôte réinitialise
-    finished --> running: hôte lance une revanche
-    waiting --> closed: hôte quitte
-    running --> closed: hôte quitte
-    finished --> closed: hôte ferme
+    running --> finished: échéance atteinte
+    countdown --> waiting: réinitialisation par l’hôte
+    running --> waiting: réinitialisation par l’hôte
+    finished --> waiting: réinitialisation par l’hôte
+    finished --> countdown: revanche
+    waiting --> closed: fermeture ou aucun hôte admissible
+    countdown --> closed: fermeture ou aucun hôte admissible
+    running --> closed: fermeture ou aucun hôte admissible
+    finished --> closed: fermeture ou aucun hôte admissible
     closed --> [*]
 ```
 
-| État | Ce que voient les joueurs | Actions autorisées |
-| --- | --- | --- |
-| `waiting` | Participants, invitation, réglages | L'hôte modifie les paramètres, ajoute un bot, change un rôle et lance si au moins deux joueurs dont un humain sont présents. |
-| `running` | Pistes, texte et zone de frappe | Les joueurs tapent ou abandonnent. Un arrivant tardif devient spectateur. L'hôte peut revenir au salon. |
-| `finished` | Podium, classement et statistiques | L'hôte peut lancer une revanche, réinitialiser ou fermer ; les autres peuvent quitter. |
-| `closed` (conceptuel) | Salon introuvable | Aucune action sur ce salon. |
+Une nouvelle entrée est refusée pendant le décompte et la course. Un membre existant peut se reconnecter ; après trente secondes sans présence réseau, le serveur enregistre son abandon. L’absence de frappe seule ne constitue pas une déconnexion. Le départ de l’hôte transfère son rôle au plus ancien humain authentifié admissible ; la fermeture est une action distincte.
 
-**Transitions liées aux participants :** un spectateur arrivé en cours de course devient joueur au prochain `reset`/à la revanche. Un joueur qui termine reçoit `finishedAt` ; un abandon est marqué `abandoned` et reste distinct d'une victoire. Lors d'une revanche, progrès, erreurs, saisie et classement visuel sont remis à zéro ; tous repartent en guépards.
-
-La limite temporelle borne aussi les bots : un tick tardif ne prolonge pas la course. Le serveur refuse les saisies reçues après l’échéance. La fin peut également survenir lorsqu’un seul joueur reste après abandon des autres ; ce comportement existant est déclaré comme écart dans la matrice.
-
-**Synchronisation :** chaque mutation du salon augmente `revision`. Le flux SSE envoie une nouvelle vue lorsque cette révision change. La progression des bots est calculée côté serveur à partir du temps écoulé ; elle ne dépend pas de la vitesse de frappe d'un humain.
-
-Sources : [`room-engine.ts`](../../src/server/room-engine.ts), [`Lobby.tsx`](../../src/components/lobby/Lobby.tsx), [`VisualRace.tsx`](../../src/components/lobby/VisualRace.tsx).
+Les bots suivent une grille temporelle serveur déterministe. Les bonus, la limite de durée et les heures individuelles de fin ou d’abandon sont calculés côté serveur. Un seul concurrent actif peut continuer jusqu’à son arrivée, son abandon ou l’échéance.

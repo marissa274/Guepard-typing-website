@@ -25,7 +25,9 @@ Sur le canevas du projet Railway : **+ New → Database → PostgreSQL**. Attend
 2. Si Railway propose **Add Variables** avant le premier déploiement, choisir cette option. Sinon, ouvrir ensuite le service web et son onglet **Variables**.
 3. Ajouter une **Reference Variable** nommée `DATABASE_URL` qui pointe vers `DATABASE_URL` du service PostgreSQL. Si l'éditeur brut est utilisé et que le service s'appelle `Postgres`, la référence est `DATABASE_URL=${{Postgres.DATABASE_URL}}` ; choisir le nom exact affiché dans le projet.
 4. Lancer le déploiement. Railpack détecte `package.json`, exécute le script `build` et utilise `start`. Les commandes du projet sont `npm run build` et `npm start`.
-5. Dans **Deployments / View Logs**, attendre le message indiquant que Next.js est prêt. Les tables `guepard_users`, `guepard_sessions` et `guepard_rooms` sont créées automatiquement au premier accès ; il n'y a pas de migration ORM à configurer pour ce prototype.
+5. Ajouter `AUTH_SECRET`, un secret privé stable généré pour cet environnement. Définir **Settings → Deploy → Pre-deploy Command** sur `npm run db:migrate:sql`. Les [commandes de pré-déploiement Railway](https://docs.railway.com/deployments/pre-deploy-command) accèdent au réseau privé et aux variables du service ; une migration échouée bloque le déploiement.
+6. Pour préparer la démonstration, définir `GUEPARD_DEMO_PASSWORD`, puis exécuter une fois `npm run db:seed` dans l’environnement du service. Ne pas modifier les fichiers de migration déjà appliqués. Les scripts exigent Node 22.18+ ou 24.
+7. Dans **Deployments / View Logs**, vérifier migrations puis démarrage de Next.js. Les instructions OAuth et photos sont dans [comptes-et-base.md](installation/comptes-et-base.md).
 
 Le script `start` écoute `0.0.0.0` sur le port `PORT` fourni par Railway. Ne pas imposer le port local `5173` dans les réglages Railway.
 
@@ -42,7 +44,7 @@ Dans les variables du **service web**, définir `APP_URL` avec cette adresse pub
 3. Ouvrir l'adresse dans un autre navigateur ou une fenêtre privée, rejoindre le salon avec le code et vérifier que les deux personnes se voient.
 4. Modifier un réglage comme hôte : l'autre navigateur doit le recevoir. Lancer une course, vérifier les pistes, puis les résultats.
 5. Après un redéploiement, vérifier que le compte et le salon persistent. Si l'inscription indique « base de données indisponible », revenir à la variable `DATABASE_URL` du service web.
-6. Remplacer `**à renseigner après déploiement**` dans `CHECKPOINT-1.md` par la vraie adresse HTTPS et retirer la mention de brouillon avant la remise.
+6. Consigner la vraie URL HTTPS, le compte de correction et les résultats des parcours publics dans le dossier de remise. `CHECKPOINT-1.md` conserve son rôle de document historique. Vérifier aussi les photos, l’historique et les callbacks OAuth si les fournisseurs sont activés.
 
 Le flux SSE du lobby maintient une connexion ouverte ; si Railway signale des erreurs de connexion ou si les mises à jour cessent, examiner les journaux du service web et les limites de l'offre utilisée.
 
