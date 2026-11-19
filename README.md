@@ -6,7 +6,27 @@ Lecteur visé : enseignant, correcteur ou développeur qui installe et évalue l
 
 ## Captures d'écran
 
-> À insérer : captures générées plus tard (accueil, salon, course, résultats, historique, thèmes clair et sombre).
+Captures générées avec Playwright sur la version de production locale (`next build`), avec les données de démonstration du seed et des participants de test.
+
+| Accueil, thème clair | Accueil, thème sombre |
+| --- | --- |
+| ![Accueil de Guépard en thème clair : panneaux en bois pour rejoindre, créer ou parcourir les courses](docs/img/accueil-clair.png) | ![Accueil de Guépard en thème sombre](docs/img/accueil-sombre.png) |
+
+| Explorateur de salles | Salon d'attente |
+| --- | --- |
+| ![Explorateur des salons publics avec filtres de langue et de complexité](docs/img/explorateur-salles.png) | ![Salon d'attente : quatre joueurs dont un bot et paramètres de course de l'hôte](docs/img/salon-attente.png) |
+
+| Course en cours | Podium |
+| --- | --- |
+| ![Course en cours : pistes des concurrents au-dessus du texte à taper et du champ de saisie](docs/img/course-en-cours.png) | ![Podium de fin de course avec les trois premiers](docs/img/resultats-podium.png) |
+
+| Résultats détaillés et graphiques | Profil et statistiques |
+| --- | --- |
+| ![Résultats : classement, statistiques personnelles, erreurs au clavier et évolution des mots par minute](docs/img/resultats-graphiques.png) | ![Statistiques du compte : moyennes, progression de la vitesse et historique des courses](docs/img/profil-statistiques.png) |
+
+<img src="docs/img/mobile-360.png" width="240" alt="Accueil sur mobile, largeur 360 pixels">
+
+Vue mobile (360 px de large).
 
 ## URL de production
 
@@ -61,7 +81,7 @@ Modèle : `.env.example` (copié dans `.env.local`, non versionné). Variables l
 | `GUEPARD_DEMO_PASSWORD` | mot de passe du compte de démonstration pour `db:seed` | oui si `NODE_ENV=production` |
 | `GUEPARD_DB_PASSWORD` | mot de passe PostgreSQL de Docker Compose (défaut `guepard_dev_only`), à faire correspondre à `DATABASE_URL` | non |
 | `GUEPARD_DATA_DIR` | dossier du secours JSON et du secret invité local (défaut `.data`) | non |
-| `GUEPARD_TRUST_PROXY` | `1` pour faire confiance aux en-têtes IP d'un proxy | non |
+| `GUEPARD_CLIENT_IP_HEADER`, `GUEPARD_TRUST_PROXY` | source de l'IP client : en-tête écrasé par la plateforme (`X-Real-IP` sur Railway) ou nombre de proxys qui complètent `X-Forwarded-For` ; sans eux, une empreinte partagée (voir `docs/deploiement-railway.md`) | oui en production |
 | `PLAYWRIGHT_CHROME_PATH`, `GUEPARD_TEST_PORT` | tests navigateur : exécutable Chrome et port du serveur isolé | non |
 | `NODE_ENV`, `PORT` | gérées par Next.js / l'hébergeur (`PORT` utilisé par `npm start`) | non |
 
@@ -103,4 +123,4 @@ La CI versionnée prépare PostgreSQL, installe avec `npm ci`, lance lint, typag
 - [Textes, complexité et bonus](docs/fonctionnalites/textes-et-bonus.md)
 - [Guide de déploiement Railway](docs/deploiement-railway.md)
 
-`CHECKPOINT-1.md` décrit l'état historique du checkpoint 1 et ne constitue pas le bilan de la remise finale. Restent à fournir par l'autrice : `docs/DEMARCHE-CREATIVE.md` (nom, logo, direction artistique), les captures d'écran, l'URL de production confirmée et les coordonnées légales.
+`CHECKPOINT-1.md` décrit l'état historique du checkpoint 1 et ne constitue pas le bilan de la remise finale. Restent à fournir par l'autrice : `docs/DEMARCHE-CREATIVE.md` (nom, logo, direction artistique), l'URL de production confirmée et les coordonnées légales.
