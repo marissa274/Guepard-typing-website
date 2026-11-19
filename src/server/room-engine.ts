@@ -4,8 +4,8 @@ import {botState,botProfiles} from './bot-engine';
 import {typingEdit} from '../lib/typing-edits';
 import {generateConfiguredText,TextGenerationError} from './text-generator';
 import {applyBonuses} from './race-bonuses';
-import {keyboardAggregate,recordKeyboard,recordTelemetry,typingAllowance} from './race-telemetry';
-import {defaultSettings, type Room,type Person,type RoomView,type Settings,type Difficulty,type Visibility,type Invitation} from '../lib/room-types';
+import {insertedErrors,keyboardAggregate,recordKeyboard,recordTelemetry,typingAllowance} from './race-telemetry';
+import {defaultSettings, type Room,type Person,type RoomView,type Settings,type Difficulty,type Visibility,type Invitation,type Heatmap} from '../lib/room-types';
 type EngineBody=Record<string,unknown>;
 export interface ActionResult {invitation?:Invitation}
 export class RoomError extends Error{constructor(message:string,public status=400){super(message)}}
@@ -54,7 +54,10 @@ export function tick(room:Room,force=false){
  if(room.phase==='finished')recordTelemetry(room,room.endedAt!,true);
  room.revision++;
 }
-export function snapshot(room:Room,p:Person):RoomView{const {invites,bannedIdentities,bannedIpHashes,...safe}=room;return {...safe,people:room.people.map(({token,input,userId,identityKey,ipHash,heatmap,lastProgressAt,typingBudget,...other})=>({...other,...(other.id===p.id?{input,heatmap}:{} )})),me:p.id,isHost:p.id===room.hostId,players:room.people.filter(p=>p.role==='player'&&!p.abandoned).length,serverNow:Date.now(),...(p.id===room.hostId?{invitations:invites.map(({token,expires,used,usedName,revoked})=>({token,expires,used,usedName,revoked}))}:{})}}
+/** COURSE-03: a custom text stays with the host until the countdown reveals it to everyone. */
+function visibleSettings(room:Room,p:Person):Settings{return room.phase==='waiting'&&p.id!==room.hostId?{...room.settings,customText:''}:room.settings}
+const heatErrors=(heat:Heatmap)=>Object.values(heat).reduce((sum,entry)=>sum+entry.errors,0);
+export function snapshot(room:Room,p:Person):RoomView{const {invites,bannedIdentities,bannedIpHashes,...safe}=room;return {...safe,settings:visibleSettings(room,p),people:room.people.map(({token,input,userId,identityKey,ipHash,heatmap,lastProgressAt,typingBudget,...other})=>({...other,...(other.id===p.id?{input,heatmap}:{} )})),me:p.id,isHost:p.id===room.hostId,players:room.people.filter(p=>p.role==='player'&&!p.abandoned).length,serverNow:Date.now(),...(p.id===room.hostId?{invitations:invites.map(({token,expires,used,usedName,revoked})=>({token,expires,used,usedName,revoked}))}:{})}}
 export function joinRoom(room:Room,body:EngineBody,options:{accessVerified?:boolean}={}):Person{requireValue(room.phase==='waiting'||room.phase==='finished','Une course est déjà en cours. Attendez les résultats.',409);const p=person(body);if(p.role==='player')requireValue(room.people.filter(x=>x.role==='player'||x.late).length<room.settings.capacity,'Le salon est complet.',409);if(!options.accessVerified){if(room.settings.visibility==='semi')requireValue(body.code===room.code,'Le code du salon est incorrect.',403);if(room.settings.visibility==='private'){const invite=room.invites.find(i=>i.token===body.invite&&!i.used&&!i.revoked&&i.expires>Date.now());requireValue(invite,'Invitation expirée ou déjà utilisée.',403);invite.used=true;invite.usedBy=p.id;invite.usedName=p.name}}if(room.phase==='finished'&&p.role==='player'){p.role='spectator';p.late=true}room.people.push(p);room.revision++;return p}
 export function act(room:Room,p:Person,body:EngineBody,generatedText?:string):ActionResult{
  tick(room,true);p.seen=Date.now();if(body.action==='heartbeat'){room.revision++;return {}}
@@ -64,7 +67,8 @@ export function act(room:Room,p:Person,body:EngineBody,generatedText?:string):Ac
   requireValue(typeof body.value==='string','Saisie invalide.');
   const reportedTyped=body.typed;
   requireValue(reportedTyped===undefined||typeof reportedTyped==='number'&&Number.isSafeInteger(reportedTyped)&&reportedTyped>=0,'Le nombre de frappes est invalide.');
-  requireValue(!p.pausedUntil||Date.now()>=p.pausedUntil,'Le bonus du meneur impose une courte pause.');
+  // Leader pause bonus: a batch already in flight is ignored (not rejected), the client sends it again once the pause ends.
+  if(p.pausedUntil&&Date.now()<p.pausedUntil)return {};
   const target=p.targetText??room.text!,input=body.value.slice(0,target.length),added=typingEdit(p.input||'',input).inserted.length;
   if(room.settings.blockErrors)requireValue(target.startsWith(input),'Corrigez les erreurs avant de continuer.');
   const typed=Math.max(p.typed+added,reportedTyped??0);
@@ -72,18 +76,26 @@ export function act(room:Room,p:Person,body:EngineBody,generatedText?:string):Ac
   const allowance=typingAllowance(p,room.startedAt!,Date.now()),cost=typed-p.typed;
   requireValue(cost<=allowance,'Cette progression est trop rapide. Réessayez après avoir ralenti.');
   const progress=input.split('').filter((c,i)=>c===target[i]).length;
-  const heatmap=body.heatmap===undefined?recordKeyboard(p.heatmap||{},p.input||'',input,target):keyboardAggregate(body.heatmap,p.heatmap||{},typed,typed-progress);
-  requireValue(heatmap,'Les statistiques du clavier sont invalides.');
-  p.typingBudget=allowance-cost;p.lastProgressAt=Date.now();p.lastInput=Date.now();p.input=input;p.progress=progress;p.typed=typed;p.errors=Object.values(heatmap).reduce((sum,entry)=>sum+entry.errors,0);p.heatmap=heatmap;
+  // Errors are counted by the server from the characters it validates (COURSE-06, annex A accuracy).
+  // Keypresses reported but never seen (typed then erased inside one batch) may only add errors, up to their number.
+  let errors=p.errors+insertedErrors(p.input||'',input,target);
+  if(body.heatmap!==undefined){
+   const claimed=keyboardAggregate(body.heatmap,{},typed);
+   requireValue(claimed,'Les statistiques du clavier sont invalides.');
+   errors+=Math.max(0,Math.min(heatErrors(claimed)-errors,cost-added));
+  }
+  // The client heatmap only distributes those errors per key; otherwise the server-observed distribution is kept.
+  const heatmap=(body.heatmap===undefined?null:keyboardAggregate(body.heatmap,p.heatmap||{},typed,errors))??recordKeyboard(p.heatmap||{},p.input||'',input,target);
+  p.typingBudget=allowance-cost;p.lastProgressAt=Date.now();p.lastInput=Date.now();p.input=input;p.progress=progress;p.typed=typed;p.errors=errors;p.heatmap=heatmap;
   applyBonuses(room,Date.now());
-  if(input===(p.targetText??room.text))p.finishedAt=Date.now();
-  recordTelemetry(room,Date.now(),true);room.revision++;tick(room,true);return {};
+  // Free mode: reaching the end of the text finishes the race, remaining errors stay counted (CONF-08).
+  const end=p.targetText??room.text!;
+  if(room.settings.blockErrors?input===end:input.length>=end.length)p.finishedAt=Date.now();
+  recordTelemetry(room,Date.now());room.revision++;tick(room,true);return {};
  }
- if(body.action==='abandon'){requireValue(room.phase==='running'&&p.role==='player'&&!p.abandoned&&!p.finishedAt,'Vous ne pouvez pas abandonner maintenant.');p.abandoned=true;p.abandonedAt=Date.now();recordTelemetry(room,Date.now(),true);room.revision++;tick(room,true);return {}}
+ if(body.action==='abandon'){requireValue(room.phase==='running'&&p.role==='player'&&!p.abandoned&&!p.finishedAt,'Vous ne pouvez pas abandonner maintenant.');p.abandoned=true;p.abandonedAt=Date.now();recordTelemetry(room,Date.now());room.revision++;tick(room,true);return {}}
  requireValue(p.id===room.hostId,'Seul l’hôte peut effectuer cette action.',403);
  if(body.action==='rematch'){requireValue(room.phase==='finished','La course doit être terminée.');const players=room.people.filter(x=>(x.role==='player'||x.late)&&(x.kind==='bot'||x.token));requireValue(players.length>=2,'Il faut au moins deux joueurs pour démarrer.');requireValue(players.some(x=>x.kind!=='bot'),'Il faut au moins un joueur humain pour démarrer.');const text=generatedText??generateText(room.settings);act(room,p,{action:'reset'});return act(room,p,{action:'start'},text)}
- if(body.action==='invite'){requireValue(room.settings.visibility==='private','Le salon n’est pas privé.');const invitation={token:randomUUID(),expires:Date.now()+30*60*1000,used:false};room.invites=room.invites.filter(i=>!i.used&&i.expires>Date.now());room.invites.push(invitation);return {invitation}}
- if(body.action==='kick'){requireValue(body.personId!==p.id,'Vous ne pouvez pas retirer l’hôte.');room.people=room.people.filter(x=>x.id!==body.personId);room.revision++;tick(room);return {}}
  if(body.action==='reset'){requireValue(room.phase==='finished','La course doit être terminée.');room.phase='waiting';delete room.startedAt;delete room.endedAt;delete room.lastTick;delete room.text;delete room.bonusEvents;delete room.bonusCheckpoints;room.people=room.people.filter(x=>x.kind==='bot'||x.token);room.people.forEach(x=>{if(x.late){x.role='player';x.late=false}delete x.input;delete x.lastInput;delete x.abandonedAt;delete x.targetText;delete x.telemetry;delete x.heatmap;delete x.bonusReceived;delete x.pauses;delete x.pausedUntil;delete x.lastProgressAt;delete x.typingBudget;x.progress=0;x.errors=0;x.typed=0;x.abandoned=false;delete x.finishedAt});room.revision++;return {}}
  requireValue(room.phase==='waiting','Les réglages sont verrouillés pendant la course.');
  if(body.action==='settings'){requireValue(body.settings&&typeof body.settings==='object'&&!Array.isArray(body.settings),'Paramètres invalides.');const settings=body.settings as EngineBody;room.settings=validateSettings({...defaultSettings,...room.settings,...settings});if(settings.visibility)room.invites=[]}

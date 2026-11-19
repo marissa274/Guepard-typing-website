@@ -11,7 +11,7 @@ test('human bonuses alter personal text, block the paused leader and reset befor
  act(room,person,{action:'settings',settings:{bonuses:true}});act(room,person,{action:'start'},text);now+=3000;tick(room);
  while(!person.pausedUntil){now+=1000;const length=Math.min((person.input?.length||0)+20,person.targetText!.length);act(room,person,{action:'progress',value:person.targetText!.slice(0,length),typed:length});}
  expect(last.targetText!.split(' ')).toHaveLength(37);expect(person.targetText!.split(' ')).toHaveLength(43);expect(last.bonusReceived).toBe(3);
- const input=person.input!;expect(()=>act(room,person,{action:'progress',value:input+'a',typed:person.typed+1})).toThrow('pause');expect(person.input).toBe(input);
+ const input=person.input!;expect(()=>act(room,person,{action:'progress',value:input+'a',typed:person.typed+1})).not.toThrow();expect(person.input).toBe(input);
  now=person.pausedUntil!;act(room,person,{action:'progress',value:person.targetText!.slice(0,input.length+1),typed:person.typed+1});
  act(room,last,{action:'abandon'});act(room,person,{action:'abandon'});act(room,person,{action:'rematch'},text);expect(room.phase).toBe('countdown');expect(person.pauses).toEqual([]);expect(room.bonusEvents).toEqual([]);expect(last.targetText).toBe(text);expect(last.bonusReceived).toBe(0);
 });

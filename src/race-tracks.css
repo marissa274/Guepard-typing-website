@@ -7,3 +7,4 @@
 @media(prefers-reduced-motion:reduce){.lane-position{transition:none}.lane-position .race-runner{animation:none}}
 .race-lanes{position:sticky;top:8px;z-index:4;max-height:min(46svh,570px);background:#fff4dfeF;border-radius:15px;box-shadow:0 6px 12px #5a472015}.race-lane-road{height:76px}.lane-travel,.lane-position,.lane-position .race-runner{height:70px}
 @media(max-width:650px){.race-lanes{max-height:38svh}.race-lane-road{height:72px}}
+.race-lane-label .race-lane-avatar{width:30px;height:30px;margin-right:8px;border-color:var(--racer-colour)}

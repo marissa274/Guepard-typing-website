@@ -8,6 +8,8 @@ export const resultSchema=`CREATE TABLE IF NOT EXISTS guepard_results (
  ended_at BIGINT NOT NULL, result JSONB NOT NULL, snapshot JSONB NOT NULL,
  UNIQUE(user_id,room_id,started_at)
 ); CREATE INDEX IF NOT EXISTS guepard_results_user_date ON guepard_results(user_id,ended_at DESC);`;
+/** An abandoned race never sets nor holds the personal record / best speed. */
+const completedRace="NOT COALESCE((result->>'abandoned')::boolean,false)";
 const runtime=globalThis as typeof globalThis & {guepardResults?:{pool:Pool;ready:Promise<unknown>}};
 
 function database(){
@@ -35,8 +37,8 @@ export function collectFinishedResults(rooms:Room[]){
 /** Called inside the same PostgreSQL transaction as the final room state. */
 export async function saveFinishedResults(client:Pick<PoolClient,'query'>,rooms:Room[]){
  for(const entry of collectFinishedResults(rooms)){
-  const previous=await client.query("SELECT MAX((result->>'speed')::numeric) AS best_speed FROM guepard_results WHERE user_id=$1 AND id<>$2",[entry.userId,entry.result.id]);
-  entry.result.personalBest=entry.result.speed>Number(previous.rows[0]?.best_speed||0);
+  const previous=await client.query(`SELECT MAX((result->>'speed')::numeric) AS best_speed FROM guepard_results WHERE user_id=$1 AND id<>$2 AND ${completedRace}`,[entry.userId,entry.result.id]);
+  entry.result.personalBest=!entry.result.abandoned&&entry.result.speed>Number(previous.rows[0]?.best_speed||0);
   entry.room.personalBest=entry.result.personalBest;
   await client.query('INSERT INTO guepard_results(id,user_id,room_id,started_at,ended_at,result,snapshot) VALUES($1,$2,$3,$4,$5,$6,$7) ON CONFLICT(user_id,room_id,started_at) DO NOTHING',[entry.result.id,entry.userId,entry.room.id,entry.room.startedAt,entry.result.date,JSON.stringify(entry.result),JSON.stringify(entry.room)]);
  }
@@ -46,7 +48,7 @@ export async function listResults(userId:string,page=1,pageSize=10):Promise<Resu
  const {pool,ready}=database();await ready;
  const [rows,aggregate,points]=await Promise.all([
   pool.query('SELECT result FROM guepard_results WHERE user_id=$1 ORDER BY ended_at DESC,id DESC LIMIT $2 OFFSET $3',[userId,pageSize,(page-1)*pageSize]),
-  pool.query(`SELECT COUNT(*)::int AS races,COUNT(*) FILTER(WHERE (result->>'won')::boolean)::int AS wins,COALESCE(MAX((result->>'speed')::numeric),0) AS best_speed,COALESCE(AVG((result->>'speed')::numeric),0) AS average_speed,AVG((result->>'accuracy')::numeric) AS average_accuracy FROM guepard_results WHERE user_id=$1`,[userId]),
+  pool.query(`SELECT COUNT(*)::int AS races,COUNT(*) FILTER(WHERE (result->>'won')::boolean)::int AS wins,COALESCE(MAX((result->>'speed')::numeric) FILTER(WHERE ${completedRace}),0) AS best_speed,COALESCE(AVG((result->>'speed')::numeric),0) AS average_speed,AVG((result->>'accuracy')::numeric) AS average_accuracy FROM guepard_results WHERE user_id=$1`,[userId]),
   pool.query("SELECT ended_at AS date,(result->>'speed')::numeric AS speed FROM (SELECT ended_at,result FROM guepard_results WHERE user_id=$1 ORDER BY ended_at DESC LIMIT 100) recent ORDER BY ended_at",[userId])
  ]);
  const summary=aggregate.rows[0];

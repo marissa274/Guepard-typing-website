@@ -1,4 +1,4 @@
-import type {Heatmap,Person,Room} from '../lib/room-types';
+import type {Heatmap,Person,Room,TelemetryPoint} from '../lib/room-types';
 import {typingEdit} from '../lib/typing-edits';
 
 export const typingLimits={charactersPerSecond:25,initialCredit:8,maximumCredit:40};
@@ -33,18 +33,38 @@ export function recordKeyboard(previous:Heatmap,oldInput:string,input:string,tar
  return heat;
 }
 
+/** Minimum spacing between two MPM samples of the same racer (RES-03 chart). */
+export const telemetryCadenceMs=1000;
+
+/** Characters inserted by this edit that do not match the text: errors observed by the server itself. */
+export function insertedErrors(oldInput:string,input:string,target:string){
+ const edit=typingEdit(oldInput,input);let errors=0;
+ for(let i=edit.start;i<edit.start+edit.inserted.length;i++)if(input[i]!==target[i])errors++;
+ return errors;
+}
+
+function telemetrySample(room:Room,person:Person,at:number):TelemetryPoint{
+ const seconds=Math.max(1,(at-room.startedAt!)/1000),length=(person.targetText??room.text??'').length;
+ return {at,wpm:Math.round(person.progress*12/seconds),grossWpm:Math.round(person.typed*12/seconds),progress:person.progress/Math.max(1,length)};
+}
+const sameValues=(a:TelemetryPoint,b:TelemetryPoint)=>a.wpm===b.wpm&&a.grossWpm===b.grossWpm&&a.progress===b.progress;
+
+/**
+ * Samples the MPM series at a fixed cadence: at most one point per racer per `telemetryCadenceMs`,
+ * and only when the plotted values changed. Arrival/abandonment always adds the terminal point.
+ * `force` (end of race) records a closing point at `at` for everyone still racing.
+ * The series therefore grows in O(players × seconds), whatever the number of progress requests.
+ */
 export function recordTelemetry(room:Room,at:number,force=false){
  if(!room.startedAt||at<room.startedAt)return;
  for(const person of room.people){
   if(person.role!=='player')continue;
-  const end=person.finishedAt??person.abandonedAt??at;
-  const sampleAt=Math.min(at,end),series=person.telemetry??=[];
-  const last=series.at(-1);
-  const terminal=person.finishedAt!==undefined||person.abandonedAt!==undefined;
-  if(last&&sampleAt<last.at||!force&&last&&sampleAt-last.at<1000&&(!terminal||last.at===end))continue;
-  const seconds=Math.max(1,(sampleAt-room.startedAt)/1000),length=(person.targetText??room.text??'').length;
-  const sample={at:sampleAt,wpm:Math.round(person.progress*12/seconds),grossWpm:Math.round(person.typed*12/seconds),progress:person.progress/Math.max(1,length)};
-  if(last?.at===sampleAt){series[series.length-1]=sample;continue}
+  const end=person.finishedAt??person.abandonedAt,terminal=end!==undefined;
+  const sampleAt=Math.min(at,end??at),series=person.telemetry??=[],last=series.at(-1);
+  if(last&&(sampleAt<last.at||terminal&&last.at===end))continue;
+  const sample=telemetrySample(room,person,sampleAt);
+  if(!last||terminal&&sampleAt===end||force){if(last?.at===sampleAt)series[series.length-1]=sample;else series.push(sample);continue}
+  if(sampleAt-last.at<telemetryCadenceMs||sameValues(sample,last))continue;
   series.push(sample);
  }
 }

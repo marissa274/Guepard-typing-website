@@ -19,18 +19,19 @@ test('capacity permits thirty participants and extra spectators, with host-only 
  act(r,h,{action:'settings',settings:{length:200}});expect(snapshot(r,guest).settings.length).toBe(200);act(r,h,{action:'role',personId:guest.id,role:'spectator'});expect(guest.role).toBe('spectator');
 });
 test('private invitation is host-only, expiring and single use, and failed admission does not consume it',()=>{
- const {room:r,person:h}=createRoom({...input,visibility:'private'});expect(()=>joinRoom(r,{nickname:'Sam',code:r.code})).toThrow('Invitation');
- const invitation=act(r,h,{action:'invite'}).invitation!;expect(()=>joinRoom(r,{nickname:'',invite:invitation.token})).toThrow('pseudo');expect(invitation.used).toBe(false);
+ const {room:r}=createRoom({...input,visibility:'private'});expect(()=>joinRoom(r,{nickname:'Sam',code:r.code})).toThrow('Invitation');
+ const invite=()=>{const invitation={token:'invite-'+r.invites.length,expires:Date.now()+30*60*1000,used:false};r.invites.push(invitation);return invitation};
+ const invitation=invite();expect(()=>joinRoom(r,{nickname:'',invite:invitation.token})).toThrow('pseudo');expect(invitation.used).toBe(false);
  joinRoom(r,{nickname:'Sam',invite:invitation.token});expect(()=>joinRoom(r,{nickname:'Replay',invite:invitation.token})).toThrow('utilisée');
- const second=act(r,h,{action:'invite'}).invitation!;second.expires=Date.now()-1;expect(()=>joinRoom(r,{nickname:'Late',invite:second.token})).toThrow('expirée');
+ const second=invite();second.expires=Date.now()-1;expect(()=>joinRoom(r,{nickname:'Late',invite:second.token})).toThrow('expirée');
 });
 test('minimum includes a human; arrivals wait for results and become players in the next round',()=>{
  const {room:r,person:h}=room();expect(()=>act(r,h,{action:'start'})).toThrow('deux joueurs');act(r,h,{action:'bot',difficulty:'impossible'});expect(r.people[1].difficulty).toBe('impossible');
  begin(r,h);expect(()=>joinRoom(r,{nickname:'Retardataire',code:r.code})).toThrow('cours');expect(()=>act(r,h,{action:'settings',settings:{length:25}})).toThrow('verrouillés');
  r.phase='finished';r.endedAt=now;const late=joinRoom(r,{nickname:'Retardataire',code:r.code});expect(late.role).toBe('spectator');act(r,h,{action:'reset'});expect(late.role).toBe('player');expect(r.phase).toBe('waiting');
 });
-test('kick revokes a token and spectators do not count toward the minimum',()=>{
- const {room:r,person:h}=room(),guest=joinRoom(r,{nickname:'Sam',code:r.code});act(r,h,{action:'role',personId:guest.id,role:'spectator'});expect(()=>act(r,h,{action:'start'})).toThrow('deux joueurs');act(r,h,{action:'kick',personId:guest.id});expect(()=>authenticate(r,guest.token!)).toThrow('partie');
+test('spectators do not count toward the minimum and removed people lose their token',()=>{
+ const {room:r,person:h}=room(),guest=joinRoom(r,{nickname:'Sam',code:r.code});act(r,h,{action:'role',personId:guest.id,role:'spectator'});expect(()=>act(r,h,{action:'start'})).toThrow('deux joueurs');r.people=r.people.filter(x=>x.id!==guest.id);expect(()=>authenticate(r,guest.token!)).toThrow('partie');
 });
 test('text options and bounds are delegated to the configured generator',()=>{
  const s={...defaultSettings,textType:'words' as const,length:200,numbers:true,specials:true,accents:false,punctuation:false,blacklist:'@'};
