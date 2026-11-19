@@ -1,22 +1,20 @@
 # Machine à états du salon
 
-Les transitions courantes et les règles de sécurité sont détaillées dans [l’architecture](../ARCHITECTURE.md). La fermeture supprime le salon ; `closed` est un état conceptuel.
+Les transitions courantes et les règles de sécurité sont détaillées dans [l’architecture](../ARCHITECTURE.md). La fermeture supprime le salon ; `closed` est un état conceptuel. Correspondance avec l’énoncé : EN_ATTENTE = `waiting`, DÉCOMPTE = `countdown`, EN_COURSE = `running`, RÉSULTATS = `finished`, FERMÉE = `closed` (ligne supprimée). `reset` et `rematch` exigent la phase `finished` ; il n’existe pas de retour direct de `countdown` ou `running` vers `waiting`. Un salon de plus de 24 h est aussi considéré fermé.
 
 ```mermaid
 stateDiagram-v2
-    [*] --> waiting: création authentifiée
-    waiting --> countdown: hôte lance, deux joueurs dont un humain
-    countdown --> running: départ commun après trois secondes
+    [*] --> waiting: création par un compte
+    waiting --> countdown: start (hôte, 2 joueurs dont 1 humain)
+    countdown --> running: heure serveur de départ atteinte (3 s)
     running --> finished: tous terminés ou abandonnés
     running --> finished: échéance atteinte
-    countdown --> waiting: réinitialisation par l’hôte
-    running --> waiting: réinitialisation par l’hôte
-    finished --> waiting: réinitialisation par l’hôte
-    finished --> countdown: revanche
-    waiting --> closed: fermeture ou aucun hôte admissible
-    countdown --> closed: fermeture ou aucun hôte admissible
-    running --> closed: fermeture ou aucun hôte admissible
-    finished --> closed: fermeture ou aucun hôte admissible
+    finished --> waiting: reset (hôte)
+    finished --> countdown: rematch (hôte)
+    waiting --> closed: close, hôte parti sans successeur, 24 h
+    countdown --> closed: close, hôte parti sans successeur, 24 h
+    running --> closed: close, hôte parti sans successeur, 24 h
+    finished --> closed: close, hôte parti sans successeur, 24 h
     closed --> [*]
 ```
 

@@ -1,6 +1,31 @@
 # Guépard
 
-Jeu de course de frappe multijoueur, en français et en anglais. Cette tranche privilégie les fonctionnalités ; la refonte visuelle et les preuves personnelles de création restent à préparer.
+Jeu de course de frappe multijoueur en temps réel, en français et en anglais : salons publics, sur code ou privés, bots de cinq niveaux, bonus de remontée, résultats et historique par compte.
+
+Lecteur visé : enseignant, correcteur ou développeur qui installe et évalue le projet.
+
+## Captures d'écran
+
+> À insérer : captures générées plus tard (accueil, salon, course, résultats, historique, thèmes clair et sombre).
+
+## URL de production
+
+À confirmer par l'autrice. `LIENS-REMISE.txt` mentionne `https://guepard-typing-website-production.up.railway.app/` pour le checkpoint 1 ; cette adresse n'a pas été revérifiée pour la remise finale.
+
+## Technologies
+
+Versions déclarées dans `package.json` (plages semver) :
+
+| Domaine | Technologie |
+| --- | --- |
+| Framework | Next.js 16.4.6 (App Router, Route Handlers Node.js), build avec webpack |
+| Interface | React ^19.3.0, TypeScript ^5.9.3 (strict), Tailwind CSS ^4.3.3 et CSS |
+| Base de données | PostgreSQL 16 (image `postgres:16-alpine`), `pg` ^8.23.1, Drizzle ORM ^0.45.4 |
+| Images | sharp 0.35.5 (traitement des photos de profil) |
+| Tests | Jest ^30.5.2, React Testing Library ^16.3.3, Playwright ^1.63.0 |
+| Qualité | ESLint ^10.14.0, typescript-eslint ^8.72.2 |
+| Exécution | Node.js 22.18+ ou 24 (la CI utilise Node 22) ; Docker pour la base locale |
+| Mots de passe | scrypt (module `node:crypto`) |
 
 ## Démarrage local
 
@@ -17,7 +42,28 @@ npm run dev
 
 Ouvrir http://localhost:5173. Vérifier les variables de `.env.local` avant de lancer les commandes : `DATABASE_URL`, `AUTH_SECRET` et `APP_URL` sont expliquées dans [le guide d’installation](docs/installation/comptes-et-base.md). Le mot de passe Compose doit correspondre à celui de `DATABASE_URL`. Si un volume PostgreSQL existe déjà, changer une variable ne change pas son mot de passe enregistré.
 
-Le seed idempotent ajoute 12 corpus FR/EN et le compte local public **GuepardDemo / GuepardDemo2026!**, avec trois courses synthétiques clairement nommées. En production, fournir `GUEPARD_DEMO_PASSWORD`. Ne jamais réutiliser un mot de passe personnel pour ce compte de correction.
+Le seed idempotent ajoute 12 corpus FR/EN et le compte de démonstration **GuepardDemo**, avec trois courses synthétiques clairement nommées. En développement, son mot de passe public est **GuepardDemo2026!**. Ne jamais réutiliser un mot de passe personnel pour ce compte de correction.
+
+**Piège en production (`GUEPARD_DEMO_PASSWORD`).** `scripts/db-seed.ts` utilise le mot de passe public par défaut dès que `NODE_ENV` n'est pas `production`, et ne crée le compte que s'il n'existe pas (`ON CONFLICT DO NOTHING`) : modifier la variable ensuite ne change pas un mot de passe déjà enregistré. Lancer le seed contre la base de production sans `NODE_ENV=production`, ou avant d'avoir défini la variable, laisse donc un compte public connu. Définir la variable (8 à 128 caractères) avant le premier seed, ou supprimer le compte et relancer. Le mot de passe de production à communiquer au correcteur est celui que vous avez choisi : il n'est pas dans le dépôt.
+
+## Variables d'environnement
+
+Modèle : `.env.example` (copié dans `.env.local`, non versionné). Variables lues par le code :
+
+| Variable | Rôle | Obligatoire |
+| --- | --- | --- |
+| `DATABASE_URL` | connexion PostgreSQL ; sans elle, les salons utilisent le secours JSON local à instance unique | oui (hors secours local) |
+| `AUTH_SECRET` | secret stable pour signer l'identité invitée | oui en production |
+| `APP_URL` | URL publique canonique, sans chemin ; contrôle d'origine et OAuth | oui en production pour OAuth |
+| `RAILWAY_PUBLIC_DOMAIN` | fournie par Railway, utilisée si `APP_URL` est absente | non |
+| `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET` | application OAuth GitHub | non |
+| `DISCORD_CLIENT_ID`, `DISCORD_CLIENT_SECRET` | application OAuth Discord | non |
+| `GUEPARD_DEMO_PASSWORD` | mot de passe du compte de démonstration pour `db:seed` | oui si `NODE_ENV=production` |
+| `GUEPARD_DB_PASSWORD` | mot de passe PostgreSQL de Docker Compose (défaut `guepard_dev_only`), à faire correspondre à `DATABASE_URL` | non |
+| `GUEPARD_DATA_DIR` | dossier du secours JSON et du secret invité local (défaut `.data`) | non |
+| `GUEPARD_TRUST_PROXY` | `1` pour faire confiance aux en-têtes IP d'un proxy | non |
+| `PLAYWRIGHT_CHROME_PATH`, `GUEPARD_TEST_PORT` | tests navigateur : exécutable Chrome et port du serveur isolé | non |
+| `NODE_ENV`, `PORT` | gérées par Next.js / l'hébergeur (`PORT` utilisé par `npm start`) | non |
 
 `npm run db:migrate` importe les anciens salons JSON ; cette commande est distincte des migrations SQL versionnées. `npm run db:stop` arrête la base sans supprimer son volume.
 
@@ -53,7 +99,8 @@ La CI versionnée prépare PostgreSQL, installe avec `npm ci`, lance lint, typag
 - [Installation, OAuth et photos](docs/installation/comptes-et-base.md)
 - [Exigences et limites de remise](docs/EXIGENCES.md)
 - [Utilisation des agents IA](docs/IA.md)
-- [Bots et choix de simulation](docs/fonctionnalites/bots.md)
+- [Bots et choix de simulation](docs/fonctionnalites/bots.md), [ADR bots](docs/architecture/adr-0002-bots.md)
+- [Textes, complexité et bonus](docs/fonctionnalites/textes-et-bonus.md)
 - [Guide de déploiement Railway](docs/deploiement-railway.md)
 
-Les documents `CHECKPOINT-1.md` et `docs/livrables/*checkpoint-1.pdf` décrivent un état historique. Ils ne constituent pas le bilan de cette tranche. La démarche personnelle du nom/logo, les coordonnées légales, l’URL publique et les preuves de correction doivent être complétées par l’auteur.
+`CHECKPOINT-1.md` décrit l'état historique du checkpoint 1 et ne constitue pas le bilan de la remise finale. Restent à fournir par l'autrice : `docs/DEMARCHE-CREATIVE.md` (nom, logo, direction artistique), les captures d'écran, l'URL de production confirmée et les coordonnées légales.

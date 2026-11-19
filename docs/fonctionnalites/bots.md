@@ -1,6 +1,6 @@
 # Bots déterministes
 
-Le moteur `src/server/bot-engine.ts` couvre BOT-01, BOT-02, BOT-03 et BOT-05. Le lobby identifie explicitement chaque bot et permet de choisir ses cinq niveaux. Les bonus de BOT-04 ne sont pas encore implémentés.
+Le moteur `src/server/bot-engine.ts` couvre BOT-01, BOT-02, BOT-03 et BOT-05. Le lobby identifie explicitement chaque bot et permet de choisir ses cinq niveaux. BOT-04 : `advance` (`room-engine.ts`) applique `applyBonuses` à tous les joueurs, bots compris ; un bot peut recevoir un raccourci, un détour ou une pause (voir [textes-et-bonus.md](textes-et-bonus.md)). La décision d'architecture est dans [ADR-0002](../architecture/adr-0002-bots.md).
 
 | Niveau | Cadence de base (MPM) | Probabilité d'erreur par caractère |
 | --- | --- | --- |
