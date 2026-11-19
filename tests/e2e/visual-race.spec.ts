@@ -15,6 +15,8 @@ test('three racers start as cheetahs after the synchronized countdown before the
   await expect(page.locator('.race-lane .runner-cheetah')).toHaveCount(3);
   const current=await waitForRace(page.request,room.id,token);
   await expect(page.getByLabel('Texte de la course')).toBeEnabled();
+  // The sticky lanes must not cover the text to type once the race scrolls the typing area into view.
+  await expect.poll(async()=>{const lanes=(await page.locator('.race-lanes').boundingBox())!,target=(await page.locator('.room-target').boundingBox())!;return target.y-(lanes.y+lanes.height)},{timeout:3000}).toBeGreaterThanOrEqual(0);
   const jump=await page.request.post('/api/rooms/'+room.id,{headers:memberHeaders(token),data:{action:'progress',value:current.text,typed:current.text!.length}});
   expect(jump.status()).toBe(400);expect((await jump.json()).error).toContain('rapide');
   expect((await readRoom(page.request,room.id,token)).people.find(person=>person.id===room.me)!.progress).toBe(0);

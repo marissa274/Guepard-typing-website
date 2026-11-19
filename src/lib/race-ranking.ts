@@ -13,4 +13,7 @@ export function speciesForRank(rank:number,total:number):RunnerSpecies{
 }
 export type Appearance={species:RunnerSpecies;candidate?:RunnerSpecies;since?:number};
 export function evolveAppearances(people:Person[],previous:Record<string,Appearance>,now:number,final=false){const ranks=rankRacers(people),allAtStart=ranks.every(r=>r.person.progress===0&&!r.person.finishedAt);const result:Record<string,Appearance>={};for(const r of ranks){const old=previous[r.person.id]||{species:'cheetah' as RunnerSpecies};if(allAtStart){result[r.person.id]={species:'cheetah'};continue}if(r.tied&&!final){result[r.person.id]={species:old.species};continue}const target=speciesForRank(r.rank,ranks.length);if(final||target===old.species)result[r.person.id]={species:target};else if(old.candidate===target&&now-(old.since??now)>=900)result[r.person.id]={species:target};else result[r.person.id]={species:old.species,candidate:target,since:old.candidate===target?old.since:now}}return result}
-export function racerColour(id:string){let n=0;for(const c of id)n=(n*31+c.charCodeAt(0))>>>0;return ['#2F6B3D','#C75B25','#287899','#935A92','#9A7417','#3B7890'][n%6]}
+// Eight clearly distinct hues, each at least 3:1 against the cream track and chart backgrounds.
+const racerPalette=['#2F6B3D','#C75B25','#287899','#935A92','#9A7417','#B03A5B','#4B4FA0','#6B4A2B'] as const;
+/** Colour of a racer. Pass the race's player order so that lanes, chart lines and legend never share a colour within one race (up to eight racers). */
+export function racerColour(id:string,order:readonly string[]=[]){const index=order.indexOf(id);if(index>=0)return racerPalette[index%racerPalette.length];let n=0;for(const c of id)n=(n*31+c.charCodeAt(0))>>>0;return racerPalette[n%racerPalette.length]}
