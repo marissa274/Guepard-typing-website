@@ -9,7 +9,7 @@ import type {PublicRoom} from '../src/lib/room-api-types';
 const mockPush=jest.fn(),mockReplace=jest.fn(),mockSave=jest.fn();
 const mockState={lang:'fr',dark:false,user:false,name:'Visiteur',avatar:'cheetah'};
 jest.mock('../src/components/SiteContext',()=>({useSite:()=>({state:mockState,fr:mockState.lang==='fr',save:mockSave,c:{refresh:'Actualiser',loading:'Chargement…'}})}));
-jest.mock('../src/lib/room-client',()=>({...jest.requireActual('../src/lib/room-client'),roomRequest:jest.fn(),subscribeRoom:jest.fn()}));
+jest.mock('../src/lib/room-client',()=>({...jest.requireActual<typeof import('../src/lib/room-client')>('../src/lib/room-client'),roomRequest:jest.fn(),subscribeRoom:jest.fn()}));
 jest.mock('next/navigation',()=>({useRouter:()=>({push:mockPush,replace:mockReplace})}));
 jest.mock('next/link',()=>({__esModule:true,default:({children,href,...props}:{children:React.ReactNode;href:string})=><a href={href} {...props}>{children}</a>}));
 const card:PublicRoom={id:'open',name:{fr:'Clairière',en:'Clearing'},animal:'cheetah',language:'FR',complexity:'medium',capacity:8,host:'Alice',players:3,state:'waiting',joinable:true,live:true};

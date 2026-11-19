@@ -41,7 +41,8 @@ jobs:
           npm --version
       - run: npm ci
       - run: npm run lint
-      - run: npm run typecheck
+      - name: Typecheck application and tests
+        run: npm run typecheck
       - run: npm test -- --silent
       - run: npm run db:migrate:sql
       - run: npm run db:seed

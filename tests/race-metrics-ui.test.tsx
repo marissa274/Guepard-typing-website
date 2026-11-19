@@ -2,16 +2,17 @@ import React from 'react';
 import {fireEvent,render,screen,waitFor} from '@testing-library/react';
 import RaceResults from '../src/components/lobby/RaceResults';
 import VisualRace from '../src/components/lobby/VisualRace';
-import {defaultSettings} from '../src/lib/room-types';
+import {defaultSettings,type RoomView} from '../src/lib/room-types';
+import {personFixture,roomViewFixture} from './fixtures';
 const mockPush=jest.fn();
 jest.mock('next/navigation',()=>({useRouter:()=>({push:mockPush}),useSearchParams:()=>new URLSearchParams('view=results')}));
-jest.mock('next/link',()=>({__esModule:true,default:({children,href,...props})=><a href={href} {...props}>{children}</a>}));
+jest.mock('next/link',()=>({__esModule:true,default:({children,href,...props}:{children:React.ReactNode;href:string})=><a href={href} {...props}>{children}</a>}));
 const mockSave=jest.fn();
 jest.mock('../src/components/SiteContext',()=>({useSite:()=>({save:mockSave,fr:true,state:{lang:'fr',user:false,results:[]}})}));
 const mockRequest=jest.fn().mockResolvedValue({});
-jest.mock('../src/lib/room-client',()=>({roomRequest:(...args)=>mockRequest(...args)}));
+jest.mock('../src/lib/room-client',()=>({roomRequest:(...args:unknown[])=>mockRequest(...args)}));
 const start=Date.now()-60000;
-const room={id:'metrics',name:'La jungle',me:'a',startedAt:start,endedAt:start+60000,serverNow:start+60000,phase:'finished',settings:defaultSettings,text:'Le guépard suit la rivière.',people:[{id:'a',name:'Alex',role:'player',kind:'guest',progress:20,typed:25,errors:5,abandoned:false}]};
+const room=roomViewFixture({id:'metrics',name:'La jungle',me:'a',startedAt:start,endedAt:start+60000,serverNow:start+60000,phase:'finished',settings:defaultSettings,text:'Le guépard suit la rivière.',people:[personFixture({id:'a',name:'Alex',role:'player',kind:'guest',progress:20,typed:25,errors:5,abandoned:false})]});
 beforeAll(()=>{HTMLElement.prototype.scrollIntoView=jest.fn()});
 
 test('results include gross speed, errors, time, status and earned bonus count',()=>{
@@ -36,11 +37,11 @@ test('a running racer sees speed and precision and confirms before abandoning',(
  expect(mockRequest).toHaveBeenCalledWith(room.id,{action:'abandon'});
 });
 test('replacing a character counts a new attempt and updates its heatmap entry',async()=>{
- const running={...room,phase:'running',endedAt:undefined,text:'abc def ghi',people:[{...room.people[0],input:'axc',typed:3,progress:2}]};
+ const running:RoomView={...room,phase:'running',endedAt:undefined,text:'abc def ghi',people:[{...room.people[0],input:'axc',typed:3,progress:2}]};
  render(<VisualRace room={running} connected onError={jest.fn()}/>);
  fireEvent.change(screen.getByLabelText('Texte de la course'),{target:{value:'abc'}});
  await waitFor(()=>expect(mockRequest).toHaveBeenCalledWith(room.id,{action:'progress',value:'abc',typed:4,heatmap:{b:{hits:1,errors:0}}}));
- expect(JSON.parse(sessionStorage.getItem('guepard-heat-'+room.id+'-'+room.startedAt))).toEqual({b:{hits:1,errors:0}});
+ expect(JSON.parse(sessionStorage.getItem('guepard-heat-'+room.id+'-'+room.startedAt)??'null')).toEqual({b:{hits:1,errors:0}});
 });
 test('a guest victory records the rank and win in session history only once',()=>{
  render(<VisualRace room={room} connected onError={jest.fn()}/>);
@@ -50,7 +51,7 @@ test('a guest victory records the rank and win in session history only once',()=
 });
 
 test('the typing field receives focus when the connection becomes ready after mounting',async()=>{
- const running={...room,phase:'running',endedAt:undefined};
+ const running:RoomView={...room,phase:'running',endedAt:undefined};
  const {rerender}=render(<VisualRace room={running} connected={false} onError={jest.fn()}/>);
  await waitFor(()=>expect(HTMLElement.prototype.scrollIntoView).toHaveBeenCalled());
  rerender(<VisualRace room={running} connected onError={jest.fn()}/>);
@@ -60,9 +61,9 @@ test('the typing field receives focus when the connection becomes ready after mo
 test('a rejected progress update restores accepted input instead of retrying it forever',async()=>{
  const onError=jest.fn();
  mockRequest.mockRejectedValueOnce(Object.assign(new Error('Invalid progress'),{status:400}));
- const running={...room,phase:'running',endedAt:undefined,text:'abc def ghi',people:[{...room.people[0],input:'a',typed:1,progress:1}]};
+ const running:RoomView={...room,phase:'running',endedAt:undefined,text:'abc def ghi',people:[{...room.people[0],input:'a',typed:1,progress:1}]};
  render(<VisualRace room={running} connected onError={onError}/>);
  fireEvent.change(screen.getByLabelText('Texte de la course'),{target:{value:'abc'}});
  await waitFor(()=>expect(onError).toHaveBeenCalledWith('Invalid progress'));
- await waitFor(()=>expect(screen.getByLabelText('Texte de la course').value).toBe('a'));
+ await waitFor(()=>expect(screen.getByLabelText<HTMLTextAreaElement>('Texte de la course').value).toBe('a'));
 });

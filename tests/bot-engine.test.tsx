@@ -28,7 +28,7 @@ test('blocking errors incur correction time and a completed bot has an exact arr
  const blocking=botState({...race,level:'noob',text:short,blockErrors:true,elapsedMs:600_000});
  const free=botState({...race,level:'noob',text:short,blockErrors:false,elapsedMs:600_000});
  expect(blocking.progress).toBe(short.length);expect(free.progress).toBe(short.length);
- expect(blocking.errors).toBeGreaterThan(0);expect(blocking.finishedAfterMs).toBeGreaterThan(free.finishedAfterMs);
+ expect(blocking.errors).toBeGreaterThan(0);expect(blocking.finishedAfterMs).toBeGreaterThan(free.finishedAfterMs!);
  expect(botState({...race,level:'noob',text:short,blockErrors:true,elapsedMs:blocking.finishedAfterMs!-1}).progress).toBeLessThan(short.length);
  expect(botState({...race,level:'noob',text:short,blockErrors:true,elapsedMs:blocking.finishedAfterMs!}).progress).toBe(short.length);
 });

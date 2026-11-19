@@ -1,5 +1,7 @@
 import {speciesForRank,rankRacers,evolveAppearances} from '../src/lib/race-ranking';
-const player=(id,progress=0,extra={})=>({id,progress,role:'player',abandoned:false,...extra});
+import type {Person} from '../src/lib/room-types';
+import {personFixture} from './fixtures';
+const player=(id:string,progress=0,extra:Partial<Person>={})=>personFixture({id,progress,...extra});
 test('bonus text lengths normalize progress and preserve genuine percentage ties',()=>{
  const people=[player('long',60,{targetText:'x'.repeat(120)}),player('short',45,{targetText:'x'.repeat(60)}),player('tie',30,{targetText:'x'.repeat(60)})];
  expect(rankRacers(people).map(r=>[r.person.id,r.rank])).toEqual([['short',1],['long',2],['tie',2]]);

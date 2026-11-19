@@ -1,14 +1,20 @@
+/** @jest-environment node */
 import {afterEach, beforeEach, expect, test} from '@jest/globals';
 import {isAllowedOrigin} from '../src/server/request-origin';
 
 const publicOrigin = 'https://guepard-typing-website-production.up.railway.app';
 const originalEnv = {...process.env};
-function request(origin, extra = {}) {
+/** Next declares NODE_ENV read-only; the tests need to switch it on the current env object. */
+function setNodeEnv(value: string) {
+  const env: Record<string, string | undefined> = process.env;
+  env.NODE_ENV = value;
+}
+function request(origin: string | undefined, extra: Record<string, string> = {}): Request {
   const headers = {...extra, ...(origin === undefined ? {} : {origin})};
-  return {url: 'http://localhost:5173/api/auth', headers: {get: name => headers[name] ?? null}};
+  return new Request('http://localhost:5173/api/auth', {headers});
 }
 beforeEach(() => {
-  process.env.NODE_ENV = 'production';
+  setNodeEnv('production');
   delete process.env.APP_URL;
   process.env.RAILWAY_PUBLIC_DOMAIN = new URL(publicOrigin).host;
 });
@@ -40,7 +46,7 @@ test('invalid public URL configuration fails closed', () => {
 });
 test('local development accepts the exact local origin, including its port', () => {
   delete process.env.RAILWAY_PUBLIC_DOMAIN;
-  process.env.NODE_ENV = 'development';
+  setNodeEnv('development');
   expect(isAllowedOrigin(request('http://localhost:5173'))).toBe(true);
   expect(isAllowedOrigin(request('http://localhost:3000'))).toBe(false);
 });

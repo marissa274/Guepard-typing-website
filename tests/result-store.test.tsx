@@ -1,10 +1,16 @@
+import {expect,jest,test} from '@jest/globals';
 import {collectFinishedResults,saveFinishedResults,listResults,getResult} from '../src/server/result-store';
-import {defaultSettings} from '../src/lib/room-types';
-import {Pool} from 'pg';
-jest.mock('pg',()=>({Pool:jest.fn()}));
+import {defaultSettings,type Person,type Room} from '../src/lib/room-types';
+import type {PoolClient} from 'pg';
+type QueryArgs=[sql:string,params?:unknown[]];
+type QueryReply={rows:unknown[]};
+const mockPoolQuery=jest.fn<(...args:QueryArgs)=>Promise<QueryReply>>();
+jest.mock('pg',()=>({Pool:jest.fn(()=>({query:(...args:QueryArgs)=>mockPoolQuery(...args)}))}));
+/** pg's overloaded `query` cannot be implemented by a plain mock: only the (sql, params) form is used. */
+function client(query:(...args:QueryArgs)=>Promise<QueryReply>):Pick<PoolClient,'query'>{return {query} as unknown as Pick<PoolClient,'query'>}
 
-const player={id:'p1',userId:'user1',identityKey:'secret-identity',ipHash:'secret-ip',heatmap:{a:{hits:3,errors:1}},name:'Alice',animal:'cheetah',kind:'demo',role:'player',late:false,token:'secret',input:'secret-input',seen:61000,progress:250,typed:250,errors:0,finishedAt:61000,abandoned:false};
-const room={id:'room1',name:'Jungle',animal:'cheetah',code:'SECRET',hostId:'p1',people:[player,{...player,id:'guest',userId:undefined,kind:'guest',finishedAt:undefined,progress:20},{...player,id:'spectator',role:'spectator'}],settings:defaultSettings,phase:'finished',createdAt:1000,startedAt:1000,endedAt:61000,revision:3,invites:[{token:'invite-secret',expires:99000,used:false}]};
+const player:Person={id:'p1',userId:'user1',identityKey:'secret-identity',ipHash:'secret-ip',heatmap:{a:{hits:3,errors:1}},name:'Alice',animal:'cheetah',kind:'demo',role:'player',late:false,token:'secret',input:'secret-input',seen:61000,progress:250,typed:250,errors:0,finishedAt:61000,abandoned:false};
+const room:Room={id:'room1',name:'Jungle',animal:'cheetah',code:'SECRET',hostId:'p1',people:[player,{...player,id:'guest',userId:undefined,kind:'guest',finishedAt:undefined,progress:20},{...player,id:'spectator',role:'spectator'}],settings:defaultSettings,phase:'finished',createdAt:1000,startedAt:1000,endedAt:61000,revision:3,invites:[{token:'invite-secret',expires:99000,used:false}]};
 
 test('only authenticated racers receive authoritative results and private snapshots omit credentials',()=>{
  const entries=collectFinishedResults([room]);
@@ -21,43 +27,42 @@ test('only authenticated racers receive authoritative results and private snapsh
 });
 
 test('finalized races use a stable unique identity and are saved idempotently',async()=>{
- const query=jest.fn().mockResolvedValue({rows:[]});
- await saveFinishedResults({query},[room]);
- await saveFinishedResults({query},[room]);
+ const query=jest.fn<(...args:QueryArgs)=>Promise<QueryReply>>(async()=>({rows:[]}));
+ await saveFinishedResults(client(query),[room]);
+ await saveFinishedResults(client(query),[room]);
  const inserts=query.mock.calls.filter(([sql])=>sql.startsWith('INSERT'));
  expect(inserts).toHaveLength(2);
- expect(inserts[0][0]).toContain('ON CONFLICT');
- expect(inserts[0][1]).toEqual(inserts[1][1]);
- expect(collectFinishedResults([{...room,startedAt:2000}])[0].result.id).not.toBe(collectFinishedResults([room])[0].result.id);
+ expect(inserts[0]?.[0]).toContain('ON CONFLICT');
+ expect(inserts[0]?.[1]).toEqual(inserts[1]?.[1]);
+ expect(collectFinishedResults([{...room,startedAt:2000}])[0]?.result.id).not.toBe(collectFinishedResults([room])[0]?.result.id);
 });
 
 test('a personal best is compared with earlier server results and preserved in its private archive',async()=>{
- const query=jest.fn(async sql=>({rows:sql.startsWith('SELECT MAX')?[{best_speed:'49'}]:[]}));
- await saveFinishedResults({query},[room]);
- const insert=query.mock.calls.find(([sql])=>sql.startsWith('INSERT'));
- expect(JSON.parse(insert[1][5]).personalBest).toBe(true);
- expect(JSON.parse(insert[1][6]).personalBest).toBe(true);
+ const query=jest.fn(async(...[sql]:QueryArgs):Promise<QueryReply>=>({rows:sql.startsWith('SELECT MAX')?[{best_speed:'49'}]:[]}));
+ const insertedJson=(index:number)=>JSON.parse(String(query.mock.calls.find(([sql])=>sql.startsWith('INSERT'))?.[1]?.[index]));
+ await saveFinishedResults(client(query),[room]);
+ expect(insertedJson(5).personalBest).toBe(true);
+ expect(insertedJson(6).personalBest).toBe(true);
  query.mockClear();query.mockImplementation(async sql=>({rows:sql.startsWith('SELECT MAX')?[{best_speed:'50'}]:[]}));
- await saveFinishedResults({query},[room]);
- expect(JSON.parse(query.mock.calls.find(([sql])=>sql.startsWith('INSERT'))[1][5]).personalBest).toBe(false);
+ await saveFinishedResults(client(query),[room]);
+ expect(insertedJson(5).personalBest).toBe(false);
 });
 
 test('pagination and archived snapshots are selected only for the authenticated account',async()=>{
  const old=process.env.DATABASE_URL;process.env.DATABASE_URL='postgres://test-only';
- delete globalThis.guepardResults;
- const query=jest.fn(async(sql)=>{
+ Reflect.deleteProperty(globalThis,'guepardResults');
+ const query=mockPoolQuery.mockImplementation(async(sql)=>{
   if(sql.includes('COUNT(*)'))return {rows:[{races:11,wins:3,best_speed:80,average_speed:55,average_accuracy:95}]};
   if(sql.includes('SELECT result FROM'))return {rows:[{result:{id:'last',speed:50}}]};
   if(sql.includes('SELECT snapshot'))return {rows:[]};
   if(sql.includes('SELECT ended_at'))return {rows:[{date:'1000',speed:'50'}]};
   return {rows:[]};
  });
- Pool.mockImplementation(()=>({query}));
  try{
   const result=await listResults('user-private',2,10);
   expect(result).toMatchObject({total:11,page:2,summary:{races:11,wins:3,bestSpeed:80,averageSpeed:55,averageAccuracy:95},progression:[{date:1000,speed:50}]});
   expect(query).toHaveBeenCalledWith(expect.stringContaining('WHERE user_id=$1 ORDER BY'),['user-private',10,10]);
   expect(await getResult('other-account','last')).toBeNull();
   expect(query).toHaveBeenCalledWith(expect.stringContaining('WHERE user_id=$1 AND id=$2'),['other-account','last']);
- }finally{if(old===undefined)delete process.env.DATABASE_URL;else process.env.DATABASE_URL=old;delete globalThis.guepardResults}
+ }finally{if(old===undefined)delete process.env.DATABASE_URL;else process.env.DATABASE_URL=old;Reflect.deleteProperty(globalThis,'guepardResults')}
 });
