@@ -1,5 +1,5 @@
 import {randomBytes} from 'node:crypto';
-import {transaction} from './room-store';
+import {retireRoom,transaction} from './room-store';
 import {createRoom,authenticate,joinRoom,act,snapshot,tick,RoomError} from './room-engine';
 import {RoomAccessError,requireRoomAccess} from './room-access';
 import {consumeCodeAttempt} from './code-rate-limit';
@@ -14,15 +14,41 @@ function available(room:Room){return Date.now()-room.createdAt<ageLimit}
 function find(data:Data,id:string){const room=data[id];if(!room||!available(room))throw new RoomError('Ce salon est fermé ou introuvable.',404);return room}
 function occupancy(room:Room){return room.people.filter(p=>p.role==='player'||p.late).length}
 function isPresent(person:Person){return person.kind!=='bot'&&!!person.token}
-function prune(data:Data){for(const [id,room]of Object.entries(data))if(!available(room))delete data[id]}
+/** COURSE-08 grace period, plus the 5 s granularity at which get() refreshes `seen`. */
+const presenceWindow=30_000+5_000;
+function connected(person:Person,now:number){return isPresent(person)&&now-person.seen<=presenceWindow}
+/** RES-05/HIST-01: a room closed mid-race keeps the results of humans who already finished. Unfinished humans were interrupted by the closure, not by their own abandonment: they are ranked as abandoned in the archived copy but no result is stored for them. */
+function closeRoom(data:Data,room:Room){
+ tick(room,true);
+ if(room.phase!=='running'&&room.phase!=='finished'){delete data[room.id];return}
+ const archived=JSON.parse(JSON.stringify(room)) as Room;
+ if(archived.phase==='running'){
+  const now=Date.now();
+  for(const person of archived.people)if(person.role==='player'&&!person.finishedAt&&!person.abandoned){person.abandoned=true;person.abandonedAt=now;if(person.kind!=='bot')delete person.userId}
+  archived.phase='finished';archived.endedAt=now;
+ }
+ retireRoom(data,archived);delete data[room.id];
+}
+/** SALLE-08: when the host has left or has not been seen for longer than the COURSE-08 grace period, the oldest connected human (player or spectator, guest or account) becomes host; with nobody left the room is closed. Returns false when the room was closed. */
+function ensureHost(data:Data,room:Room,now=Date.now()){
+ const host=room.people.find(p=>p.id===room.hostId);
+ if(host&&connected(host,now))return true;
+ const next=room.people.filter(p=>p.id!==room.hostId&&connected(p,now)).sort((a,b)=>(a.joinedAt??a.seen)-(b.joinedAt??b.seen))[0];
+ if(next){room.hostId=next.id;room.revision++;return true}
+ closeRoom(data,room);return false;
+}
+function prune(data:Data){for(const [id,room]of Object.entries(data)){if(!available(room))delete data[id];else ensureHost(data,room)}}
 function identity(body:Command){requireRoomAccess(typeof body.identityKey==='string'&&body.identityKey.length>0,'Identité de session manquante.',401);return body.identityKey}
 function membership(data:Data,key:string){for(const room of Object.values(data)){if(!available(room))continue;const person=room.people.find(p=>p.identityKey===key&&isPresent(p));if(person)return {room,person}}}
 function requireSingleRoom(data:Data,key:string,id?:string){const active=membership(data,key);if(active&&active.room.id!==id)throw new RoomAccessError('Vous êtes déjà dans un autre salon. Quittez-le avant de continuer.',409,'ROOM_MEMBERSHIP_CONFLICT',active.room.id);return active?.person}
 function account(body:Command){requireRoomAccess(body.kind==='demo'&&typeof body.userId==='string'&&body.identityKey==='user:'+body.userId,'Connectez-vous pour créer un salon.',403)}
 function requireHost(room:Room,person:Person){requireRoomAccess(room.hostId===person.id,'Seul l’hôte peut effectuer cette action.')}
-function checkBan(room:Room,body:Command){requireRoomAccess(!room.bannedIdentities?.includes(String(body.identityKey))&&!room.bannedIpHashes?.includes(String(body.ipHash)),'Votre accès à ce salon a été révoqué.')}
+/** SALLE-07: a kicked identity is refused, and its IP fingerprint is refused for guests so a fresh guest cookie cannot get around the kick. A different signed-in account from the same IP (school, household, NAT) stays allowed: accounts are banned by identity. */
+function banned(room:Room,body:Command){return !!room.bannedIdentities?.includes(String(body.identityKey))||body.kind!=='demo'&&typeof body.ipHash==='string'&&!!room.bannedIpHashes?.includes(body.ipHash)}
+function checkBan(room:Room,body:Command){requireRoomAccess(!banned(room,body),'Votre accès à ce salon a été révoqué.')}
 function validateInvitation(room:Room,body:Command){
- const invitation=room.invites.find(i=>i.token===body.invite&&!i.revoked&&i.expires>Date.now());
+ // Expiry only limits the first use: the bound recipient may reuse the link to reconnect (SALLE-04).
+ const invitation=room.invites.find(i=>i.token===body.invite&&!i.revoked&&(i.used||i.expires>Date.now()));
  requireRoomAccess(invitation,'Invitation expirée, révoquée ou introuvable.');
  if(invitation.used)requireRoomAccess(invitation.identityKey===body.identityKey&&invitation.ipHash===body.ipHash,'Cette invitation est réservée à son destinataire.');
  return invitation;
@@ -30,9 +56,14 @@ function validateInvitation(room:Room,body:Command){
 function admit(data:Data,room:Room,body:Command){
  const key=identity(body);checkBan(room,body);
  requireRoomAccess(body.role===undefined||body.role==='player'||body.role==='spectator','Rôle invalide.',400);
- const invitation=typeof body.invite==='string'&&body.invite?validateInvitation(room,body):undefined;
  const existing=requireSingleRoom(data,key,room.id);
- if(existing){existing.seen=Date.now();room.revision++;return {room:snapshot(room,existing),token:existing.token}}
+ if(existing){
+  // A present member reconnects with its signed identity even if its link has since expired or been purged; a bound link still refuses another IP.
+  const bound=room.invites.find(i=>i.token===body.invite&&i.used);
+  if(bound)requireRoomAccess(bound.identityKey===key&&bound.ipHash===body.ipHash,'Cette invitation est réservée à son destinataire.');
+  existing.seen=Date.now();room.revision++;return {room:snapshot(room,existing),token:existing.token};
+ }
+ const invitation=typeof body.invite==='string'&&body.invite?validateInvitation(room,body):undefined;
  requireRoomAccess(room.phase==='waiting'||room.phase==='finished','Cette course a déjà commencé. Attendez les résultats.',409);
  if(body.role!=='spectator')requireRoomAccess(occupancy(room)<room.settings.capacity,'Le salon est complet.',409);
  if(room.settings.visibility==='private')requireRoomAccess(invitation,'Une invitation est nécessaire pour ce salon privé.');
@@ -42,7 +73,7 @@ function admit(data:Data,room:Room,body:Command){
  return {room:snapshot(room,person),token:person.token};
 }
 
-export async function listRooms(filters:{language?:string;complexity?:string}={}){return transaction(data=>Object.values(data).filter(room=>room.settings.visibility==='public'&&available(room)&&(!filters.language||room.settings.language===filters.language)&&(!filters.complexity||room.settings.complexity===filters.complexity)).map(room=>({id:room.id,name:{fr:room.name,en:room.name},animal:room.animal,language:room.settings.language,complexity:room.settings.complexity,capacity:room.settings.capacity,host:room.people.find(p=>p.id===room.hostId)?.name||'',players:occupancy(room),state:room.phase,joinable:(room.phase==='waiting'||room.phase==='finished')&&occupancy(room)<room.settings.capacity,live:true})),false)}
+export async function listRooms(filters:{language?:string;complexity?:string}={}){return transaction(data=>{prune(data);return Object.values(data).filter(room=>room.settings.visibility==='public'&&available(room)&&(!filters.language||room.settings.language===filters.language)&&(!filters.complexity||room.settings.complexity===filters.complexity)).map(room=>({id:room.id,name:{fr:room.name,en:room.name},animal:room.animal,language:room.settings.language,complexity:room.settings.complexity,capacity:room.settings.capacity,host:room.people.find(p=>p.id===room.hostId)?.name||'',players:occupancy(room),state:room.phase,joinable:(room.phase==='waiting'||room.phase==='finished')&&occupancy(room)<room.settings.capacity,live:true}))},false)}
 export async function create(body:Command){
  account(body);const key=identity(body);
  requireRoomAccess(body.role===undefined||body.role==='player'||body.role==='spectator','Rôle invalide.',400);
@@ -61,7 +92,7 @@ export async function quickJoin(body:Command){
  return transaction(data=>{
   prune(data);
   const current=membership(data,key);if(current)return {room:snapshot(current.room,current.person),token:current.person.token};
-  const rooms=Object.values(data).filter(room=>room.settings.visibility==='public'&&(room.phase==='waiting'||room.phase==='finished')&&occupancy(room)<room.settings.capacity&&!room.bannedIdentities?.includes(key)&&!room.bannedIpHashes?.includes(String(body.ipHash))).sort((a,b)=>(a.settings.capacity-occupancy(a))-(b.settings.capacity-occupancy(b))||a.createdAt-b.createdAt);
+  const rooms=Object.values(data).filter(room=>room.settings.visibility==='public'&&(room.phase==='waiting'||room.phase==='finished')&&occupancy(room)<room.settings.capacity&&!banned(room,body)).sort((a,b)=>(a.settings.capacity-occupancy(a))-(b.settings.capacity-occupancy(b))||a.createdAt-b.createdAt);
   if(!rooms.length)throw new RoomAccessError('Aucun salon public disponible pour le moment.',404,'QUICK_JOIN_EMPTY',undefined,body.kind==='demo');
   return admit(data,rooms[0],body);
  });
@@ -69,14 +100,33 @@ export async function quickJoin(body:Command){
 export async function resolveCode(code:string,ipHash='local'){
  await consumeCodeAttempt(ipHash);
  requireRoomAccess(/^[A-HJKMNP-Z2-9]{6}$/i.test(code),'Code introuvable.',404);
- return transaction(data=>{const room=Object.values(data).find(room=>room.code===code.toUpperCase()&&room.settings.visibility!=='private'&&available(room));if(!room)throw new RoomError('Code introuvable.',404);return {id:room.id}},false);
+ return transaction(data=>{prune(data);const room=Object.values(data).find(room=>room.code===code.toUpperCase()&&room.settings.visibility!=='private'&&available(room));if(!room)throw new RoomError('Code introuvable.',404);return {id:room.id}},false);
 }
-export async function get(id:string,token:string){return transaction(data=>{const room=find(data,id),person=authenticate(room,token);tick(room,true);if(Date.now()-person.seen>5000){person.seen=Date.now();room.revision++}return snapshot(room,person)})}
+/** Everything a client can observe; `seen` (presence) and the tick cursor are bookkeeping. */
+function observable(room:Room){const {revision,lastTick,...rest}=room;void revision;void lastTick;return JSON.stringify({...rest,people:rest.people.map(({seen,...person})=>{void seen;return person})})}
+/** Brings a room up to date for a reader. Returns whether anything must be persisted; the revision only moves when observable state changed (C1-B14). */
+function refresh(data:Data,room:Room,person:Person){
+ const now=Date.now(),revision=room.revision,lastTick=room.lastTick,before=observable(room);
+ let persist=false;
+ if(now-person.seen>5000){person.seen=now;persist=true}
+ tick(room,true);
+ if(!ensureHost(data,room,now))return true;
+ if(observable(room)!==before)return true;
+ room.revision=revision;if(lastTick===undefined)delete room.lastTick;else room.lastTick=lastTick;
+ return persist;
+}
+/** Called by every SSE stream: a read-only pass serves unchanged rooms without writing; only real changes open a write transaction. */
+export async function get(id:string,token:string){
+ const unchanged=await transaction(data=>{const room=find(data,id),person=authenticate(room,token);return refresh(data,room,person)?undefined:snapshot(room,person)},false);
+ if(unchanged)return unchanged;
+ const result=await transaction(data=>{const room=find(data,id),person=authenticate(room,token);refresh(data,room,person);return data[id]?snapshot(room,person):undefined});
+ if(!result)throw new RoomError('Ce salon est fermé ou introuvable.',404);
+ return result;
+}
 function leave(data:Data,room:Room,person:Person){
  if(room.phase==='waiting')room.people=room.people.filter(p=>p.id!==person.id);
  else{person.token=undefined;if((room.phase==='running'||room.phase==='countdown')&&!person.finishedAt){person.abandoned=true;person.abandonedAt=Date.now()}}
- if(person.id===room.hostId){const next=room.people.filter(p=>p.kind==='demo'&&isPresent(p)&&Date.now()-p.seen<35000).sort((a,b)=>(a.joinedAt||a.seen)-(b.joinedAt||b.seen))[0];if(next)room.hostId=next.id;else delete data[room.id]}
- room.revision++;tick(room,true);return {left:true};
+ room.revision++;tick(room,true);ensureHost(data,room);return {left:true};
 }
 export async function leaveCurrent(body:Command){const key=identity(body);return transaction(data=>{prune(data);const current=membership(data,key);return current?leave(data,current.room,current.person):{left:true}})}
 /** A verified guest cookie may become a signed-in identity, never a second presence. */
@@ -98,7 +148,7 @@ export async function mutate(id:string,token:string,body:Command){
   if(body.action==='join')return admit(data,room,body);
   const person=authenticate(room,token);person.seen=Date.now();
   if(body.action==='leave')return leave(data,room,person);
-  if(body.action==='close'){requireHost(room,person);delete data[id];return {left:true,closed:true}}
+  if(body.action==='close'){requireHost(room,person);closeRoom(data,room);return {left:true,closed:true}}
   if(body.action==='invite'){
    requireHost(room,person);requireRoomAccess(room.settings.visibility!=='public','Les salons publics ne nécessitent pas d’invitation.',400);
    const count=body.count===undefined?1:body.count;requireRoomAccess(Number.isInteger(count)&&Number(count)>=1&&Number(count)<=30,'Nombre d’invitations invalide.',400);
@@ -112,6 +162,7 @@ export async function mutate(id:string,token:string,body:Command){
    requireHost(room,person);requireRoomAccess(body.personId!==person.id,'Vous ne pouvez pas retirer l’hôte.',400);
    const target=room.people.find(p=>p.id===body.personId);requireRoomAccess(target,'Participant introuvable.',404);
    if(target.identityKey){room.bannedIdentities??=[];if(!room.bannedIdentities.includes(target.identityKey))room.bannedIdentities.push(target.identityKey)}
+   if(target.ipHash){room.bannedIpHashes??=[];if(!room.bannedIpHashes.includes(target.ipHash))room.bannedIpHashes.push(target.ipHash)}
    for(const invitation of room.invites)if(invitation.usedBy===target.id||invitation.identityKey===target.identityKey&&!!target.identityKey)invitation.revoked=true;
    if(room.phase==='waiting')room.people=room.people.filter(p=>p.id!==target.id);else{target.token=undefined;if((room.phase==='running'||room.phase==='countdown')&&!target.finishedAt){target.abandoned=true;target.abandonedAt=Date.now()}}
    room.revision++;tick(room,true);return {room:snapshot(room,person)};

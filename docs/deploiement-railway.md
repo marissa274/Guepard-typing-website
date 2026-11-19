@@ -37,6 +37,18 @@ Dans le service web : **Settings → Networking → Public Networking → Genera
 
 Dans les variables du **service web**, définir `APP_URL` avec cette adresse publique complète, par exemple `https://guepard-typing-website-production.up.railway.app`, puis redéployer. Le contrôle d’origine reconnaît aussi automatiquement `RAILWAY_PUBLIC_DOMAIN` lorsqu’il est fourni par Railway. Cela évite de comparer l’origine HTTPS du navigateur à l’adresse HTTP interne de Next.js derrière le proxy. Ne pas désactiver ce contrôle ni autoriser tous les domaines.
 
+## 5 bis. Adresse IP des visiteurs
+
+GUÉPARD n'enregistre jamais l'adresse IP en clair : il en garde une empreinte HMAC (signée avec `AUTH_SECRET`). Elle sert à la limite de 10 essais de code par minute et par IP (SALLE-10), à la liaison d'une invitation à l'IP de son premier utilisateur (SALLE-04) et à l'expulsion d'un invité (SALLE-07).
+
+- **Comportement par défaut (aucune variable)** : l'adresse est l'entrée **la plus à droite** de `X-Forwarded-For`. Derrière Railway, c'est l'adresse vue par le proxy de Railway, qui l'ajoute à la fin de l'en-tête ; en local sans proxy, Next.js remplit lui-même l'en-tête avec l'adresse du socket. Les entrées de gauche, qu'un client peut écrire lui-même, sont ignorées. Il n'y a donc pas de compteur unique partagé par tout le site.
+- `GUEPARD_TRUST_PROXY=N` : à utiliser seulement si **N** proxys successifs ajoutent chacun une entrée (par exemple un CDN devant Railway : `2`). La valeur par défaut `1` convient à Railway seul.
+- `GUEPARD_CLIENT_IP_HEADER=X-Real-IP` (ou `CF-Connecting-IP` derrière Cloudflare) : à utiliser seulement si la plateforme **écrase** toujours cet en-tête ; un en-tête simplement transmis pourrait être falsifié.
+
+Vérification après déploiement : depuis deux connexions différentes (Wi-Fi et réseau mobile), entrer 11 codes erronés sur la première ; la onzième tentative doit être refusée, alors que la seconde connexion peut encore essayer un code. Si les deux sont bloquées ensemble, un proxy supplémentaire ajoute une entrée : augmenter `GUEPARD_TRUST_PROXY`.
+
+Choix pour l'expulsion : l'identité expulsée (compte ou cookie invité) est bannie, et l'empreinte IP est aussi bannie **pour les invités**, afin qu'un invité expulsé ne revienne pas en effaçant son cookie. Un autre **compte connecté** venant de la même IP (même école, même foyer) reste accepté, puisque les comptes sont bannis par leur identité.
+
 ## 6. Vérifier les parcours
 
 1. Ouvrir l'accueil et `/signup`, puis créer un compte de test.
