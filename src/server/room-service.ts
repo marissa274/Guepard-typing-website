@@ -43,9 +43,22 @@ function membership(data:Data,key:string){for(const room of Object.values(data))
 function requireSingleRoom(data:Data,key:string,id?:string){const active=membership(data,key);if(active&&active.room.id!==id)throw new RoomAccessError('Vous êtes déjà dans un autre salon. Quittez-le avant de continuer.',409,'ROOM_MEMBERSHIP_CONFLICT',active.room.id);return active?.person}
 function account(body:Command){requireRoomAccess(body.kind==='demo'&&typeof body.userId==='string'&&body.identityKey==='user:'+body.userId,'Connectez-vous pour créer un salon.',403)}
 function requireHost(room:Room,person:Person){requireRoomAccess(room.hostId===person.id,'Seul l’hôte peut effectuer cette action.')}
-/** SALLE-07: a kicked identity is refused, and its IP fingerprint is refused for guests so a fresh guest cookie cannot get around the kick. A different signed-in account from the same IP (school, household, NAT) stays allowed: accounts are banned by identity. */
-function banned(room:Room,body:Command){return !!room.bannedIdentities?.includes(String(body.identityKey))||body.kind!=='demo'&&typeof body.ipHash==='string'&&!!room.bannedIpHashes?.includes(body.ipHash)}
-function checkBan(room:Room,body:Command){requireRoomAccess(!banned(room,body),'Votre accès à ce salon a été révoqué.')}
+/**
+ * SALLE-07 kick bans (C2-B1).
+ * - The kicked identity (account or guest cookie) is banned from the room for good.
+ * - Its IP fingerprint is also banned, but only for `ipBanDuration` and only for *new* guest identities, so the
+ *   kicked guest cannot come straight back with a fresh cookie while a class or household behind the same NAT
+ *   is not locked out: members already present are never refused by the IP ban (they reconnect normally),
+ *   signed-in accounts are never refused by it (accounts are banned by identity), and after ten minutes new
+ *   guests from that IP are admitted again.
+ */
+export const ipBanDuration=10*60*1000;
+function identityBanned(room:Room,body:Command){return !!room.bannedIdentities?.includes(String(body.identityKey))}
+/** Entries persisted before C2-B1 were bare strings without expiry: `until` is then undefined and they no longer apply. */
+function ipBanned(room:Room,body:Command,now:number){return body.kind!=='demo'&&typeof body.ipHash==='string'&&!!room.bannedIpHashes?.some(ban=>ban.hash===body.ipHash&&ban.until>now)}
+/** Whether a newcomer (not a present member) is refused by a kick ban. */
+function banned(room:Room,body:Command,now=Date.now()){return identityBanned(room,body)||ipBanned(room,body,now)}
+const revoked='Votre accès à ce salon a été révoqué.';
 function validateInvitation(room:Room,body:Command){
  // Expiry only limits the first use: the bound recipient may reuse the link to reconnect (SALLE-04).
  const invitation=room.invites.find(i=>i.token===body.invite&&!i.revoked&&(i.used||i.expires>Date.now()));
@@ -54,7 +67,7 @@ function validateInvitation(room:Room,body:Command){
  return invitation;
 }
 function admit(data:Data,room:Room,body:Command){
- const key=identity(body);checkBan(room,body);
+ const key=identity(body);requireRoomAccess(!identityBanned(room,body),revoked);
  requireRoomAccess(body.role===undefined||body.role==='player'||body.role==='spectator','Rôle invalide.',400);
  const existing=requireSingleRoom(data,key,room.id);
  if(existing){
@@ -63,6 +76,7 @@ function admit(data:Data,room:Room,body:Command){
   if(bound)requireRoomAccess(bound.identityKey===key&&bound.ipHash===body.ipHash,'Cette invitation est réservée à son destinataire.');
   existing.seen=Date.now();room.revision++;return {room:snapshot(room,existing),token:existing.token};
  }
+ requireRoomAccess(!ipBanned(room,body,Date.now()),revoked);
  const invitation=typeof body.invite==='string'&&body.invite?validateInvitation(room,body):undefined;
  requireRoomAccess(room.phase==='waiting'||room.phase==='finished','Cette course a déjà commencé. Attendez les résultats.',409);
  if(body.role!=='spectator')requireRoomAccess(occupancy(room)<room.settings.capacity,'Le salon est complet.',409);
@@ -162,7 +176,7 @@ export async function mutate(id:string,token:string,body:Command){
    requireHost(room,person);requireRoomAccess(body.personId!==person.id,'Vous ne pouvez pas retirer l’hôte.',400);
    const target=room.people.find(p=>p.id===body.personId);requireRoomAccess(target,'Participant introuvable.',404);
    if(target.identityKey){room.bannedIdentities??=[];if(!room.bannedIdentities.includes(target.identityKey))room.bannedIdentities.push(target.identityKey)}
-   if(target.ipHash){room.bannedIpHashes??=[];if(!room.bannedIpHashes.includes(target.ipHash))room.bannedIpHashes.push(target.ipHash)}
+   if(target.ipHash){const hash=target.ipHash;room.bannedIpHashes=[...(room.bannedIpHashes??[]).filter(ban=>ban.hash!==hash&&ban.until>Date.now()),{hash,until:Date.now()+ipBanDuration}]}
    for(const invitation of room.invites)if(invitation.usedBy===target.id||invitation.identityKey===target.identityKey&&!!target.identityKey)invitation.revoked=true;
    if(room.phase==='waiting')room.people=room.people.filter(p=>p.id!==target.id);else{target.token=undefined;if((room.phase==='running'||room.phase==='countdown')&&!target.finishedAt){target.abandoned=true;target.abandonedAt=Date.now()}}
    room.revision++;tick(room,true);return {room:snapshot(room,person)};

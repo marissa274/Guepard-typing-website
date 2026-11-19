@@ -1,5 +1,6 @@
 import type {Heatmap,Person,Room,TelemetryPoint} from '../lib/room-types';
 import {typingEdit} from '../lib/typing-edits';
+import {heatmapKey,isHeatmapKey} from '../lib/heatmap-key';
 
 export const typingLimits={charactersPerSecond:25,initialCredit:8,maximumCredit:40};
 
@@ -13,7 +14,7 @@ export function keyboardAggregate(value:unknown,previous:Heatmap,typed:number,ma
  const entries=Object.entries(value);if(entries.length>256)return null;
  const heat:Heatmap=Object.create(null);let total=0,totalErrors=0;
  for(const [key,entry]of entries){
-  if(key.length!==1||!entry||typeof entry!=='object')return null;
+  if(!isHeatmapKey(key)||!entry||typeof entry!=='object')return null;
   const {hits,errors}=entry as {hits:unknown;errors:unknown};
   if(typeof hits!=='number'||typeof errors!=='number'||!Number.isSafeInteger(hits)||!Number.isSafeInteger(errors)||errors<0||hits<errors||hits<0)return null;
   if(hits<(previous[key]?.hits||0)||errors<(previous[key]?.errors||0))return null;
@@ -27,7 +28,7 @@ export function recordKeyboard(previous:Heatmap,oldInput:string,input:string,tar
  const heat:Heatmap=Object.fromEntries(Object.entries(previous).map(([key,entry])=>[key,{...entry}]));
  const edit=typingEdit(oldInput,input);
  for(let i=edit.start;i<edit.start+edit.inserted.length;i++){
-  const key=(target[i]||input[i]).toLowerCase(),entry=heat[key]??={hits:0,errors:0};
+  const key=heatmapKey(target[i]||input[i]),entry=heat[key]??={hits:0,errors:0};
   entry.hits++;if(input[i]!==target[i])entry.errors++;
  }
  return heat;

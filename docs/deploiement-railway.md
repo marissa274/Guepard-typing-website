@@ -41,13 +41,22 @@ Dans les variables du **service web**, définir `APP_URL` avec cette adresse pub
 
 GUÉPARD n'enregistre jamais l'adresse IP en clair : il en garde une empreinte HMAC (signée avec `AUTH_SECRET`). Elle sert à la limite de 10 essais de code par minute et par IP (SALLE-10), à la liaison d'une invitation à l'IP de son premier utilisateur (SALLE-04) et à l'expulsion d'un invité (SALLE-07).
 
-- **Comportement par défaut (aucune variable)** : l'adresse est l'entrée **la plus à droite** de `X-Forwarded-For`. Derrière Railway, c'est l'adresse vue par le proxy de Railway, qui l'ajoute à la fin de l'en-tête ; en local sans proxy, Next.js remplit lui-même l'en-tête avec l'adresse du socket. Les entrées de gauche, qu'un client peut écrire lui-même, sont ignorées. Il n'y a donc pas de compteur unique partagé par tout le site.
-- `GUEPARD_TRUST_PROXY=N` : à utiliser seulement si **N** proxys successifs ajoutent chacun une entrée (par exemple un CDN devant Railway : `2`). La valeur par défaut `1` convient à Railway seul.
-- `GUEPARD_CLIENT_IP_HEADER=X-Real-IP` (ou `CF-Connecting-IP` derrière Cloudflare) : à utiliser seulement si la plateforme **écrase** toujours cet en-tête ; un en-tête simplement transmis pourrait être falsifié.
+Next.js n'écrit l'adresse du socket dans `X-Forwarded-For` que si la requête n'a **pas** cet en-tête : sans proxy, toutes ses entrées peuvent donc venir du client. Les route handlers n'exposent pas l'adresse du socket. GUÉPARD ne lit donc une adresse IP que si la configuration déclare d'où elle vient :
 
-Vérification après déploiement : depuis deux connexions différentes (Wi-Fi et réseau mobile), entrer 11 codes erronés sur la première ; la onzième tentative doit être refusée, alors que la seconde connexion peut encore essayer un code. Si les deux sont bloquées ensemble, un proxy supplémentaire ajoute une entrée : augmenter `GUEPARD_TRUST_PROXY`.
+- `GUEPARD_CLIENT_IP_HEADER=<en-tête>` : en-tête que la plateforme **écrase** toujours avec l'adresse du client (`X-Real-IP` sur Railway, `CF-Connecting-IP` derrière Cloudflare). Un en-tête simplement transmis serait falsifiable.
+- `GUEPARD_TRUST_PROXY=N` (entier de 1 à 10) : **N** proxys successifs ajoutent chacun une entrée à la fin de `X-Forwarded-For` ; l'entrée prise est la N-ième en partant de la droite, les entrées de gauche écrites par le client sont ignorées. Utilisé aussi quand l'en-tête de `GUEPARD_CLIENT_IP_HEADER` manque.
+- **Aucune des deux (ou valeur invalide)** : `X-Forwarded-For` est ignoré et tous les visiteurs partagent **une seule empreinte** (limite de codes commune, plus stricte mais jamais contournable). En production, le serveur écrit au démarrage un avertissement `[guepard] AVERTISSEMENT configuration IP client` dans les journaux. En local, ce mode convient.
 
-Choix pour l'expulsion : l'identité expulsée (compte ou cookie invité) est bannie, et l'empreinte IP est aussi bannie **pour les invités**, afin qu'un invité expulsé ne revienne pas en effaçant son cookie. Un autre **compte connecté** venant de la même IP (même école, même foyer) reste accepté, puisque les comptes sont bannis par leur identité.
+Les adresses IPv6 sont regroupées par préfixe **/64** (un abonné dispose en général d'un /64 entier et peut changer d'adresse à l'intérieur) ; les adresses IPv4 sont prises entières.
+
+**Configuration Railway** : dans les variables du service web, définir `GUEPARD_CLIENT_IP_HEADER=X-Real-IP` (le proxy de Railway remplace cet en-tête par l'adresse du client) ; on peut ajouter `GUEPARD_TRUST_PROXY=1` comme repli. Avec un CDN devant Railway, utiliser l'en-tête du CDN (`CF-Connecting-IP`) ou `GUEPARD_TRUST_PROXY=2`. Après redéploiement, les journaux ne doivent plus contenir l'avertissement.
+
+Vérification après déploiement :
+
+1. Depuis deux connexions différentes (Wi-Fi et réseau mobile), entrer 11 codes erronés sur la première ; la onzième tentative doit être refusée, alors que la seconde connexion peut encore essayer un code. Si les deux sont bloquées ensemble, l'adresse n'est pas lue (vérifier la variable et l'avertissement au démarrage).
+2. Falsification : répéter 11 fois `curl -X POST "$APP_URL/api/rooms" -H "Origin: $APP_URL" -H 'Content-Type: application/json' -H "X-Real-IP: 198.51.100.$RANDOM" -H "X-Forwarded-For: 203.0.113.$RANDOM" -d '{"action":"resolve","code":"ZZZZZZ"}'` depuis la même machine : la onzième réponse doit rester un refus pour trop de tentatives. Sinon la plateforme transmet l'en-tête sans l'écraser : choisir l'autre réglage.
+
+Choix pour l'expulsion (SALLE-07) : l'identité expulsée (compte ou cookie invité) est bannie du salon définitivement. Son empreinte IP est aussi bannie, mais **pendant 10 minutes** et **seulement pour les nouvelles identités invitées**, afin qu'un invité expulsé ne revienne pas aussitôt en effaçant son cookie. Les membres déjà présents dans le salon derrière la même IP (classe, foyer, NAT) ne sont jamais refusés et se reconnectent normalement ; un **compte connecté** de la même IP reste toujours accepté (les comptes sont bannis par leur identité) ; passé 10 minutes, de nouveaux invités de cette IP peuvent rejoindre le salon, y compris par la partie rapide.
 
 ## 6. Vérifier les parcours
 

@@ -123,3 +123,18 @@ test('C1-B7: invitations and removals are no longer handled by the engine (room-
  expect(()=>act(room,host,{action:'kick',personId:guest.id})).toThrow('Action inconnue');
  expect(room.people.some(person=>person.id===guest.id)).toBe(true);
 });
+
+test('C2-B4: a key whose lower case spans several code units (İ → i̇) is recorded and accepted, the race goes on',()=>{
+ const text='İstanbul ville',{room,host}=race(text);
+ const key='İ'.toLowerCase();
+ expect(key.length).toBe(2);
+ now+=1000;
+ act(room,host,{action:'progress',value:'İs',typed:2,heatmap:{[key]:{hits:1,errors:0},s:{hits:1,errors:0}}});
+ expect(host.progress).toBe(2);
+ expect(host.heatmap).toEqual({[key]:{hits:1,errors:0},s:{hits:1,errors:0}});
+ now+=1000;
+ // Without a client heatmap the server builds the same key itself.
+ act(room,host,{action:'progress',value:'İst',typed:3});
+ expect(host.heatmap?.[key]).toEqual({hits:1,errors:0});
+ expect(host.heatmap?.t).toEqual({hits:1,errors:0});
+});
