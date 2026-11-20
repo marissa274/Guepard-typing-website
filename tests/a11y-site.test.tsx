@@ -71,6 +71,23 @@ describe('A11Y-03 · control names',()=>{
   fireEvent.click(screen.getByText('type'));fireEvent.click(screen.getByText('swap'));
   await waitFor(()=>expect(screen.getByTestId('guest').textContent).toBe('Léa'));
  });
+ test('a typed name that equals the other default name is never rewritten, on reload or language change',async()=>{
+  sessionStorage.clear();
+  const Probe=()=>{const {state,save}=useSite();return <><p data-testid="guest">{state.name}</p><button onClick={()=>save('lang',state.lang==='fr'?'en':'fr')}>swap</button><button onClick={()=>save('name','CuriousCheetah')}>type</button></>};
+  const first=render(<SiteProvider><Probe/></SiteProvider>);
+  await screen.findByText('GuépardCurieux');
+  fireEvent.click(screen.getByText('type'));fireEvent.click(screen.getByText('swap'));fireEvent.click(screen.getByText('swap'));
+  await waitFor(()=>expect(screen.getByTestId('guest').textContent).toBe('CuriousCheetah'));
+  first.unmount();
+  render(<SiteProvider><Probe/></SiteProvider>);
+  await waitFor(()=>expect(screen.getByTestId('guest').textContent).toBe('CuriousCheetah'));
+ });
+ test('a legacy stored default name (no flag) still follows the language',async()=>{
+  sessionStorage.clear();sessionStorage.setItem('guepard-name',JSON.stringify('CuriousCheetah'));
+  const Probe=()=>{const {state}=useSite();return <p data-testid="guest">{state.name}</p>};
+  render(<SiteProvider><Probe/></SiteProvider>);
+  await waitFor(()=>expect(screen.getByTestId('guest').textContent).toBe('GuépardCurieux'));
+ });
 });
 
 describe('A11Y-04 · account menu',()=>{
