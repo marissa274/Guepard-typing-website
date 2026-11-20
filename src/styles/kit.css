@@ -1,0 +1,214 @@
+/* Kit shared by several components (TECH-03), in @layer components: buttons and panels, woodland and lobby frames, animal portraits and cut-outs, runner sprites.
+   Everything that belongs to one component is a utility in its JSX. What stays here is shared (button, primary, inner, eyebrow, scoreboard, wood-*, woodland-*, lobby-*,
+   animal-*), a sprite or an animation, or a chain of context overrides (`.lobby-page`, `.lobby-results`, `.woodland-shell`) that utilities would cancel.
+   Colours are @theme tokens (app/globals.css); dark mode and widths are `@variant`s. */
+button:disabled{cursor:not-allowed;opacity:.5}
+.eyebrow{font-size:12px;letter-spacing:2.2px;font-weight:700;display:flex;align-items:center;gap:9px;color:var(--green);margin-bottom:20px}
+/* Buttons: three variants, one radius (--radius-control). Primary = mango (.primary, .wood-primary); secondary = parchment (.button, .wood-small-button); quiet = no fill (.quiet). */
+.button,.wood-small-button,.quiet{display:inline-flex;align-items:center;justify-content:center;gap:27px;border:2px solid var(--line-ui);border-radius:var(--radius-control);padding:12px 20px;font-size:15px;font-weight:700;min-height:48px;background:var(--color-parchment);color:var(--color-jungle);box-shadow:0 3px 0 var(--color-secondary-shadow)}
+.button:hover,.wood-small-button:hover{transform:translateY(-1px);background:var(--color-wood-small-hover)}
+.button:active,.wood-small-button:active,.primary:active,.wood-primary:active{transform:translateY(2px);box-shadow:none}
+.quiet{background:transparent;border-width:1px;box-shadow:none;color:var(--green)}
+.quiet:hover{background:var(--color-nav-active)}
+.primary,.wood-primary{border:2px solid var(--color-primary-edge);border-radius:var(--radius-control);background:var(--color-wood-orange);color:var(--color-primary-ink);box-shadow:0 4px 0 var(--shadow);font-weight:800}
+.primary:hover,.wood-primary:hover{transform:translateY(-1px);background:var(--color-wood-hover)}
+.inner{max-width:1180px;padding:65px 5% 105px;margin:auto;min-height:65vh}
+.inner h1{font-size:46px;margin:12px 0 20px}
+.inner>p{color:var(--muted);line-height:1.8}
+.scoreboard{display:flex;justify-content:space-around;border-bottom:1px dashed var(--line);padding:15px 0 25px;margin:10px 0 30px;text-align:center;gap:20px}
+.scoreboard strong{display:block;font-family:'Nunito',sans-serif;color:var(--green);font-size:38px}
+.scoreboard span{color:var(--muted);font-size:12px}
+@variant phone{
+ .eyebrow{letter-spacing:1.7px}
+ .inner{padding:38px 6% 90px}
+ .inner h1{font-size:35px;letter-spacing:-1.5px}
+ .inner>p{font-size:13px}
+ .scoreboard strong{font-size:28px}
+}
+@media (prefers-reduced-motion:reduce){
+ *,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}
+}
+.avatar-photo{width:100%;height:100%;object-fit:cover;border-radius:50%}
+main[tabindex="-1"]:focus{outline:none}
+.button[aria-disabled=true]{cursor:not-allowed;opacity:.5}
+.animal-cutout{width:100%;height:100%;background-image:url('/_next/image?url=%2Fassets%2Frelief-animals.webp&w=1200&q=75');background-repeat:no-repeat;background-size:300% 200%}
+.animal-monkey{background-position:0 0;animation:canopy-swing 6.5s ease-in-out infinite alternate}
+.animal-parrot{background-position:50% 0}
+.animal-elephant{background-position:100% 0}
+.leaves-cutout{width:100%;height:100%;background:url('/_next/image?url=%2Fassets%2Frelief-foliage.webp&w=1200&q=75') 0 0/200% 100% no-repeat;transform-origin:15% 100%;animation:leaf-sway 8s ease-in-out infinite alternate}
+@keyframes canopy-swing{from{transform:rotate(-2deg)}to{transform:rotate(2.5deg)}}
+@keyframes leaf-sway{from{transform:rotate(-1deg)}to{transform:rotate(1.5deg)}}
+@keyframes vine-sway{from{transform:rotate(-1.8deg)}to{transform:rotate(1.8deg)}}
+@media (prefers-reduced-motion:reduce){
+ .animal-monkey,.leaves-cutout{animation:none!important}
+}
+.animal-monkey{transform-origin:70% 5%}
+@variant dark{
+ .animal-cutout{background-image:url('/_next/image?url=%2Fassets%2Fanimals-night.webp&w=1200&q=75')}
+}
+@variant phone{
+ .animal-cutout{background-image:url('/_next/image?url=%2Fassets%2Frelief-animals.webp&w=1080&q=75')}
+ @variant dark{
+  .animal-cutout{background-image:url('/_next/image?url=%2Fassets%2Fanimals-night.webp&w=1080&q=75')}
+ }
+ .leaves-cutout{background-image:url('/_next/image?url=%2Fassets%2Frelief-foliage.webp&w=1080&q=75')}
+}
+/* Shared, illustrated animal identities. The art comes from the home page. */
+.animal-avatar{display:inline-block;width:54px;height:54px;background-image:url('/assets/animal-portraits.webp');background-size:300% 200%}
+.avatar-cheetah{background-position:0 0}
+.avatar-parrot{background-position:50% 0}
+.avatar-crocodile{background-position:100% 0}
+.avatar-monkey{background-position:0 100%}
+.avatar-elephant{background-position:50% 100%}
+.avatar-toucan{background-position:100% 100%}
+@variant dark{
+ .animal-avatar{background-image:url('/assets/animal-portraits-night.webp')}
+}
+.animal-picker{border:0;margin:0;padding:0;min-width:0}
+.animal-options label.selected{border-color:var(--color-jungle);box-shadow:0 0 0 2px var(--color-option-ring)}
+.animal-options label:focus-within{outline:3px solid var(--color-focus-warm);outline-offset:3px}
+.animal-option-landscape{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:-2}
+.animal-picker-landscape label::after{content:'';position:absolute;inset:40% 0 0;z-index:-1;background:linear-gradient(transparent,#f7e7c6 75%)}
+.animal-picker-landscape label.selected{border-color:var(--color-wood-orange);box-shadow:0 0 0 3px var(--color-option-ring-landscape)}
+.woodland-page{position:relative;isolation:isolate;background:var(--color-cream);padding:80px 5% 220px;min-height:75vh;color:var(--color-woodland-ink);overflow-x:clip}
+.woodland-scenery{position:absolute;inset:0;z-index:-2;background:linear-gradient(#f7e7c6bc,#f7e7c6f2 70%),url('/assets/relief-background.webp') center top/cover;pointer-events:none}
+.woodland-shell{max-width:1260px;margin:auto;position:relative;z-index:2}
+.woodland-back{font-size:13px;color:var(--color-woodland-back);display:inline-block;min-height:35px;padding:7px 0}
+.woodland-page input[type=checkbox]{width:17px;height:17px;min-height:0;accent-color:var(--color-jungle);padding:0}
+.wood-primary{display:flex;justify-content:space-between;gap:35px;min-height:57px;padding:15px 24px;cursor:pointer}
+.wood-primary:disabled{background:var(--color-wood-off);border-color:var(--color-wood-off-edge);color:var(--color-wood-off-ink);box-shadow:0 3px 0 var(--color-wood-off-shadow);cursor:not-allowed}
+@variant dark{
+ .woodland-page{background:var(--color-woodland-night);color:var(--color-cream)}
+}
+@variant dark{
+ .woodland-scenery{background:linear-gradient(#132b4ac9,#132e33eb 75%),url('/assets/jungle-blue-night.webp') center top/cover}
+}
+@variant dark{
+ .woodland-back{color:var(--color-woodland-back-night)}
+}
+@variant upto-1050{
+ .woodland-page{padding-inline:4%}
+}
+@variant upto-800{
+ .woodland-page{padding:65px 24px 190px}
+}
+@variant upto-450{
+ .woodland-page{padding-inline:16px}
+}
+.woodland-page .animal-options input[type=radio]{width:16px;height:16px;min-height:0;padding:0;margin:0;box-shadow:none;accent-color:var(--color-jungle)}
+/* The lobby is another clearing in the same illustrated forest as the home scene. */
+.lobby-page .woodland-back{font-weight:750;background:var(--color-lobby-back)}
+.lobby-page .wood-small-button{font-size:16px;padding:13px 17px;min-height:50px}
+.lobby-page .wood-primary{font-size:21px;min-height:65px}
+@variant dark{
+ .lobby-page .woodland-back{background:var(--color-lobby-back-night);color:var(--color-cream)}
+}
+/* Searchable-looking strips: a few choices stay visible and the rest scroll. */
+.animal-options{display:grid;grid-auto-flow:column;grid-auto-columns:112px;grid-template-columns:none;gap:12px;overflow-x:auto;overscroll-behavior-inline:contain;scroll-snap-type:x mandatory;scrollbar-color:var(--color-fresh-leaf) var(--color-scrollbar-track);scrollbar-width:thin;padding:5px 4px 14px}
+.animal-options label{scroll-snap-align:start;min-width:0}
+/* Lobby: soft sculpted paper and felt-marker texture, following the supplied layout. */
+.lobby-page{background:var(--color-cream);padding-top:55px;padding-bottom:125px;color:var(--color-lobby-ink)}
+@variant dark{
+ .lobby-page{background:var(--color-lobby-night);color:var(--color-cream)}
+}
+@media (prefers-reduced-motion:reduce){
+ .animal-options{scroll-behavior:auto}
+}
+.woodland-page ::placeholder{color:var(--color-placeholder)}
+/* Host controls stay focusable while a request is pending (A11Y-04). */
+.woodland-page button[aria-disabled=true]{cursor:progress}
+.lobby-page .woodland-shell{position:relative}
+.lobby-page .woodland-shell::before,.lobby-page .woodland-shell::after{content:'';position:absolute;width:9px;background:repeating-linear-gradient(35deg,#ad814a 0 5px,#e5c08b 5px 9px);border-radius:7px;box-shadow:2px 0 1px #513f2a}
+.lobby-page .woodland-shell::before{left:24px}
+.lobby-page .woodland-shell::after{right:24px}
+.race-runner{background:url('/assets/race-runners.webp') 0 0/300% 200% no-repeat;filter:drop-shadow(1px 4px 2px #58421d26)}
+.runner-cheetah{background-position:0 0}
+.runner-gazelle{background-position:50% 0}
+.runner-hare{background-position:100% 0}
+.runner-fox{background-position:0 100%}
+.runner-panda{background-position:50% 100%}
+.runner-tortoise{background-position:100% 100%}
+@variant dark{
+ .lobby-page .woodland-shell{border-color:var(--color-shell-night-edge)}
+}
+@variant upto-1150{
+ .lobby-page{padding-inline:35px}
+}
+/* Compact waiting room: real controls inside a separate illustrated frame. */
+.lobby-page{--side-space:clamp(110px,17vw,350px);padding:34px var(--side-space) 100px;min-height:0}
+.lobby-page .woodland-shell{max-width:1400px;padding:18px 22px;border:14px solid transparent;border-radius:24px 19px 23px 18px;box-shadow:inset 0 0 0 2px #e7c392,0 3px 0 #664624,0 12px 26px #19372050}
+.lobby-page .woodland-shell::before,.lobby-page .woodland-shell::after{top:-50px;height:43px}
+.lobby-page .woodland-back{font-size:16px}
+@variant dark{
+ .lobby-page .woodland-shell{background:linear-gradient(#173747ee,#173747ee) padding-box,repeating-linear-gradient(3deg,#684629 0 2px,#926a3f 3px 5px,#bb915d 6px,#72502f 8px,#926739 12px) border-box}
+}
+@variant upto-1600{
+ @variant from-1101{
+  .lobby-page{--side-space:11vw}
+  .lobby-page .woodland-shell{padding:14px 16px}
+ }
+}
+@variant upto-1100{
+ .lobby-page{--side-space:45px;padding-top:35px;padding-bottom:140px}
+}
+@variant compact{
+ .lobby-page{--side-space:10px}
+ .lobby-page .woodland-shell{padding:12px 10px;border-width:9px}
+}
+/* Final framing adjustments after the same-size screenshot comparison. */
+.lobby-page .woodland-shell{background:linear-gradient(#fff3df,#fff3df) padding-box,repeating-linear-gradient(3deg,#88572e 0 2px,#b78046 3px 5px,#d3a36c 6px,#986235 8px,#b78149 12px) border-box}
+@variant from-1101{
+ .lobby-page .woodland-shell::before,.lobby-page .woodland-shell::after{top:-42px;height:35px}
+}
+#app:has(>.lobby-page)>.lobby-page{flex:1 0 auto;margin:0}
+.lobby-page{overflow:clip}
+/* Four real locomotion poses per species; translation remains controlled by progress. */
+.race-runner{background-image:url('/assets/race-gaits.webp');background-size:400% 600%}
+.race-runner.runner-cheetah[data-motion=running]{animation:cheetah-gait .68s steps(1,end) infinite}
+/* The stretched third source pose crosses its atlas cell. Use the three complete poses. */
+@keyframes cheetah-gait{0%,100%{background-position:0 0}25%{background-position:33.333333% 0}50%{background-position:100% 0}75%{background-position:33.333333% 0}}
+@keyframes gait-cycle{0%,100%{background-position-x:0}25%{background-position-x:33.333333%}50%{background-position-x:66.666667%}75%{background-position-x:100%}}
+@keyframes finish-nod{50%{transform:rotate(-7deg) translateY(-3px)}}
+@keyframes sleeping-tail{0%,65%,100%{background-position:0 0}72%{background-position:100% 0}80%{background-position:0 100%}90%{background-position:100% 100%}}
+.lobby-page .woodland-back{padding:10px 18px;min-height:44px;line-height:1.35;border-radius:22px}
+/***** Three dimensional wooden podium and results *****/
+.podium-place-1 .race-runner{animation:finish-nod 1.2s ease-out 2}
+@media (prefers-reduced-motion:reduce){
+ .race-runner[data-motion],.podium-place .race-runner,.lobby-page .lobby-sleeping-cheetah,.sleeping-cheetah,.podium-confetti i{animation:none!important}
+}
+/* Every pose uses the same atlas window, so the animal keeps a consistent size. */
+@keyframes gait-cycle{0%,100%{background-position:0 var(--gait-row)}25%{background-position:33.333333% var(--gait-row)}50%{background-position:66.666667% var(--gait-row)}75%{background-position:100% var(--gait-row)}}
+@variant from-1101{
+ .lobby-page{padding-top:18px}
+}
+/* Rest and podium use the complete original portraits; the running atlas is reserved for the gait. */
+.race-runner:not([data-motion=running]){background-image:url('/assets/race-runners.webp');background-size:300% 200%}
+.runner-cheetah:not([data-motion=running]){background-position:0 0}
+.runner-gazelle:not([data-motion=running]){background-position:50% 0}
+.runner-hare:not([data-motion=running]){background-position:100% 0}
+.runner-fox:not([data-motion=running]){background-position:0 100%}
+.runner-panda:not([data-motion=running]){background-position:50% 100%}
+.runner-tortoise:not([data-motion=running]){background-position:100% 100%}
+.lobby-page.lobby-active{padding-bottom:150px}
+/* The tortoise uses the four drawn walking poses, like the other racers. */
+.race-runner.runner-tortoise[data-motion=running]{background-image:url('/assets/race-gaits.webp');background-size:400% 600%;animation:tortoise-gait 1.15s steps(1,end) infinite}
+@keyframes tortoise-gait{0%,100%{background-position:0 100%;transform:translateY(0) rotate(-1deg)}25%{background-position:33.333333% 100%;transform:translateY(-2px) rotate(0)}50%{background-position:66.666667% 100%;transform:translateY(-3px) rotate(1deg)}75%{background-position:100% 100%;transform:translateY(-1px) rotate(0)}}
+@media (prefers-reduced-motion:reduce){
+ .race-runner.runner-tortoise[data-motion=running]{animation:none;background-image:url('/assets/race-runners.webp');background-size:300% 200%;background-position:100% 100%}
+}
+.lobby-results{padding-top:30px;padding-bottom:100px}
+.lobby-results .woodland-shell{background:none!important;border:0;box-shadow:none;padding:0}
+.lobby-results .woodland-shell::before,.lobby-results .woodland-shell::after{display:none}
+.lobby-results{padding:10px 4.5% 8px;--side-space:5vw}
+@variant compact{
+ .lobby-results{padding:20px 10px 15px}
+}
+/* Celebration composition: one responsive ground plane, no page-wide scaling. */
+.lobby-page.lobby-results{padding:20px 5% 0;min-height:0}
+.lobby-results .woodland-shell{max-width:2400px;width:100%}
+.lobby-page.lobby-results:has(.details-open){padding:30px clamp(16px,3vw,70px) 45px;background:var(--color-cream);min-height:calc(100svh - 250px)}
+.lobby-results:has(.details-open) .woodland-scenery{display:none}
+.lobby-results:has(.details-open) .woodland-shell{max-width:none;width:100%}
+@variant compact{
+ .lobby-page.lobby-results{padding:28px 12px 0}
+}

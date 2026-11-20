@@ -1,0 +1,17 @@
+/* Home scene (lot A). Imported in @layer components. Layout, spacing, typography, colours, dark mode and responsive rules are
+   utilities in Jungle.tsx, SignBoard.tsx and JoinByCode.tsx. What remains, because it cannot be written as a utility:
+   - the sprite atlas bounds of the cutout animals (the sprite sheets themselves live in kit.css);
+   - the two continuous ropes of the hanging boards (pseudo-elements with a repeating gradient);
+   - @keyframes wooden-sign-sway;
+   - the reduced-motion declarations that are !important (their meaning is inverted inside a layer). */
+/* Atlas bounds follow each silhouette so the crocodile's snout is never clipped. */
+.animal-crocodile{background-size:251.8033% 200%;background-position:46.9762% 100%}
+.animal-toucan{background-size:312.831% 200%;background-position:100% 100%}
+/* Three individual wooden planks, hung on two continuous ropes from the navbar canopy. */
+.board-ropes::before,.board-ropes::after{content:'';position:absolute;top:0;bottom:0;width:10px;border:1px solid #4e3925;border-radius:4px;background:repeating-linear-gradient(18deg,#765334 0 12px,#a0784b 12px 18px,#685030 18px 23px);box-shadow:inset 2px 0 0 #c5a06d70,2px 2px 3px #243b2330;@variant phone{width:7px}}
+.board-ropes::before{left:5.1%}
+.board-ropes::after{right:5.1%}
+@keyframes wooden-sign-sway{from{transform:rotate(-.9deg)}to{transform:rotate(.9deg)}}
+@media (prefers-reduced-motion:reduce){
+ .scene-depth,.scene-background img{transform:none!important;transition:none!important}
+}

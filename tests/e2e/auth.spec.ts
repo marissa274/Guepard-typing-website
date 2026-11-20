@@ -1,8 +1,10 @@
 import {test,expect} from '@playwright/test';
+import {waitForHydration} from './helpers';
 
 test('signup, session, logout and login use PostgreSQL',async({page})=>{
  const username='Jungle'+Date.now().toString(36),password='JungleSecret42!';
  await page.goto('/signup');
+ await waitForHydration(page);
  await page.getByLabel('Nom d’utilisateur').fill(username);
  await page.getByLabel('Mot de passe',{exact:true}).fill(password);
  await page.getByLabel('Confirmer le mot de passe').fill(password);
@@ -17,6 +19,7 @@ test('signup, session, logout and login use PostgreSQL',async({page})=>{
  await page.getByRole('button',{name:'Déconnexion'}).click();
  await expect(page.locator('header').getByRole('link',{name:'Se connecter'})).toBeVisible();
  await page.goto('/login');
+ await waitForHydration(page);
  await page.getByLabel('Nom d’utilisateur').fill(username);
  await page.getByLabel('Mot de passe',{exact:true}).fill('bad-password');
  await page.getByRole('button',{name:'Se connecter',exact:true}).click();

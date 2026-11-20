@@ -3,6 +3,7 @@ import {animals,profileAnimals} from '../lib/animals';
 import type {AnimalId,ProfileAnimalId} from '../lib/animals';
 import type {Difficulty,Settings,Visibility} from '../lib/room-types';
 import type {OAuthProvider} from './oauth-store';
+import {isHeatmapKey} from '../lib/heatmap-key';
 
 /**
  * Schémas de validation de toutes les entrées serveur (TECH-07).
@@ -105,7 +106,7 @@ const personId=identifier('Participant introuvable.');
 const difficulty=(message:string)=>z.enum(difficulties,{error:message});
 const heatmapError='Les statistiques du clavier sont invalides.';
 const counter=(message:string)=>z.number({error:message}).int(message).min(0,message).max(Number.MAX_SAFE_INTEGER,message);
-export const heatmapSchema=z.record(z.string({error:heatmapError}).length(1,heatmapError),z.object({hits:counter(heatmapError),errors:counter(heatmapError)},{error:heatmapError}),{error:heatmapError})
+export const heatmapSchema=z.record(z.string({error:heatmapError}).refine(isHeatmapKey,heatmapError),z.object({hits:counter(heatmapError),errors:counter(heatmapError)},{error:heatmapError}),{error:heatmapError})
  .refine(heatmap=>Object.keys(heatmap).length<=256,heatmapError);
 /** Message temps réel de progression envoyé pendant la course. */
 export const progressSchema=z.object({

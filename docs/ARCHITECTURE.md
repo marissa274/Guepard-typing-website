@@ -94,7 +94,7 @@ Un compte utilise un cookie HttpOnly et un jeton dont seul le hash est en base. 
 
 Les jetons de membre sont des capacités privées, distinctes du cookie de compte. Les vues partagées retirent jetons, identifiants de compte, clés de présence, empreintes IP et budgets de frappe. Une saisie et sa heatmap ne sont envoyées qu’à leur propriétaire. L’historique applique toujours un filtre par compte authentifié.
 
-Les invitations contiennent 256 bits aléatoires. La première utilisation les lie à l’identité signée et à l’empreinte IP ; leur destinataire peut les rejouer avec ces deux propriétés. Une expulsion révoque ses invitations et bannit son identité du salon. L’IP n’est pas bannie globalement pour préserver les autres élèves derrière le même NAT. Les en-têtes IP ne sont utilisés que derrière un proxy explicitement déclaré fiable. Les limites de tentatives de code sont persistées par empreinte IP dans PostgreSQL.
+Les invitations contiennent 256 bits aléatoires. La première utilisation les lie à l’identité signée et à l’empreinte IP ; leur destinataire peut les rejouer avec ces deux propriétés. Une expulsion révoque ses invitations et bannit son identité du salon ; l’empreinte IP de l’expulsé refuse en plus les nouvelles identités invitées pendant 10 minutes, sans jamais refuser les membres déjà présents ni les comptes, pour préserver les autres élèves derrière le même NAT. Les en-têtes IP ne sont utilisés que derrière un proxy explicitement déclaré (`GUEPARD_CLIENT_IP_HEADER` ou `GUEPARD_TRUST_PROXY`) ; IPv6 est regroupé par /64. Les limites de tentatives de code sont persistées par empreinte IP dans PostgreSQL.
 
 ## Machine à états
 

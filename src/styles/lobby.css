@@ -1,0 +1,85 @@
+/* Room lobby, room creation and quick join (lot B). Imported in @layer components. Layout, spacing, typography, colours, dark mode and
+   responsive rules are utilities in lobby/Lobby.tsx, CreateRoom.tsx, QuickJoin.tsx, RoomSettings.tsx and room-styles.ts. What remains,
+   because it cannot be written as a utility or because it also reaches elements of the race and results (lot C):
+   - the wooden and paper backgrounds of the panels (repeating gradients) and their bolts (::before/::after);
+   - the scenery: animations (keyframes, blink, sway, bob), the perches (::before/::after), the vine gradient, the sleeping cheetah
+     sprite and the background images of the scene (url());
+   - the :has() rules of the results lobby (they decide whether the launch bar is shown);
+   - the descendant rules of the lobby page that also reach the race inputs, and the animal picker rules, which AnimalPicker renders;
+   - the leftovers of the lot A forms (JoinByCode), kept here for their order. */
+/* Panels: wooden board of the entry, closed and quick join pages, paper cards of the lobby and of the creation form. */
+.wood-panel{background:var(--color-panel-wood);background-image:repeating-linear-gradient(1deg,transparent 0 91px,#ad804327 92px,#fff1cc75 94px,transparent 96px),repeating-linear-gradient(177deg,transparent 0 9px,#9e753608 11px,transparent 12px),linear-gradient(100deg,#f4ddb2,#eed3a0 70%,#e6c794)}
+.wood-panel::before,.wood-panel::after{content:'';position:absolute;top:13px;width:7px;height:7px;border-radius:50%;background:#a47c47;box-shadow:inset 1px 1px 2px #67472580,0 1px 0 #fff2ce;pointer-events:none}
+.wood-panel::before{left:13px}
+.wood-panel::after{right:13px}
+.lobby-page .wood-panel{background:var(--color-panel-lobby);background-image:radial-gradient(#bf94591a 1px,transparent 1px),linear-gradient(130deg,#fff8e9,#f6e6c9);background-size:8px 8px,auto}
+.lobby-page .wood-panel::before,.lobby-page .wood-panel::after{display:none}
+@variant dark{
+ .lobby-page .wood-panel{background-image:radial-gradient(#8a9f6817 1px,transparent 1px),linear-gradient(130deg,#f6e6c7,#e5d1a9)}
+}
+.create-room-page .wood-panel{background:var(--color-panel-create);background-image:radial-gradient(#bf94591a 1px,transparent 1px),linear-gradient(130deg,#fff8e9,#f6e6c9);background-size:8px 8px,auto}
+.create-room-page .wood-panel::before,.create-room-page .wood-panel::after{display:none}
+.lobby-results .race-board{background:none!important}
+.lobby-results .race-board::before,.lobby-results .race-board::after{display:none}
+/* Disclosure markers (the summaries are styled in RoomSettings and Lobby). */
+.lobby-page .person-tags span+span::before{content:'·';padding-right:7px}
+/* Scenery: animations. The blink swaps the sprite sheet for its night version. */
+.lobby-monkey .animal-cutout{animation:lobby-monkey-swing 8s ease-in-out 3 alternate,lobby-blink 11s steps(1) infinite;animation-delay:-3s,-5s}
+.lobby-toucan{animation:lobby-head 10s ease-in-out infinite}
+.lobby-toucan .animal-cutout{animation:lobby-blink 13s steps(1) infinite;animation-delay:-7s}
+.lobby-leaves-right .leaves-cutout{animation-delay:-5s}
+.lobby-page:focus-within .lobby-toucan,.lobby-page:focus-within .lobby-monkey .animal-cutout{animation-play-state:paused}
+@keyframes lobby-monkey-swing{from{transform:rotate(-3deg)}to{transform:rotate(3deg)}}
+@keyframes lobby-head{0%,70%,100%{transform:rotate(-2deg)}40%{transform:rotate(3deg)}}
+@keyframes lobby-blink{0%,97%,100%{background-image:url('/assets/relief-animals.webp')}98%,99%{background-image:url('/assets/animals-night.webp')}}
+@variant dark{
+ .lobby-toucan .animal-cutout{animation:none}
+ .lobby-monkey .animal-cutout{animation:lobby-monkey-swing 8s ease-in-out 3 alternate}
+}
+@variant motion-reduce{
+ .lobby-monkey .animal-cutout,.lobby-toucan,.lobby-toucan .animal-cutout,.lobby-leaves .leaves-cutout{animation:none!important;transform:none!important}
+}
+.lobby-world-animal{animation:lobby-world-bob 9s ease-in-out infinite alternate}
+.lobby-parrot{animation-delay:-2s}
+.lobby-elephant{animation-delay:-5s}
+.lobby-crocodile{animation-delay:-7s}
+.lobby-giraffe{animation-delay:-3s}
+.lobby-leaves-upper-left .leaves-cutout{animation-delay:-2s}
+.lobby-leaves-upper-right .leaves-cutout{animation-delay:-6s}
+@keyframes lobby-world-bob{from{translate:0 0}to{translate:0 -9px}}
+@variant motion-reduce{
+ .lobby-world-animal{animation:none}
+ .lobby-leaves-upper-left .leaves-cutout,.lobby-leaves-upper-right .leaves-cutout{animation:none}
+}
+.lobby-page .lobby-giraffe,.lobby-page .lobby-parrot,.lobby-page .lobby-toucan{animation:none}
+.lobby-page .lobby-monkey .animal-cutout{animation:lobby-blink 11s steps(1) infinite}
+/* Scenery: perches and vine. */
+.lobby-page .lobby-parrot::before{content:'';position:absolute;border:2px solid #634624;border-radius:50% 20% 30% 30%;background:repeating-linear-gradient(5deg,#8c6036 0 2px,#bb8b52 3px 5px,#a57542 6px 8px);transform-origin:left center;box-shadow:0 4px 4px #233b2433}
+.lobby-page .lobby-parrot::before{top:77%;left:48%;right:-20%;height:7%;transform:rotate(-12deg);z-index:-1}
+.lobby-page .lobby-giraffe::after{content:'';position:absolute;left:2%;right:-15%;z-index:-1}
+.lobby-page .lobby-giraffe::after{height:12%;bottom:-2%;border-radius:60% 60% 0 0;background:radial-gradient(ellipse at 50% 0,#8a9865,#586d41 55%,#3a5933);box-shadow:none}
+.lobby-page .lobby-toucan::before{content:'';position:absolute;left:-12%;width:63%;top:74%;height:7%;border-radius:30%;background:repeating-linear-gradient(6deg,#986333 0 3px,#c29153 4px 7px,#805830 8px);transform:rotate(8deg);z-index:-1}
+.monkey-vine{background:repeating-linear-gradient(35deg,#4b642e 0 9px,#83a34b 10px 14px,#674d2d 15px 20px)}
+/* Scenery: the sleeping cheetah sprite (shared with the home page) and the background images. */
+.lobby-page .lobby-sleeping-cheetah,.sleeping-cheetah{background:url('/_next/image?url=%2Fassets%2Fsleeping-tail.webp&w=1080&q=75') 0 0/200% 200% no-repeat;aspect-ratio:1;animation:sleeping-tail 6s steps(1,end) infinite}
+@variant dark{
+ .lobby-page .lobby-sleeping-cheetah{background-image:url('/_next/image?url=%2Fassets%2Fsleeping-tail.webp&w=1080&q=75')}
+}
+.create-room-page .woodland-scenery{background:linear-gradient(#f7e7c6bf,#f7e7c6e4),url('/assets/relief-background.webp') center/cover}
+.lobby-page .woodland-scenery{background:url('/assets/relief-background.webp') center/cover}
+.lobby-results .woodland-scenery{background:url('/assets/results-celebration-jungle-v3.webp') center bottom/cover}
+@variant dark{
+ .create-room-page .woodland-scenery{background:linear-gradient(#132b4aca,#132b4ad5),url('/assets/jungle-blue-night.webp') center/cover}
+ .lobby-page .woodland-scenery{background:url('/assets/jungle-blue-night.webp') center/cover}
+ .lobby-results .woodland-scenery{background:linear-gradient(#11293977,#11293977),url('/assets/results-celebration-jungle-v3.webp') center bottom/cover;filter:none}
+}
+/* Results lobby: the launch bar only shows when the details are open. */
+.lobby-results .room-launch{display:flex;max-width:890px;background:linear-gradient(#fcf0d8,#fcf0d8) padding-box,url('/assets/results-wood-marker.webp') center/cover border-box}
+.lobby-results:not(:has(.details-open)) .room-launch{display:none}
+.lobby-results:has(.details-open) .room-launch{max-width:none;width:100%}
+/* The inputs of the lobby, race included. */
+.lobby-page input,.lobby-page select,.lobby-page textarea{font-size:16px;min-height:49px}
+/* Animal picker of the creation page (rendered by AnimalPicker, shared with the sign-up page). */
+.animal-picker-arrows button{width:38px;height:38px;border:1px solid var(--color-arrow-edge);border-radius:var(--radius-control);background:var(--color-cream);color:var(--color-jungle);font-size:22px;line-height:1}
+.animal-picker-arrows button:hover{background:var(--color-arrow-hover)}
+/* Leftovers of the lot A forms: the code and filter fields of the race browser. */

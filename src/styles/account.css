@@ -1,0 +1,32 @@
+/* Sign in, sign up and account (lot A). Imported in @layer components. Layout, spacing, typography, colours, dark mode and
+   responsive rules of the auth page, the history list and the empty state are utilities in Auth.tsx and StatsPage.tsx.
+   What remains, because it cannot be written as a utility:
+   - decorative backgrounds: card texture, scenery veil, sprites of the cheetah and of the four animals (url(), gradients);
+   - masks that let only the paws of the animals show above the card edge;
+   - the shared animal picker and the woodland / lobby form rules (also rendered by the lot B pages). */
+.auth-card{background-image:radial-gradient(#b7986020 .65px,transparent .65px);background-size:5px 5px}
+.auth-scenery::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,#f7e7c622,#f7e7c699 40%,#f7e7c699 60%,#f7e7c622)}
+.auth-top-cheetah{background:url('/assets/cheetahs-3d-marker.webp') 100% 0/212.7098% 100% no-repeat}
+.auth-friend{background:url('/assets/auth-animals.webp') 0 0/200% 200% no-repeat}
+.auth-crocodile{background-position:0 100%}
+.auth-parrot{background-position:100% 0}
+.auth-elephant{background-image:url('/assets/auth-elephant.webp');background-size:200% 100%}
+@variant dark{
+ .auth-scenery::after{background:linear-gradient(90deg,#152e6311,#182a2250 40%,#182a2250 60%,#152e6311)}
+ .auth-top-cheetah{background-image:url('/assets/cheetahs-night.webp')}
+ .auth-friend{background-image:url('/assets/auth-animals-night.webp')}
+ .auth-elephant{background-image:url('/assets/auth-elephant.webp');background-position:100% 0}
+}
+/* Bodies sit behind the paper. Only isolated fingers/paws render above its edge. */
+.auth-paws{mask-image:linear-gradient(#000,#000),linear-gradient(#000,#000);mask-repeat:no-repeat}
+.auth-monkey.auth-paws{mask-size:18% 22%,18% 20%;mask-position:96% 36%,96% 82%}
+.auth-crocodile.auth-paws{mask-size:18% 18%,18% 22%;mask-position:96% 28%,96% 82%}
+.auth-parrot.auth-paws{mask-size:18% 19%,18% 19%;mask-position:42% 47%,42% 73%}
+.auth-elephant.auth-paws{mask-size:18% 20%,18% 20%;mask-position:98% 60%,98% 94%}
+.animal-options label{position:relative;isolation:isolate;display:flex;flex-direction:column;align-items:center;gap:8px;padding:13px 8px;background:var(--color-option-bg);border:2px solid var(--color-option-edge);border-radius:15px;cursor:pointer;text-align:center;overflow:hidden;margin:0}
+.animal-options input{position:absolute;right:8px;top:8px;accent-color:var(--color-jungle);width:15px;height:15px;min-height:0!important;padding:0}
+.animal-options strong{display:block;color:var(--color-option-ink)}
+.woodland-page label{font-size:12px;font-weight:700;margin-bottom:8px;color:var(--color-field-label)}
+.woodland-page input,.woodland-page select,.woodland-page textarea{width:100%;min-height:44px;border:1px solid var(--color-field-edge);background-color:var(--color-field-bg);color:var(--color-field-ink);border-radius:var(--radius-control);padding:11px 12px;font:inherit;font-size:13px;box-shadow:inset 0 2px 3px var(--color-field-shadow)}
+.woodland-page textarea{min-height:120px;resize:vertical}
+.lobby-page label{font-size:16px}

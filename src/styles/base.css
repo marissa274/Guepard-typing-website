@@ -1,0 +1,42 @@
+/* Reset and element defaults. Imported in @layer base. The theme variables (:root and dark) are in app/globals.css, next to the @theme tokens. */
+:root{font-family:'DM Sans',sans-serif;color:var(--ink);background:var(--paper);font-synthesis:none}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:30px}
+body{margin:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 160 160' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Cpath fill='%23987b42' opacity='.045' filter='url(%23n)' d='M0 0h160v160H0z'/%3E%3C/svg%3E")}
+button,input,select,textarea{font:inherit}
+button,a,input,textarea{-webkit-tap-highlight-color:transparent}
+button,a{touch-action:manipulation}
+a{color:inherit;text-decoration:none}
+button{cursor:pointer;color:inherit}
+button{background:none;border:0}
+a,button{transition:transform .18s,background .18s}
+a:hover,button:hover{filter:brightness(.95)}
+:focus-visible{outline:3px solid var(--color-focus);outline-offset:5px}
+h1,h2,h3,p{margin:0}
+h1,h2,h3{color:var(--green);font-family:'Nunito',sans-serif}
+h1{font-size:clamp(42px,4.7vw,70px);font-weight:1000;line-height:1.06;letter-spacing:-2.8px}
+h2{font-size:29px;letter-spacing:-.9px;font-weight:900}
+label{display:block;font-size:13px;font-weight:600;margin-bottom:10px}
+/* Fields: one look for input, select and textarea (same tokens as the creation form); dark mode uses the card colours. */
+input,select,textarea{padding:13px 16px;color:var(--color-field-ink);border:1px solid var(--color-field-edge);background:var(--color-field-bg);border-radius:var(--radius-control);width:100%}
+select{appearance:none;cursor:pointer;padding-right:42px;background-image:linear-gradient(45deg,transparent 50%,currentcolor 50%),linear-gradient(135deg,currentcolor 50%,transparent 50%);background-position:calc(100% - 21px) 50%,calc(100% - 15px) 50%;background-size:6px 6px;background-repeat:no-repeat}
+select option{background:var(--color-field-bg);color:var(--color-field-ink)}
+input[type=checkbox],input[type=radio]{accent-color:var(--green)}
+input[type=file]{padding:8px 10px;font-size:14px;cursor:pointer}
+input[type=file]::file-selector-button{margin-right:12px;padding:8px 14px;border:2px solid var(--color-wood-small-edge);border-radius:var(--radius-control);background:var(--color-parchment);color:var(--color-jungle);font:inherit;font-weight:700;cursor:pointer}
+fieldset{min-width:0;border-color:var(--line-ui)}
+progress{width:100%;height:12px;accent-color:var(--green)}
+textarea{resize:vertical;min-height:100px;margin-bottom:20px;font-size:18px}
+@variant phone{
+ h1{font-size:52px;letter-spacing:-2.2px}
+ h2{font-size:25px}
+}
+@variant dark{
+ :focus-visible{outline-color:var(--color-focus-night)}
+ input,select,textarea{color:var(--ink);border-color:var(--line-ui);background-color:var(--card)}
+ select option{background:var(--card);color:var(--ink)}
+}
+::placeholder{color:var(--color-placeholder)}
+@variant dark{
+ ::placeholder{color:var(--color-placeholder-night)}
+}

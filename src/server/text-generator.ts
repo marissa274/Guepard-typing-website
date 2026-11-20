@@ -46,13 +46,19 @@ export function classifyComplexity(text:string,kind:CorpusPassage['kind']):TextC
  return score<limits.easy?'easy':score<limits.medium?'medium':'hard';
 }
 
+/** Removes the gaps left by deleted numbers or symbols: no space before punctuation, no empty brackets. */
+function tidy(text:string,removed:string){
+ if(text===removed)return text;
+ return removed.replace(/[(«]\s*[)»]/g,'').replace(/\s+([,.;:!?…)»])/g,'$1').replace(/([(«])\s+/g,'$1').replace(/([,;:])(?=[,.;:!?])/g,'').replace(/\s+/g,' ');
+}
+
 function transform(text:string,settings:Settings){
  let result=text;
  if(!settings.accents)result=result.normalize('NFD').replace(/[̀-ͯ]/g,'');
  if(!settings.uppercase)result=result.toLocaleLowerCase(settings.language==='FR'?'fr':'en');
  if(!settings.punctuation)result=result.replace(punctuationCharacters,'');
- if(!settings.numbers)result=result.replace(/\d/g,'');
- if(!settings.specials)result=result.replace(specialCharacters,'');
+ if(!settings.numbers)result=tidy(result,result.replace(/\d+(?:[.,]\d+)*/g,''));
+ if(!settings.specials)result=tidy(result,result.replace(specialCharacters,''));
  return result.replace(/\s+/g,' ').trim();
 }
 
@@ -70,7 +76,9 @@ function shuffle(values:number[],pick:(max:number)=>number){
  */
 function chainPassages(passages:CorpusPassage[],settings:Settings,pick:(max:number)=>number){
  const featured=(content:string)=>settings.numbers&&/\d/.test(content)||settings.specials&&new RegExp(specialCharacters.source).test(content);
- const prepared=passages.map(passage=>({words:transform(passage.content,settings).split(' ').filter(Boolean),featured:featured(passage.content)})).filter(passage=>passage.words.length);
+ // Options off: prefer passages that need no removal, so sentences are not left with holes (e.g. "En l'année , ...").
+ const clean=passages.filter(passage=>!(!settings.numbers&&/\d/.test(passage.content))&&!(!settings.specials&&new RegExp(specialCharacters.source).test(passage.content)));
+ const prepared=(clean.length?clean:passages).map(passage=>({words:transform(passage.content,settings).split(' ').filter(Boolean),featured:featured(passage.content)})).filter(passage=>passage.words.length);
  if(!prepared.length)return [];
  const words:string[]=[];let last=-1;
  for(let round=0;words.length<settings.length;round++){

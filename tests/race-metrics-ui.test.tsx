@@ -2,6 +2,7 @@ import React from 'react';
 import {fireEvent,render,screen,waitFor} from '@testing-library/react';
 import RaceResults from '../src/components/lobby/RaceResults';
 import VisualRace from '../src/components/lobby/VisualRace';
+import RaceTimeline from '../src/components/lobby/RaceTimeline';
 import {defaultSettings,type RoomView} from '../src/lib/room-types';
 import {personFixture,roomViewFixture} from './fixtures';
 const mockPush=jest.fn();
@@ -66,4 +67,16 @@ test('a rejected progress update restores accepted input instead of retrying it 
  fireEvent.change(screen.getByLabelText('Texte de la course'),{target:{value:'abc'}});
  await waitFor(()=>expect(onError).toHaveBeenCalledWith('Invalid progress'));
  await waitFor(()=>expect(screen.getByLabelText<HTMLTextAreaElement>('Texte de la course').value).toBe('a'));
+});
+
+test('the speed chart and lanes never give two racers of the race the same colour',()=>{
+ // 'a' and 'g' share a hash bucket: only the lane order keeps their lines distinguishable.
+ const telemetry=[{at:start+1000,wpm:40,grossWpm:42,progress:5},{at:start+2000,wpm:50,grossWpm:52,progress:12}];
+ const people=[personFixture({id:'a',name:'Alex',role:'player',telemetry}),personFixture({id:'g',name:'Gaby',role:'player',telemetry})];
+ const {container,unmount}=render(<RaceTimeline room={{...room,people}}/>);
+ const strokes=[...container.querySelectorAll('polyline')].map(line=>line.getAttribute('stroke'));
+ expect(strokes).toHaveLength(2);expect(strokes[0]).not.toBe(strokes[1]);unmount();
+ const race=render(<VisualRace room={{...room,people,phase:'running',endedAt:undefined}} connected onError={jest.fn()}/>);
+ const lanes=[...race.container.querySelectorAll<HTMLElement>('.race-lane')].map(lane=>lane.style.getPropertyValue('--racer-colour'));
+ expect(lanes).toEqual(strokes);
 });

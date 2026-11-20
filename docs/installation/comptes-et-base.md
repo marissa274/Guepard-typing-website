@@ -19,11 +19,11 @@ La variable `GUEPARD_DB_PASSWORD` est utilisée par Compose ; elle doit correspo
 
 ## Identité invitée et URL publique
 
-Générer un secret avec `openssl rand -hex 32` et enregistrer sa valeur uniquement dans `.env.local` ou les variables privées du serveur, sous `AUTH_SECRET`. Il signe le cookie invité et anonymise les empreintes IP. Il doit rester stable entre les redémarrages et être partagé entre instances. En production, il est obligatoire. En développement sans secret configuré, le serveur conserve un secret aléatoire dans `.data/guest-secret` avec des permissions limitées.
+Générer un secret avec `openssl rand -hex 32` (ou `openssl rand -base64 32`) et enregistrer sa valeur uniquement dans `.env.local` ou les variables privées du serveur, sous `AUTH_SECRET`. Il signe le cookie invité et anonymise les empreintes IP. Il doit rester stable entre les redémarrages et être partagé entre instances. En production, il est obligatoire. En développement sans secret configuré, le serveur conserve un secret aléatoire dans `.data/guest-secret` avec des permissions limitées.
 
 Définir `APP_URL` avec l'origine canonique du site, par exemple `https://votre-site.example`, sans chemin. Sur Railway, `RAILWAY_PUBLIC_DOMAIN` peut fournir cette origine si `APP_URL` n'est pas renseigné. OAuth exige HTTPS en production. L'origine n'est jamais tirée d'un en-tête de proxy arbitraire pour construire un callback.
 
-Ne définir `GUEPARD_TRUST_PROXY=1` que si le proxy frontal supprime ou remplace les en-têtes IP fournis par les clients. Le serveur peut alors utiliser `x-forwarded-for` ou `x-real-ip`. Sans ce réglage, il utilise un bucket partagé conservateur pour les limites de tentatives de code. La base ne conserve que l'empreinte HMAC de l'IP.
+Définir `GUEPARD_CLIENT_IP_HEADER` (en-tête que la plateforme écrase toujours, `X-Real-IP` sur Railway) ou `GUEPARD_TRUST_PROXY=N` (nombre de proxys qui ajoutent une entrée à `x-forwarded-for`). Sans l'un des deux, `x-forwarded-for` est ignoré car un client peut l'écrire, et le serveur utilise une empreinte partagée conservatrice ; en production, il l'annonce par un avertissement au démarrage. Les adresses IPv6 sont regroupées par préfixe /64. La base ne conserve que l'empreinte HMAC de l'IP.
 
 ## GitHub
 

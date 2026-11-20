@@ -1,0 +1,9 @@
+/* How to play (lot A). Imported in @layer components. Layout, spacing, typography, colours, dark mode and responsive rules are
+   utilities in HowToPlay.tsx and Pages.tsx. What remains, because it cannot be written as a utility:
+   - the wooden frame of the four step cards (transparent border painted by two stacked gradients);
+   - the illustration backdrop (url() under a gradient);
+   - the podium blocks of the last illustration (repeating gradient). */
+.how-card{border:11px solid transparent;background:linear-gradient(#fff5df,#fff5df) padding-box,repeating-linear-gradient(4deg,#956238 0 3px,#c69760 4px 7px,#ac7946 8px 11px) border-box}
+.how-illustration{background:linear-gradient(#f7e7c645,#f7e7c665),url('/assets/relief-background.webp') center/cover}
+.mini-place b{background:repeating-linear-gradient(2deg,#c8955a 0 5px,#b7834c 6px 8px)}
+.how-card-copy small{display:block;margin-top:12px;line-height:1.5;font-size:14px;color:var(--color-how-note)}

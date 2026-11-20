@@ -1,5 +1,5 @@
 import {afterEach,beforeEach,expect,jest,test} from '@jest/globals';
-import {create,get,listRooms,mutate} from '../src/server/room-service';
+import {create,get,listRooms,mutate,quickJoin} from '../src/server/room-service';
 import {collectFinishedResults} from '../src/server/result-store';
 import type {Room,RoomView} from '../src/lib/room-types';
 
@@ -11,6 +11,12 @@ jest.mock('../src/server/room-store',()=>({
   const copy=JSON.parse(JSON.stringify(mockStore.data)) as Record<string,Room>;
   const result=await fn(copy);
   if(write){mockStore.data=copy;mockStore.writes++}
+  return result;
+ },
+ roomTransaction:async<T,>(id:string,fn:(data:Record<string,Room>)=>T|Promise<T>,write=true):Promise<T>=>{
+  const copy=JSON.parse(JSON.stringify(id in mockStore.data?{[id]:mockStore.data[id]}:{})) as Record<string,Room>;
+  const result=await fn(copy);
+  if(write){const next={...mockStore.data};delete next[id];mockStore.data={...next,...copy};mockStore.writes++}
   return result;
  },
  retireRoom:(data:Record<string,Room>,room:Room)=>{mockStore.retired.push(JSON.parse(JSON.stringify(room)) as Room);delete data[room.id]}
@@ -63,10 +69,32 @@ test('C1-B2: a kicked guest cannot return with a fresh guest identity from the s
  const joined=await call(created.room.id,'',{...guest('intrus','ip-shared'),action:'join'});
  expect(joined.room.id).toBe(created.room.id);
  await call(created.room.id,created.token,{action:'kick',personId:joined.room.me});
- expect(room(created.room.id).bannedIpHashes).toEqual(['ip-shared']);
+ expect(room(created.room.id).bannedIpHashes).toEqual([{hash:'ip-shared',until:now+10*60*1000}]);
  await expect(call(created.room.id,'',{...guest('nouveau-cookie','ip-shared'),action:'join'})).rejects.toMatchObject({status:403});
  await expect(call(created.room.id,'',{...account('voisin'),ipHash:'ip-shared',action:'join'})).resolves.toMatchObject({room:{id:created.room.id}});
  await expect(call(created.room.id,'',{...guest('ailleurs','ip-other'),action:'join'})).resolves.toMatchObject({room:{id:created.room.id}});
+});
+
+test('C2-B1: kicking a guest never refuses the other guests already present behind the same IP',async()=>{
+ const created=await open(account('host'));
+ const classmate=await call(created.room.id,'',{...guest('camarade','ip-shared'),action:'join'});
+ const intruder=await call(created.room.id,'',{...guest('intrus','ip-shared'),action:'join'});
+ await call(created.room.id,created.token,{action:'kick',personId:intruder.room.me});
+ const again=await call(created.room.id,'',{...guest('camarade','ip-shared'),action:'join'});
+ expect(again.token).toBe(classmate.token);
+ await expect(quickJoin(guest('camarade','ip-shared'))).resolves.toMatchObject({room:{id:created.room.id},token:classmate.token});
+ await expect(call(created.room.id,'',{...guest('intrus','ip-shared'),action:'join'})).rejects.toMatchObject({status:403});
+});
+
+test('C2-B1: the IP ban only holds new guest identities for ten minutes; the kicked identity stays banned',async()=>{
+ const created=await open(account('host'));
+ const intruder=await call(created.room.id,'',{...guest('intrus','ip-shared'),action:'join'});
+ await call(created.room.id,created.token,{action:'kick',personId:intruder.room.me});
+ await expect(call(created.room.id,'',{...guest('nouveau','ip-shared'),action:'join'})).rejects.toMatchObject({status:403});
+ await expect(quickJoin(guest('nouveau','ip-shared'))).rejects.toMatchObject({status:404});
+ now+=10*60*1000+1;member(created.room.id,created.room.me).seen=now;
+ await expect(quickJoin(guest('nouveau','ip-shared'))).resolves.toMatchObject({room:{id:created.room.id}});
+ await expect(call(created.room.id,'',{...guest('intrus','ip-shared'),action:'join'})).rejects.toMatchObject({status:403});
 });
 
 test('C1-B3: a host unseen for more than 30 seconds hands over to the oldest connected human',async()=>{

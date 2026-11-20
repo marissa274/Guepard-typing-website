@@ -20,3 +20,14 @@ test('coherent corpus ignores character inclusion and exclusion without changing
  const base:Settings={...defaultSettings,textType:'story',length:20,whitelist:'@',blacklist:'e'};
  expect(generateConfiguredText(base,initialCorpus,()=>0)).toBe(generateConfiguredText({...base,whitelist:'',blacklist:''},initialCorpus,()=>0));
 });
+test('numbers off: coherent texts leave no hole where a number was',()=>{
+ const base:Settings={...defaultSettings,language:'FR',textType:'story',complexity:'medium',length:200,numbers:false};
+ const text=generateConfiguredText(base,initialCorpus,()=>0);
+ expect(text).not.toMatch(/\d/);expect(text).not.toMatch(/\s[,.]|\(\s*\)|\s{2}/);
+ expect(text).not.toContain('maison portant le numéro');
+});
+test('numbers off: a passage whose only choice contains numbers is cleaned without orphan punctuation',()=>{
+ const passage={id:'t',language:'FR' as const,complexity:'medium' as const,kind:'story' as const,source:'t',content:"En l'année 1872, la maison portant le numéro 7 de Saville-row, où Sheridan mourut en 1814, était habitée."};
+ const text=generateConfiguredText({...defaultSettings,language:'FR',textType:'story',complexity:'medium',length:12,numbers:false},[passage],()=>0);
+ expect(text).not.toMatch(/\d/);expect(text).not.toMatch(/\s[,.;:!?]|\s{2}/);expect(text).toContain("En l'année,");
+});

@@ -43,3 +43,24 @@ test('C1-B20: input ignored by the server during the leader pause is kept and se
  expect(mockRequest).toHaveBeenCalledWith('track',expect.objectContaining({action:'progress',value:'ab'}));
  expect(onError).not.toHaveBeenCalled();
 });
+
+test('the race text field takes focus as soon as typing becomes possible: end of the local countdown',async()=>{
+ const people=[racer({id:'a',name:'Alex'}),racer({id:'b',name:'Bea'})];
+ const start=Date.now()+1500;
+ render(<VisualRace room={running(people,{startedAt:start})} connected onError={jest.fn()}/>);
+ const field=screen.getByLabelText('Texte de la course');
+ await act(async()=>{jest.advanceTimersByTime(300)});
+ expect(field.hasAttribute('disabled')).toBe(true);expect(document.activeElement).not.toBe(field);
+ await act(async()=>{jest.advanceTimersByTime(1500)});await act(async()=>{jest.advanceTimersByTime(50)});
+ expect(field.hasAttribute('disabled')).toBe(false);expect(document.activeElement).toBe(field);
+});
+
+test('the race text field takes focus as soon as typing becomes possible: end of the leader pause',async()=>{
+ const people=[racer({id:'a',name:'Alex',pausedUntil:Date.now()+1000}),racer({id:'b',name:'Bea'})];
+ render(<VisualRace room={running(people)} connected onError={jest.fn()}/>);
+ const field=screen.getByLabelText('Texte de la course');
+ await act(async()=>{jest.advanceTimersByTime(300)});
+ expect(field.hasAttribute('disabled')).toBe(true);expect(document.activeElement).not.toBe(field);
+ await act(async()=>{jest.advanceTimersByTime(1200)});await act(async()=>{jest.advanceTimersByTime(50)});
+ expect(field.hasAttribute('disabled')).toBe(false);expect(document.activeElement).toBe(field);
+});
