@@ -3,11 +3,7 @@
    - `url()` backgrounds, sprites and animations (keyframes) of the runners, the botanicals, the confetti and the sign;
    - the pseudo-element decor of the wooden blocks and plaques;
    - `!important` declarations (they would invert in a layer);
-   - rules whose outcome depends on the cascade against kit.css (`.lobby-page .woodland-back`);
-   - `.person-tags span`, used by the lobby roster (lot B). */
-
-/* Roster tags of lobby/Lobby.tsx (lot B). */
-.person-tags span{font-size:12px;background:#fff1d475;color:#786f4d;border-radius:5px;padding:2px 5px}
+   - rules whose outcome depends on the cascade against kit.css (`.lobby-page .woodland-back`); */
 
 /* Runner sprite: animation states (override each other by order) and the portraits of the results atlas. */
 .race-runner[data-motion=running]{animation:gait-cycle .62s steps(1,end) infinite}

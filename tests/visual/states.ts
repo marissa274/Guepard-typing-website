@@ -28,6 +28,8 @@ const masks=['.room-code','.race-clock','.typing-metrics'];
 const hostMasks=[...masks,'.person-copy>strong','.room-invitation li'];
 
 const visit=(path:string)=>async(page:Page)=>{await page.goto(path)};
+/** Waits for the finite CSS animations to end (the podium « results-settle »): captured while running, their first keyframe (`scale(.96)`) would depend on timing. */
+const finiteAnimationsDone=(page:Page)=>page.waitForFunction(()=>document.getAnimations().every(animation=>!(animation instanceof CSSAnimation)||!Number.isFinite(animation.effect?.getComputedTiming().endTime as number)||animation.playState==='finished'));
 const fakeUser={id:'visual-user',username:'Explorateur',avatar:'cheetah'};
 /** Signed-in chrome without a database: the account endpoints are answered by the browser. */
 async function signedIn(page:Page){
@@ -96,11 +98,13 @@ export const scenarios:Record<string,Scenario>={
  contact:{open:visit('/contact'),viewports:base},
  legal:{open:visit('/legal'),viewports:base},
  privacy:{open:visit('/privacy'),viewports:base},
- missing:{open:visit('/introuvable'),viewports:base},
+ missing:{open:async page=>{await visit('/introuvable')(page);await settle(page);
+  // Since the 404 status, the streamed scripts of the error page come before the markup: put them back last (the invisible router announcer of Next goes after them) so the DOM paths of the captured elements are the ones of the references.
+  await page.evaluate(()=>{document.body.append(...Array.from(document.body.querySelectorAll(':scope>script')),...Array.from(document.body.querySelectorAll(':scope>next-route-announcer')))})},viewports:base},
  'legacy-race':{open:visit('/race/canopy'),viewports:base},
  'legacy-private-race':{open:async page=>{await page.addInitScript(race=>{sessionStorage.setItem('guepard-privateRaces',JSON.stringify([race]));localStorage.setItem('guepard-privateRaces',JSON.stringify([race]))},privateRace);await page.goto('/race/'+privateRace.id)},viewports:base},
- podium:{open:visit('/demo/podium'),viewports:everywhere},
- 'podium-details':{open:async page=>{await page.goto('/demo/podium');await page.getByRole('button',{name:'Voir mes statistiques'}).click();await expect(page.locator('.results-table')).toBeVisible()},viewports:base},
+ podium:{open:async page=>{await visit('/demo/podium')(page);await finiteAnimationsDone(page)},viewports:everywhere},
+ 'podium-details':{open:async page=>{await page.goto('/demo/podium');await finiteAnimationsDone(page);await page.getByRole('button',{name:'Voir mes statistiques'}).click();await expect(page.locator('.results-table')).toBeVisible()},viewports:base},
  lobby:{open:async page=>{await page.goto('/');const {room,guest,cleanup}=await guestRoom(page);await openLobby(page,room.id,guest);await expect(page.locator('.room-code')).toBeVisible();return cleanup},masks,viewports:everywhere},
  'lobby-settings':{open:async page=>{await page.goto('/');const {room,guest,cleanup}=await guestRoom(page);await openLobby(page,room.id,guest);await page.locator('details.wood-disclosure summary').first().click();return cleanup},masks,viewports:base},
  'create-room':{open:async page=>{await signedIn(page);await page.goto('/create')},viewports:base},
