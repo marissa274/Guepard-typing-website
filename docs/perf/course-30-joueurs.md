@@ -71,6 +71,39 @@ Point de comparaison (10 joueurs, même script, `LOAD_PLAYERS=10`) : progression
 
 Aucun bug fonctionnel n'est apparu sous charge, donc aucun correctif de code n'accompagne cette mesure.
 
+## Optimisation du magasin de salons : avant / après
+
+Cause confirmée dans `src/server/room-store.ts` : chaque transaction, y compris chaque lecture SSE, prenait le verrou consultatif global, relisait toute la table `guepard_rooms` et réécrivait ce qui avait changé. Une ligne de salon à 30 joueurs pèse environ 160 Ko de JSONB ; la réécrire coûte environ 23 ms côté base, et toutes les écritures passaient l'une après l'autre.
+
+Correctifs :
+- `roomTransaction(id, …)` : verrou consultatif partagé global, puis verrou exclusif de la salle (`hashtext(id)`), lecture et écriture de cette seule ligne. Ordre toujours global puis salle ; une transaction globale ne prend aucun verrou de salle, donc pas d'interblocage.
+- Les écritures qui arrivent ensemble pour une même salle sont groupées dans une seule transaction (une lecture, une écriture, un commit). Chaque appel garde son résultat ou son erreur ; un appel en échec est annulé seul ; si le groupe ne peut pas être validé, les appels sont rejoués un par un.
+- Lectures pures (SSE, liste, résolution de code) : un simple SELECT, sans verrou ni transaction d'écriture.
+- `transaction` (global) conservé pour les opérations multi-salles : création, adhésion (`join`) avec contrôle « déjà dans un autre salon », adhésion rapide, quitter le salon courant, adoption d'un invité. La table `guepard_room_memberships` et sa contrainte continuent de protéger l'unicité.
+- Persistance des résultats, suppressions et archivage inchangés (même code d'écriture).
+
+Mêmes conditions pour les deux séries : build de production, `next start -p 5190`, base `guepard_load`, 30 joueurs, texte de 329 caractères. Machine très chargée pendant les mesures (charge moyenne de 15 à 50, autres agents en parallèle ; l'exécution C, sur le build final, a eu lieu pendant une charge moindre mais encore élevée) : les valeurs absolues sont pessimistes, la comparaison reste valable.
+
+| Mesure | Avant | Après, exécution A | Après, exécution B | Après, exécution C (build final) |
+| --- | --- | --- | --- | --- |
+| Durée de la course | 55,6 s | 47,0 s | 47,4 s | 45,7 s |
+| Requêtes de progression (dont navigateur) | 683 (24) | 5375 (173) | 5045 (165) | 3941 (131) |
+| Débit de progression | 12 req/s | 114 req/s | 106 req/s | 86 req/s |
+| Progression p50 / p95 / max | 1675 / 2413 / 2932 ms | 133 / 252 / 921 ms | 141 / 257 / 742 ms | 147 / 533 / 1949 ms |
+| Progression vue du navigateur p50 / p95 | 1675 / 2251 ms | 66 / 212 ms | 83 / 203 ms | 74 / 669 ms |
+| Délai frappe vers SSE p50 / p95 / max | 3051 / 5565 / 6845 ms | 467 / 833 / 1583 ms | 440 / 794 / 1169 ms | 522 / 1346 / 2411 ms |
+| Images par seconde du navigateur | 59,2 | 59,2 | 59,9 | 59,0 |
+| Images de plus de 50 ms / longues tâches | 7 / 0 | 6 / 2 | 0 / 0 | 7 / 3 |
+| Réponses 2xx / 4xx / 5xx | 683 / 0 / 0 | 5375 / 0 / 0 | 5045 / 0 / 0 | 3941 / 0 / 0 |
+| Déconnexions SSE | 0 | 0 | 0 | 0 |
+| Résultats persistés | 30 / 30 | 30 / 30 | 30 / 30 | 30 / 30 |
+| CPU `next start` médiane / max | 32 % / 74 % | 74 % / 123 % | 84 % / 138 % | 67 % / 133 % |
+| Mémoire `next start`, max | 465 Mo | 634 Mo | 624 Mo | 584 Mo |
+
+Le délai SSE restant (environ 450 ms) correspond surtout au sondage de 600 ms par flux. Le processus Node utilise désormais davantage de CPU : il traite plus de trois à neuf fois plus de requêtes dans le même temps.
+
+Tests : `tests/room-store-locks.test.tsx` (base réelle, `GUEPARD_TEST_DATABASE_URL`, ignoré sinon) vérifie deux salles en parallèle sans blocage, aucune écriture perdue dans une même salle (y compris entre deux « processus »), exclusion entre verrou global et verrou de salle sans interblocage, conflit « déjà dans un autre salon » en concurrence, groupage des écritures, annulation d'un appel en échec.
+
 ## Limites
 
 - Mesuré en local (client, serveur et base sur la même machine, qui se partagent donc les 16 threads), pas sur Railway : réseau, CPU alloué et latence de la base y seront différents ; les valeurs absolues ne sont pas transposables, la tendance l'est.
