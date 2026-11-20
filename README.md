@@ -1,10 +1,143 @@
 # Guépard
 
-Jeu de course de frappe multijoueur en temps réel, en français et en anglais : salons publics, sur code ou privés, bots de cinq niveaux, bonus de remontée, résultats et historique par compte.
+[**Jouer à Guépard**](https://guepard-typing-website-production.up.railway.app)
 
-Lecteur visé : enseignant, correcteur ou développeur qui installe et évalue le projet.
+Guépard est un jeu de course de frappe multijoueur en temps réel, en français et en anglais (FR/EN), avec un thème clair et un thème sombre. On rejoint un salon public, sur code ou privé, on affronte des joueurs et des bots (cinq niveaux), puis on consulte le podium, ses résultats détaillés, ses statistiques et son historique. Les courses accueillent de 2 à 30 participants ; les spectateurs suivent la progression sans taper.
 
-## Captures d'écran
+Lecteur visé : enseignant qui corrige le TP, ou développeur qui clone et lance le projet.
+
+## Technologies
+
+Next.js 16 (App Router), React, TypeScript strict, Tailwind CSS 4, PostgreSQL 16, Drizzle ORM et `pg`. Les mises à jour des salons sont diffusées par SSE. Jest et React Testing Library couvrent les composants et la logique ; Playwright couvre les parcours navigateur, les comparaisons visuelles et la charge.
+
+## Installation locale
+
+Prérequis : Node.js 22.18+ ou 24, npm, Docker et Docker Compose.
+
+```sh
+npm ci
+cp .env.example .env.local
+```
+
+Configurer `.env.local` avant de poursuivre (le fichier `.env.example` documente chaque variable). Renseigner `DATABASE_URL`, `AUTH_SECRET`, `APP_URL`, `GUEPARD_DB_PASSWORD` et `GUEPARD_DEMO_PASSWORD`. Pour générer `AUTH_SECRET`, utiliser une chaîne aléatoire d’au moins 32 octets, par exemple `openssl rand -hex 32`. Le mot de passe PostgreSQL de `DATABASE_URL` doit correspondre à `GUEPARD_DB_PASSWORD`. Conserver toutes les valeurs privées hors du dépôt.
+
+```sh
+docker compose --env-file .env.local up -d db
+npm run db:migrate:sql
+npm run db:seed
+npm run dev
+```
+
+La base est définie dans [compose.yaml](compose.yaml), avec un volume persistant. Attendre son état sain avant les migrations. Le site local est accessible sur [localhost:5173](http://localhost:5173).
+
+Les migrations SQL versionnées sont appliquées par `db:migrate:sql`. Le seed ajoute le corpus, les comptes de démonstration et un historique synthétique. Il conserve les comptes et mots de passe existants : changer `GUEPARD_DEMO_PASSWORD` ne remplace pas un mot de passe déjà enregistré. `npm run db:migrate` sert uniquement à importer les anciens salons JSON et ne remplace pas les migrations SQL.
+
+Pour arrêter PostgreSQL sans supprimer le volume :
+
+```sh
+npm run db:stop
+```
+
+### Compte de démonstration
+
+Le seed crée notamment le compte **GuepardDemo**. Son mot de passe est défini avec `GUEPARD_DEMO_PASSWORD` et doit être communiqué au correcteur par un canal privé. Aucune valeur de mot de passe n’est reproduite dans ce README. Les courses synthétiques sont identifiées comme des démonstrations.
+
+### Variables d’environnement
+
+[.env.example](.env.example) fournit le modèle ; `.env.local` reste non versionné.
+
+| Variable | Usage |
+| --- | --- |
+| `DATABASE_URL` | Connexion PostgreSQL du serveur et des scripts |
+| `AUTH_SECRET` | Signature des cookies invités et empreintes IP ; requis et stable en production |
+| `APP_URL` | Origine canonique du site, contrôle d’origine et callbacks OAuth |
+| `GUEPARD_DB_PASSWORD` | Mot de passe PostgreSQL utilisé par Compose |
+| `GUEPARD_DEMO_PASSWORD` | Mot de passe choisi pour les comptes du seed ; requis en production |
+| `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET` | Configuration de l’application OAuth GitHub |
+| `DISCORD_CLIENT_ID`, `DISCORD_CLIENT_SECRET` | Configuration de l’application OAuth Discord |
+| `GUEPARD_CLIENT_IP_HEADER`, `GUEPARD_TRUST_PROXY` | Configuration du proxy de confiance pour identifier les clients |
+| `RAILWAY_PUBLIC_DOMAIN`, `PORT`, `NODE_ENV` | Environnement de déploiement et d’exécution |
+| `GUEPARD_DATA_DIR` | Stockage JSON de secours, réservé au développement à instance unique |
+| `PLAYWRIGHT_CHROME_PATH`, `GUEPARD_TEST_PORT` | Navigateur et port utilisés par les tests |
+| `GUEPARD_TEST_DATABASE_URL` | Base dédiée aux tests de concurrence PostgreSQL ; ces tests sont ignorés si elle est absente |
+| `LOAD_BASE_URL` | Adresse du serveur isolé utilisé pour le test de charge |
+
+Voir le [guide d’installation](docs/installation/comptes-et-base.md) pour les détails. Les comptes, photos, résultats et contraintes de présence nécessitent PostgreSQL ; le secours JSON ne les remplace pas.
+
+## Connexion GitHub et Discord
+
+La connexion par nom d’utilisateur et mot de passe est disponible. Les deux boutons OAuth nécessitent des applications configurées chez leurs fournisseurs :
+
+| Fournisseur | Variables privées | Callback à enregistrer |
+| --- | --- | --- |
+| GitHub | `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET` | `<APP_URL>/api/auth/github/callback` |
+| Discord | `DISCORD_CLIENT_ID`, `DISCORD_CLIENT_SECRET` | `<APP_URL>/api/auth/discord/callback` |
+
+Créer des applications distinctes pour le développement et la production, enregistrer les callbacks exacts, puis redémarrer le serveur après configuration. `APP_URL` doit correspondre à l’origine utilisée par le navigateur. Le fonctionnement des fournisseurs réels doit être vérifié séparément : les tests automatisés simulent leurs réponses et utilisent des comptes locaux pour les parcours de bout en bout.
+
+Instructions détaillées : [installation, OAuth et photos](docs/installation/comptes-et-base.md).
+
+## Commandes
+
+| Commande | Description |
+| --- | --- |
+| `npm run dev` | Serveur de développement local |
+| `npm run build` | Compilation de production |
+| `npm start` | Démarrage de la compilation de production |
+| `npm run lint` | Vérification ESLint |
+| `npm run typecheck` | Vérification TypeScript du code et des tests |
+| `npm run test` | Tests unitaires et de composants Jest |
+| `npm run test:e2e` | Parcours navigateur Playwright, avec une base de test dédiée |
+| `GUEPARD_TEST_PORT=5180 npm run test:visual` | Captures et styles calculés sur une compilation de production |
+| `npm run test:load` | Course à 30 joueurs, sur un serveur de test déjà démarré |
+| `npm run tailwind:metrics` | Mesure de la migration des styles vers Tailwind |
+
+### Tests navigateur et visuels
+
+Préparer une base PostgreSQL dédiée aux tests, appliquer les migrations et exporter `DATABASE_URL` dans le terminal qui lance Playwright. Ne jamais utiliser la base de production : les scénarios créent et suppriment des comptes et des salles. Les variables du fichier `.env.local` ne sont pas automatiquement exportées vers le processus Playwright ; elles doivent être chargées dans son environnement.
+
+```sh
+npx playwright install chromium
+npm run test:e2e
+```
+
+Sur macOS, les configurations utilisent Chrome local s’il est disponible ; `PLAYWRIGHT_CHROME_PATH` permet de choisir l’exécutable.
+
+Les tests visuels démarrent eux-mêmes un serveur de production isolé. Compiler d’abord, libérer le port de test et conserver le port 5180 pour les références de styles :
+
+```sh
+npm run build
+GUEPARD_TEST_PORT=5180 npm run test:visual
+```
+
+Les références de captures et de styles calculés ne sont pas versionnées : elles sont propres à chaque machine (système, polices, rendu). Disposer des références validées pour effectuer une véritable comparaison ; leur création initiale ne prouve pas l’absence de régression. Les limites connues sont consignées dans le [bilan de migration Tailwind](docs/architecture/migration-tailwind.md).
+
+### Charge : course à 30 joueurs
+
+`test:load` ne démarre pas le serveur. Préparer une base dédiée, ses migrations et son seed, compiler puis démarrer un serveur de production isolé avec `DATABASE_URL`, `AUTH_SECRET` et `APP_URL` configurées. Renseigner `LOAD_BASE_URL` pour cibler ce serveur, puis lancer :
+
+```sh
+npm run test:load
+```
+
+Le scénario utilise 29 clients HTTP/SSE et un navigateur Chromium. Il ne s’exécute ni dans `test:e2e` ni automatiquement dans la CI. Méthode, commandes de démarrage, mesures et limites : [course à 30 joueurs](docs/perf/course-30-joueurs.md).
+
+## Architecture en bref
+
+- `app/` : routes Next.js (App Router), dont les Route Handlers `app/api/` (auth, salons, résultats, avatars).
+- `src/components/` : interface React (accueil, salons, course, résultats, statistiques, compte).
+- `src/server/` : logique serveur (moteur de course, bots, stockage PostgreSQL, authentification, OAuth).
+- `src/styles/` : feuilles de style Tailwind CSS 4 et styles globaux.
+- `migrations/` et `scripts/` : migrations SQL versionnées, seed et outils.
+
+Les salons sont stockés en JSONB dans PostgreSQL (table `guepard_rooms`) ; chaque transaction prend un verrou consultatif par salle, et un verrou global seulement pour les opérations qui touchent plusieurs salles. Détails : [architecture](docs/ARCHITECTURE.md).
+
+## Intégration continue
+
+Le workflow GitHub Actions [.github/workflows/ci.yml](.github/workflows/ci.yml) s’exécute à chaque push et pull request, sur Node 22 avec un service PostgreSQL 16. Il lance, dans l’ordre : `npm ci`, `npm run lint`, `npm run typecheck`, `npm test`, `npm run db:migrate:sql`, `npm run db:seed`, `npm run build`, l’installation de Chromium, puis `npm run test:e2e`. Il ne lance ni `test:visual` ni `test:load`.
+
+## Captures d’écran
+
 
 Captures générées avec Playwright sur la version de production locale (`next build`), avec les données de démonstration du seed et des participants de test.
 
@@ -28,99 +161,21 @@ Captures générées avec Playwright sur la version de production locale (`next 
 
 Vue mobile (360 px de large).
 
-## URL de production
 
-À confirmer par l'autrice. `LIENS-REMISE.txt` mentionne `https://guepard-typing-website-production.up.railway.app/` pour le checkpoint 1 ; cette adresse n'a pas été revérifiée pour la remise finale.
+## Documentation et remise
 
-## Technologies
-
-Versions déclarées dans `package.json` (plages semver) :
-
-| Domaine | Technologie |
-| --- | --- |
-| Framework | Next.js 16.4.6 (App Router, Route Handlers Node.js), build avec webpack |
-| Interface | React ^19.3.0, TypeScript ^5.9.3 (strict), Tailwind CSS ^4.3.3 et CSS |
-| Base de données | PostgreSQL 16 (image `postgres:16-alpine`), `pg` ^8.23.1, Drizzle ORM ^0.45.4 |
-| Images | sharp 0.35.5 (traitement des photos de profil) |
-| Tests | Jest ^30.5.2, React Testing Library ^16.3.3, Playwright ^1.63.0 |
-| Qualité | ESLint ^10.14.0, typescript-eslint ^8.72.2 |
-| Exécution | Node.js 22.18+ ou 24 (la CI utilise Node 22) ; Docker pour la base locale |
-| Mots de passe | scrypt (module `node:crypto`) |
-
-## Démarrage local
-
-Prérequis : Node.js 22.18+ (ou 24), npm, Docker pour PostgreSQL.
-
-```sh
-npm ci
-cp .env.example .env.local
-npm run db:up
-npm run db:migrate:sql
-npm run db:seed
-npm run dev
-```
-
-Ouvrir http://localhost:5173. Vérifier les variables de `.env.local` avant de lancer les commandes : `DATABASE_URL`, `AUTH_SECRET` et `APP_URL` sont expliquées dans [le guide d’installation](docs/installation/comptes-et-base.md). Le mot de passe Compose doit correspondre à celui de `DATABASE_URL`. Si un volume PostgreSQL existe déjà, changer une variable ne change pas son mot de passe enregistré.
-
-Le seed idempotent ajoute 12 corpus FR/EN et le compte de démonstration **GuepardDemo**, avec trois courses synthétiques clairement nommées. En développement, son mot de passe public est **GuepardDemo2026!**. Ne jamais réutiliser un mot de passe personnel pour ce compte de correction.
-
-**Piège en production (`GUEPARD_DEMO_PASSWORD`).** `scripts/db-seed.ts` utilise le mot de passe public par défaut dès que `NODE_ENV` n'est pas `production`, et ne crée le compte que s'il n'existe pas (`ON CONFLICT DO NOTHING`) : modifier la variable ensuite ne change pas un mot de passe déjà enregistré. Lancer le seed contre la base de production sans `NODE_ENV=production`, ou avant d'avoir défini la variable, laisse donc un compte public connu. Définir la variable (8 à 128 caractères) avant le premier seed, ou supprimer le compte et relancer. Le mot de passe de production à communiquer au correcteur est celui que vous avez choisi : il n'est pas dans le dépôt.
-
-## Variables d'environnement
-
-Modèle : `.env.example` (copié dans `.env.local`, non versionné). Variables lues par le code :
-
-| Variable | Rôle | Obligatoire |
-| --- | --- | --- |
-| `DATABASE_URL` | connexion PostgreSQL ; sans elle, les salons utilisent le secours JSON local à instance unique | oui (hors secours local) |
-| `AUTH_SECRET` | secret stable pour signer l'identité invitée ; générer avec `openssl rand -hex 32` (le serveur de production refuse de démarrer sans lui) | oui en production |
-| `APP_URL` | URL publique canonique, sans chemin ; contrôle d'origine et OAuth | oui en production pour OAuth |
-| `RAILWAY_PUBLIC_DOMAIN` | fournie par Railway, utilisée si `APP_URL` est absente | non |
-| `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET` | application OAuth GitHub | non |
-| `DISCORD_CLIENT_ID`, `DISCORD_CLIENT_SECRET` | application OAuth Discord | non |
-| `GUEPARD_DEMO_PASSWORD` | mot de passe du compte de démonstration pour `db:seed` | oui si `NODE_ENV=production` |
-| `GUEPARD_DB_PASSWORD` | mot de passe PostgreSQL de Docker Compose (défaut `guepard_dev_only`), à faire correspondre à `DATABASE_URL` | non |
-| `GUEPARD_DATA_DIR` | dossier du secours JSON et du secret invité local (défaut `.data`) | non |
-| `GUEPARD_CLIENT_IP_HEADER`, `GUEPARD_TRUST_PROXY` | source de l'IP client : en-tête écrasé par la plateforme (`X-Real-IP` sur Railway) ou nombre de proxys qui complètent `X-Forwarded-For` ; sans eux, une empreinte partagée (voir `docs/deploiement-railway.md`) | oui en production |
-| `PLAYWRIGHT_CHROME_PATH`, `GUEPARD_TEST_PORT` | tests navigateur : exécutable Chrome et port du serveur isolé | non |
-| `NODE_ENV`, `PORT` | gérées par Next.js / l'hébergeur (`PORT` utilisé par `npm start`) | non |
-
-`npm run db:migrate` importe les anciens salons JSON ; cette commande est distincte des migrations SQL versionnées. `npm run db:stop` arrête la base sans supprimer son volume.
-
-## Fonctionnalités
-
-- Comptes par mot de passe, sessions PostgreSQL, profil, changement de mot de passe et photo JPEG/PNG/WebP recadrée côté serveur. Flux OAuth GitHub/Discord préparés ; leur activation exige vos applications et variables privées.
-- Salons publics, sur code ou privés ; capacité de 2 à 30 joueurs, spectateurs, invitations révocables, présence unique et transfert de l’hôte. Les invités utilisent une identité signée et ne créent pas de salon.
-- Corpus en base, trois complexités, textes FR/EN cohérents ou aléatoires, paramètres de caractères, durée et correction. Les options d’inclusion/exclusion concernent les mots aléatoires.
-- Décompte serveur de trois secondes, progression contrôlée, cinq niveaux de bots déterministes, abandon et reconnexion, bonus de remontée facultatifs. Une course commencée refuse les nouvelles entrées.
-- Résultats avec MPM net/brut, précision, erreurs, bonus, courbes temporelles réellement collectées et heatmap personnelle. Historique PostgreSQL paginé, consultation après fermeture du salon et annonce de record personnel. Les invités gardent des statistiques de session.
-- Interface FR/EN, préférence de langue conservée en cookie, thème initial selon le système. Sur petit écran, la course recommande un clavier physique ; les résultats restent accessibles.
-
-Les principaux chemins sont `/`, `/login`, `/signup`, `/play`, `/create`, `/races`, `/lobby/:id`, `/how`, `/stats` et `/history/:id`. `/demo/podium` est une démonstration explicitement fictive. Les anciens parcours locaux `/race/:id` sont conservés pour compatibilité ; les courses partagées passent par `/lobby/:id`.
-
-## Vérifications
-
-```sh
-npm run lint
-npm run typecheck
-npm test
-npm run build
-npx playwright install chromium
-npm run test:e2e
-```
-
-Playwright emploie Chrome local sur macOS s’il est disponible, sinon Chromium Playwright ; `PLAYWRIGHT_CHROME_PATH` permet de choisir l’exécutable. Préparer la base avant les tests. Pour tester la compilation de production sur un port distinct, fournir `GUEPARD_TEST_PORT=5191`, `DATABASE_URL` et `AUTH_SECRET` à la commande Playwright. Les scénarios créent leurs propres comptes et salons.
-
-La CI versionnée prépare PostgreSQL, installe avec `npm ci`, lance lint, typage strict, tests, migrations, seed, build et parcours navigateur. Son exécution distante et le déploiement HTTPS doivent être vérifiés sur les services réels.
-
-## Documentation
-
-- [Architecture et sécurité](docs/ARCHITECTURE.md)
-- [Installation, OAuth et photos](docs/installation/comptes-et-base.md)
-- [Exigences et limites de remise](docs/EXIGENCES.md)
-- [Utilisation des agents IA](docs/IA.md)
-- [Bots et choix de simulation](docs/fonctionnalites/bots.md), [ADR bots](docs/architecture/adr-0002-bots.md)
-- [Textes, complexité et bonus](docs/fonctionnalites/textes-et-bonus.md)
+- [Matrice des exigences et limites](docs/EXIGENCES.md)
+- [Démarche créative](docs/DEMARCHE-CREATIVE.md) · [version PDF](docs/DEMARCHE-CREATIVE.pdf)
+- [Architecture, données et flux temps réel](docs/ARCHITECTURE.md)
+- [Migration Tailwind et vérifications visuelles](docs/architecture/migration-tailwind.md)
+- [Test de charge et mesures à 30 joueurs](docs/perf/course-30-joueurs.md)
 - [Guide de déploiement Railway](docs/deploiement-railway.md)
+- [Direction artistique, moodboard et croquis](docs/design/direction-artistique.md)
+- [Installation, comptes et OAuth](docs/installation/comptes-et-base.md)
+- [Bilan des vérifications locales](docs/verification-fonctionnelle.md)
+- [Outils et démarche de travail](docs/IA.md)
+- [ADR temps réel](docs/architecture/adr-0001-temps-reel-sse.md) · [ADR bots](docs/architecture/adr-0002-bots.md)
 
-`CHECKPOINT-1.md` décrit l'état historique du checkpoint 1 et ne constitue pas le bilan de la remise finale. Restent à fournir par l'autrice : `docs/DEMARCHE-CREATIVE.md` (nom, logo, direction artistique), l'URL de production confirmée et les coordonnées légales.
+[Site de production](https://guepard-typing-website-production.up.railway.app) · [Dépôt GitHub](https://github.com/marissa274/Guepard-typing-website)
+
+Le partage du dépôt avec l’enseignant, les accès de démonstration et les vérifications sur le site public doivent accompagner la remise. Les résultats locaux ne certifient pas la disponibilité du déploiement, les callbacks OAuth réels ni une exécution distante de la CI. `CHECKPOINT-1.md` conserve uniquement l’état historique du premier checkpoint.
