@@ -13,6 +13,12 @@ jest.mock('../src/server/room-store',()=>({
   if(write){mockStore.data=copy;mockStore.writes++}
   return result;
  },
+ roomTransaction:async<T,>(id:string,fn:(data:Record<string,Room>)=>T|Promise<T>,write=true):Promise<T>=>{
+  const copy=JSON.parse(JSON.stringify(id in mockStore.data?{[id]:mockStore.data[id]}:{})) as Record<string,Room>;
+  const result=await fn(copy);
+  if(write){const next={...mockStore.data};delete next[id];mockStore.data={...next,...copy};mockStore.writes++}
+  return result;
+ },
  retireRoom:(data:Record<string,Room>,room:Room)=>{mockStore.retired.push(JSON.parse(JSON.stringify(room)) as Room);delete data[room.id]}
 }));
 jest.mock('pg',()=>({Pool:class {}}));

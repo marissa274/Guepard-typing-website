@@ -1,5 +1,5 @@
 import {randomBytes} from 'node:crypto';
-import {retireRoom,transaction} from './room-store';
+import {retireRoom,roomTransaction,transaction} from './room-store';
 import {createRoom,authenticate,joinRoom,act,snapshot,tick,RoomError} from './room-engine';
 import {RoomAccessError,requireRoomAccess} from './room-access';
 import {consumeCodeAttempt} from './code-rate-limit';
@@ -131,9 +131,9 @@ function refresh(data:Data,room:Room,person:Person){
 }
 /** Called by every SSE stream: a read-only pass serves unchanged rooms without writing; only real changes open a write transaction. */
 export async function get(id:string,token:string){
- const unchanged=await transaction(data=>{const room=find(data,id),person=authenticate(room,token);return refresh(data,room,person)?undefined:snapshot(room,person)},false);
+ const unchanged=await roomTransaction(id,data=>{const room=find(data,id),person=authenticate(room,token);return refresh(data,room,person)?undefined:snapshot(room,person)},false);
  if(unchanged)return unchanged;
- const result=await transaction(data=>{const room=find(data,id),person=authenticate(room,token);refresh(data,room,person);return data[id]?snapshot(room,person):undefined});
+ const result=await roomTransaction(id,data=>{const room=find(data,id),person=authenticate(room,token);refresh(data,room,person);return data[id]?snapshot(room,person):undefined});
  if(!result)throw new RoomError('Ce salon est fermé ou introuvable.',404);
  return result;
 }
@@ -157,7 +157,8 @@ export async function adoptGuestMembership(user:Account,guestId:string){
 }
 export async function mutate(id:string,token:string,body:Command){
  if(body.action==='join'&&typeof body.code==='string'&&body.code)await consumeCodeAttempt(String(body.ipHash||'local'));
- return transaction(async data=>{
+ /** Joining checks membership across rooms (global transaction); every other action only touches its own room. */
+ const run=async(data:Data)=>{
   prune(data);const room=find(data,id);tick(room,true);
   if(body.action==='join')return admit(data,room,body);
   const person=authenticate(room,token);person.seen=Date.now();
@@ -186,5 +187,6 @@ export async function mutate(id:string,token:string,body:Command){
   let generatedText:string|undefined;
   if(body.action==='start'||body.action==='rematch'){requireHost(room,person);try{generatedText=await prepareConfiguredText(room.settings)}catch(error){if(error instanceof Error&&'status'in error&&error.status===400)throw new RoomError(error.message,400);throw error}}
   const result=act(room,person,body,generatedText);return {...result,room:snapshot(room,person)};
- });
+ };
+ return body.action==='join'?transaction(run):roomTransaction(id,run);
 }

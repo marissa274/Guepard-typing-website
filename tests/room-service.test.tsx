@@ -2,7 +2,7 @@ import {create,mutate,quickJoin,resolveCode,listRooms,leaveCurrent,adoptGuestMem
 import type {Room,RoomView} from '../src/lib/room-types';
 type Data=Record<string,Room>;
 let mockData:Data={};
-jest.mock('../src/server/room-store',()=>({transaction:jest.fn(async<T,>(fn:(data:Data)=>T|Promise<T>)=>{const copy=JSON.parse(JSON.stringify(mockData)) as Data;const result=await fn(copy);mockData=copy;return result})}));
+jest.mock('../src/server/room-store',()=>({transaction:jest.fn(async<T,>(fn:(data:Data)=>T|Promise<T>)=>{const copy=JSON.parse(JSON.stringify(mockData)) as Data;const result=await fn(copy);mockData=copy;return result}),roomTransaction:jest.fn(async<T,>(id:string,fn:(data:Data)=>T|Promise<T>)=>{const copy=JSON.parse(JSON.stringify(id in mockData?{[id]:mockData[id]}:{})) as Data;const result=await fn(copy);const next={...mockData};delete next[id];mockData={...next,...copy};return result})}));
 /** Stored room (server side), failing loudly when the test expects it to exist. */
 function stored(id:string):Room{const room=mockData[id];if(!room)throw new Error('room missing');return room}
 /** Narrow a create/join reply to an admission carrying a member token. */
