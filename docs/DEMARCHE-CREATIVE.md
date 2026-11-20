@@ -1,5 +1,7 @@
 # Démarche créative : nom et logo
 
+**Repère de lecture :** le nom et le logo existaient déjà en octobre 2026. Les dates des échanges retrouvés indiquent des traces conservées, pas le début de la conception. Le 20 novembre correspond à la rédaction et à la recherche documentaire, pas à la création.
+
 Ce document retrace comment le nom **Guépard** et le logo du projet ont été trouvés. Il documente les exigences DES-01 (nom) et DES-02 (logo) de la [matrice d'exigences](EXIGENCES.md).
 
 ## 1. Point de départ : le thème
@@ -19,7 +21,7 @@ Le nom devait donc venir de cet univers et dire en un mot ce que fait le site : 
 | Guépard Type | Non | Plus explicite sur la frappe, mais plus long et mélange français et anglais |
 | **Guépard** | **Oui** | Court, facile à retenir, en français, et l'image de vitesse suffit à évoquer la course |
 
-Les deux noms ci-dessus sont ceux cités dans mon explication du **20 novembre 2026**. Aucun autre nom envisagé n’a été retrouvé dans les conversations locales consultées.
+Les deux noms ci-dessus sont ceux cités dans mon explication rétrospective. Aucun autre nom envisagé n’a été retrouvé dans les conversations locales consultées.
 
 **Vérification d'originalité.**
 
@@ -42,7 +44,7 @@ Le logo final est intégré dans l'en-tête du site ([guepard-logo.png](../publi
 
 **Croquis.**
 
-Dans mon explication du **20 novembre 2026**, je décris un croquis de clavier, puis l’idée d’y faire dormir le guépard. La photo et la date de réalisation de ce croquis n’ont pas été retrouvées dans l’historique local consulté. Le logo final fourni le 1er octobre ne constitue pas une photo du croquis.
+Dans mon explication rétrospective, je décris un croquis de clavier, puis l’idée d’y faire dormir le guépard. La photo et la date de réalisation de ce croquis n’ont pas été retrouvées dans l’historique local consulté. Le logo final fourni le 1er octobre ne constitue pas une photo du croquis.
 
 <!-- À COMPLÉTER : insérer la photo originale du croquis et sa date lorsqu’elles sont retrouvées. -->
 
@@ -59,8 +61,8 @@ ChatGPT a aidé à rédiger le brief et à explorer l’univers visuel, comme l�
 | Date | Étape |
 |---|---|
 | Au plus tard le 1er octobre 2026 | Thème jungle explicitement demandé dans le brief de 19 h 46 (heure de Toronto) |
-| Au plus tard le 1er octobre 2026 | Nom Guépard déjà employé dans le brief ; démarche expliquée le 20 novembre |
-| Date du croquis non retrouvée | Croquis décrit le 20 novembre ; idée du guépard endormi déjà présente dans le brief du 1er octobre |
+| Au plus tard le 1er octobre 2026 | Nom Guépard déjà employé dans le brief ; choix effectué auparavant |
+| Date du croquis non retrouvée | Croquis évoqué rétrospectivement ; idée du guépard endormi déjà présente dans le brief du 1er octobre |
 | Au plus tard le 2 octobre 2026 | Logo déjà intégré dans l’en-tête du premier commit (`24333c3`, `src/components/Chrome.jsx`) ; la date exacte de création reste à confirmer |
 
 Les dates de conception ne sont pas déduites des dates de modification des fichiers. La présence du logo dans le premier commit atteste son intégration à cette date, sans dater le croquis ni sa réalisation.
@@ -149,7 +151,7 @@ h1{font-size:27pt}.lead{font-size:10.5pt}section{margin-top:.12in}
   <div>
    <p class="eyebrow">Démarche créative</p>
    <h1>Le nom et le logo de Guépard</h1>
-   <p class="lead">Comment le nom <strong>Guépard</strong> et le logo du jeu de courses de frappe ont été trouvés. Ce document présente la démarche liée aux exigences <strong>DES-01</strong> (nom) et <strong>DES-02</strong> (logo).</p>
+   <p class="lead">Nom et logo déjà présents en <strong>octobre 2026</strong>. Les dates retrouvées ne datent pas le début de la conception. Démarche liée aux exigences <strong>DES-01</strong> (nom) et <strong>DES-02</strong> (logo).</p>
   </div>
   <div>
    <img class="logo" src="file:///Users/marissabellebindeki/Downloads/Guepard/public/assets/guepard-logo.png" alt="Logo de Guépard : un guépard endormi sur un clavier">
@@ -171,7 +173,7 @@ h1{font-size:27pt}.lead{font-size:10.5pt}section{margin-top:.12in}
    <tr><td>Guépard Type</td><td><span class="tag no">Non</span></td><td>Plus explicite sur la frappe, mais plus long, et il mélange français et anglais.</td></tr>
    <tr class="win"><td><strong>Guépard</strong></td><td><span class="tag yes">Oui</span></td><td>Court, facile à retenir, en français ; l'image de vitesse suffit à évoquer la course.</td></tr>
   </table>
-  <p style="font-size:9pt">Deux noms cités dans mon explication du 20 novembre 2026 ; aucun autre retrouvé dans les conversations locales consultées.</p>
+  <p style="font-size:9pt">Deux noms retrouvés dans mon explication rétrospective ; les recherches antérieures ne sont pas encore reconstituées.</p>
   <p><strong>Vérification d'originalité.</strong></p>
   <div class="card" style="font-size:9pt;line-height:1.4"><strong>Recherche du 20 novembre 2026.</strong> Requêtes : « Guépard jeu de frappe », « Guepard typing game », « Guépard dactylographie » et recherche web ciblant GitHub.<br>Aucun jeu nommé exactement <strong>Guépard</strong> identifié dans les résultats consultés. Cependant, <a href="https://play.google.com/store/apps/details?hl=fr&amp;id=com.coq.animaltyping.lite">Animal Typing - Lite</a> (Corentin Faucher) associe déjà le guépard à la vitesse et à la précision. <a href="https://github.com/Guepard-Corp/gfs">Guepard-Corp/gfs</a> utilise aussi ce nom, dans un autre domaine.<br>Recherche limitée : l'unicité du nom et du concept n'est pas démontrée ; marques et domaines non vérifiés.</div>
  </section>
@@ -195,7 +197,7 @@ h1{font-size:27pt}.lead{font-size:10.5pt}section{margin-top:.12in}
 
  <section>
   <h2><span class="n">4</span>Le croquis</h2>
-  <div class="todo">photo originale et date non retrouvées dans l’historique local. Le 20 novembre, je décris un croquis de clavier ; le logo final fourni n’est pas une photo du croquis.</div>
+  <div class="todo">photo originale et date non retrouvées dans l’historique local. Un croquis de clavier est décrit rétrospectivement ; le logo final fourni n’est pas une photo du croquis.</div>
  </section>
 
  <section>
@@ -208,8 +210,8 @@ h1{font-size:27pt}.lead{font-size:10.5pt}section{margin-top:.12in}
   <table>
    <tr><th style="width:28%">Date</th><th>Étape</th></tr>
    <tr><td>Au plus tard le<br>1er octobre 2026</td><td>Thème jungle explicitement demandé dans le brief.</td></tr>
-   <tr><td>Au plus tard le<br>1er octobre 2026</td><td>Nom Guépard déjà utilisé ; démarche expliquée le 20 novembre.</td></tr>
-   <tr><td>Date non retrouvée</td><td>Croquis décrit le 20 novembre ; idée déjà présente le 1er octobre.</td></tr>
+   <tr><td>Au plus tard le<br>1er octobre 2026</td><td>Nom Guépard déjà utilisé ; choix effectué auparavant.</td></tr>
+   <tr><td>Date non retrouvée</td><td>Croquis évoqué rétrospectivement ; idée déjà présente le 1er octobre.</td></tr>
    <tr><td>Au plus tard le<br>2 octobre 2026</td><td>Logo déjà intégré dans l’en-tête du premier commit (<strong>24333c3</strong>). Date de création à confirmer.</td></tr>
   </table>
   <p style="font-size:9pt;color:var(--muted)">La présence du logo dans le premier commit atteste son intégration, sans dater le croquis ni sa réalisation.</p>
