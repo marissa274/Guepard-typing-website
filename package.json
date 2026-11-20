@@ -13,6 +13,7 @@
     "db:migrate": "node --env-file-if-exists=.env.local scripts/migrate-rooms-to-postgres.ts",
     "test": "jest --config jest.config.json --runInBand",
     "test:e2e": "playwright test",
+    "test:load": "playwright test -c playwright.load.config.ts",
     "typecheck": "tsc --noEmit -p tsconfig.json && tsc --noEmit -p tsconfig.test.json",
     "lint": "eslint app src scripts tests *.ts --max-warnings 0",
     "db:migrate:sql": "node --env-file-if-exists=.env.local scripts/db-migrate.ts",
