@@ -88,6 +88,17 @@ Pièges découverts pendant le lot B :
 - Outil de travail : `getComputedStyle` + cascade par élément (règle gagnante, bande de largeur, thème) a servi à écrire les classes ; le diff de styles calculés reste l'arbitre (`GUEPARD_DIFF_LINES=4000` affiche tout). Les tests de salon enchaînés peuvent buter sur les limites de débit : relancer par lots.
 - Les cas visuels du salon couvrent aussi la vue de l'hôte (bot, observateur, invitations, menu ouvert), le formulaire d'entrée, le salon fermé, les résultats (invité et hôte, détails ouverts) et le formulaire de création.
 
+Pièges découverts pendant la fin de TECH-03 (nettoyage des feuilles partagées) :
+- Méthode : un script jetable charge chaque cas visuel avec la CSS compilée non minifiée, retire une déclaration à la fois dans le CSSOM de la page (`rule.style.cssText`) et compare les styles calculés (sous-arbre) et les rectangles de tout le document. Une déclaration qui ne change rien dans aucun cas est candidate à la suppression. Elle ne vaut que comme présélection : le diff de styles calculés sur tout le jeu de cas reste l'arbitre.
+- Les transitions masquent le résultat : sans `*{transition:none!important}` injecté, `getComputedStyle` renvoie la valeur de départ de la transition qui vient de démarrer (`a,button{transition:transform .18s,background .18s}`), donc le retrait de `background` ou de `transform` « ne change rien ».
+- Retirer un longhand (`background-color`) d'une règle écrite en raccourci (`background`) ne fait rien dans le CSSOM : retirer l'élément de `cssText`.
+- Deux déclarations de deux règles peuvent être chacune redondante sans l'être ensemble (`.animal-options{display:grid}` dans deux règles, `min-height:0` du radio dans deux règles, `content` d'un `::after` repris par une règle de contexte) : toute suppression automatique se vérifie par le diff complet ; les règles de pseudo-éléments, celles en `:has()` et la chaîne `.lobby-page` / `.lobby-results` / `.woodland-*` (mal couvertes aux largeurs intermédiaires et à 2688 px) sont conservées telles quelles.
+- Une liste de sélecteurs n'est morte que si **chaque** partie vise une classe disparue (`.leaves-cutout,.vines-cutout` garde `.leaves-cutout`) ; les éléments nus (`h2`, `.section-heading h2,h2`) ne sont jamais morts. Les classes recherchées par mot dans les sources trompent (`how`, `status`, `steps` sont des mots des textes) : lire le contexte.
+- Un nom de `@keyframes` peut être écrit avec des `_` dans une valeur arbitraire (`[animation:wooden-sign-sway_6s_…]`) : le chercher sans frontière de mot.
+- Reformater du CSS avec postcss en ne gardant que les déclarations perd les `@variant` imbriqués dans une règle (`.board-ropes::before{… @variant phone{width:7px}}`).
+- Une règle qui suit, dans la même couche, une règle de même sélecteur et de même contexte la masque entièrement : ces déclarations se retirent sans sonde (`scripts` jetables `shadow`) ; `@variant dark` n'est pas du même contexte qu'une règle nue (une classe de spécificité de plus).
+- Les tests visuels : l'animation finie `results-settle` du podium (`scale(.96)` → `none`) était captée ou non selon la durée du chargement, d'où des références instables ; la page attend maintenant la fin des animations CSS finies. Depuis l'état 404 réel, les scripts de la page d'erreur précèdent le markup : le cas `missing` les replace en fin de `body` pour conserver les chemins DOM des références. Le survol d'une planche déplace le ciel avec une transition de 450 ms pilotée par le pointeur : la référence `home-plank-hover-dark-360` capte une valeur intermédiaire différente des trois autres (elle échoue tel quel, voir « État »).
+
 ## Stratégie
 
 La cascade se joue par élément : on migre par paire « élément × propriété ». Pour un élément, on rassemble toutes les règles qui le ciblent (media, sombre, hover, contexte) et on les traduit ensemble en classes, puis on supprime ces déclarations.
@@ -131,3 +142,22 @@ Mesuré par `scripts/tailwind-metrics.ts` :
 5. Aucun hex littéral hors `@theme`, sauf dégradés, SVG et décor.
 6. Aucune règle restante ne portant que du layout/espacement/typo sur un élément rendu par un seul composant.
 7. Diffs pixel et styles calculés nuls ; `npm test`, `npm run test:e2e`, `typecheck`, `lint`, `build` passent.
+
+### État (fin de la migration)
+
+| Critère | Au départ de la dernière étape | Final |
+| --- | --- | --- |
+| 1. Point d'entrée | oui | oui |
+| 2. Déclarations d'origine hors CSS | 69,3 % (1587 restantes) | **85,8 %** (4434 / 5169 ; 735 restantes) ; 1521 utilitaires générés |
+| 3. CSS restant | 52,7 Ko (`kit.css` 34 Ko) | **32,0 Ko** (`kit.css` 12,7 Ko, `lobby.css` 5,9, `results.css` 4,1, `chrome.css` 2,4, `account.css` 2,3, `base.css` 1,7, `expeditions.css` 0,9, `home.css` 0,7, `race.css` 0,7, `how.css` 0,5) |
+| 4. `[data-theme=dark]` / `@media` de largeur bruts | 25 / 34 | **0 / 0** (`@variant dark`, `phone`, `compact`…) |
+| 5. Hex hors `@theme` (tous / hors dégradés et `url()`) | 344 / 209 | **119 / 17** |
+| 6. Règles layout / typo seules | 213 | **40** |
+| 7. Styles calculés et pixels | — | 384 cas sur 385 identiques ; `npm test`, `typecheck`, `lint`, `build`, `test:e2e` verts |
+
+Ce qui a été fait : environ 780 déclarations mortes ou redondantes retirées des feuilles (`kit.css` perd 22 Ko), les règles d'un seul composant déplacées dans leur JSX (dialogue du compte, blocs « salons publics » vides ou en chargement, avatars de « Comment jouer », marqueurs de `details`, mise en page du sélecteur d'animal, rangée `course-code-entry`, bandeaux des expéditions), les variables du thème (`:root`, sombre) et une cinquantaine de couleurs du kit (boutons de bois, pages de la forêt et du salon, champs, sélecteur d'animal, anneaux de focus) devenues des jetons `@theme` ; tout le CSS restant utilise `@variant dark` et les `@variant` de largeur, et les feuilles sont reformatées une règle par ligne.
+
+Ce qui reste, et pourquoi (le critère 7 est tenu hors un cas) :
+- **Critère 5 (17 hex)** : tous sont des biseaux et ombres de pseudo-éléments (`::before` / `::after` des cordes de l'accueil, du cadre du salon, des planches et plaques, du perroquet) ou l'ombre portée du coureur : du décor au sens du plan. Le script ne les distingue pas, car il n'exempte que `gradient`, `url()` et `data:` ; les passer en jetons de thème (17 couleurs à usage unique) ne sert à rien.
+- **Critère 6 (40 règles)** : 9 sont les réglages de base des éléments nus (`*`, `h1`, `h2`, `label`… dans `base.css`), 4 sont le pied de page et la navigation que les compositions `#app:has(…)` écrasent (un utilitaire annulerait ces écrasements), 20 appartiennent à la chaîne de conteneurs partagés `.woodland-*` / `.lobby-*` (au moins deux composants, listés comme noyau du kit dans le plan), 7 sont `.inner`, `.eyebrow` et `.scoreboard` (quatre pages ; leurs `h1` descendants entrent en conflit avec les `sr-only` et classes propres). Aucune ne vise un élément d'un seul composant dont le style serait indépendant du contexte ; `--strict` reste donc rouge sur les critères 5 et 6, et il n'a pas été assoupli.
+- **Critère 7** : `computed styles home-plank-hover-dark-360` échoue. Sa référence (générée avant la migration) contient `matrix(1.04, 0, 0, 1.04, 0, 0.803747)` pour l'image du ciel, valeur de fin de transition, alors que les trois autres cas du survol (clair 360 et 1440, sombre 1440) contiennent la valeur de départ ; l'échec est identique avant et après les changements de style (il existait sur l'arbre fusionné de départ). Il faut régénérer cette seule référence (non versionnée) ou fixer la position de la souris dans le cas ; ce n'est pas fait ici.
