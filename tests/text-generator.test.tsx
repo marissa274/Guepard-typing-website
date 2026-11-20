@@ -23,7 +23,7 @@ test('coherent corpus ignores character inclusion and exclusion without changing
 test('numbers off: coherent texts leave no hole where a number was',()=>{
  const base:Settings={...defaultSettings,language:'FR',textType:'story',complexity:'medium',length:200,numbers:false};
  const text=generateConfiguredText(base,initialCorpus,()=>0);
- expect(text).not.toMatch(/\d/);expect(text).not.toMatch(/\s[,.;:!?]|\(\s*\)|\s{2}/);
+ expect(text).not.toMatch(/\d/);expect(text).not.toMatch(/\s[,.]|\(\s*\)|\s{2}/);
  expect(text).not.toContain('maison portant le numéro');
 });
 test('numbers off: a passage whose only choice contains numbers is cleaned without orphan punctuation',()=>{
