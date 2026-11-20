@@ -85,4 +85,18 @@ describe('A11Y-04 · account menu',()=>{
   menu.open=true;fireEvent.pointerDown(container.querySelector('main')!);
   expect(menu.open).toBe(false);
  });
+ test('closing the settings dialog returns focus to the account menu summary, not to <body> (K1)',async()=>{
+  jest.mocked(authService.current).mockResolvedValueOnce({user:{id:'u1',username:'Jungle',avatar:'cheetah'}} as never);
+  const {container}=await mount('/how');
+  const summary=(await screen.findByText('Jungle')).closest('summary') as HTMLElement;
+  const menu=container.querySelector('details.account') as HTMLDetailsElement;
+  menu.open=true;
+  const opener=within(menu).getByRole('button',{name:'Paramètres'});act(()=>opener.focus());
+  fireEvent.click(opener);
+  const dialog=await waitFor(()=>{const element=container.querySelector('dialog[open]');expect(element).not.toBeNull();return element as HTMLDialogElement});
+  expect(menu.open).toBe(false);
+  act(()=>{dialog.close()});
+  await waitFor(()=>expect(container.querySelector('dialog')).toBeNull());
+  expect(document.activeElement).toBe(summary);
+ });
 });

@@ -27,7 +27,7 @@ const ui={
  link:'whitespace-nowrap rounded-[30px] py-13 px-17 upto-1250:py-12 upto-1250:px-12 phone:py-11 phone:px-10 upto-450:py-9 upto-450:px-8',
  controls:'controls relative z-3 flex items-center gap-12 text-[16px] font-semibold upto-1250:gap-8 tablet:col-[2] tablet:row-[1] phone:gap-5 phone:text-[14px] upto-450:gap-2',
  summary:'flex items-center justify-center gap-8 cursor-pointer [list-style:none] tablet:min-w-44 tablet:min-h-44',
- menu:'absolute right-0 top-35 tablet:top-50 z-5 grid gap-16 min-w-230 p-20 bg-card text-ink text-[16px] border border-line rounded-[15px] [box-shadow:0_10px_25px_#0002]',
+ menu:'absolute right-0 top-35 tablet:top-50 z-5 grid gap-16 min-w-230 p-20 bg-card text-ink text-[16px] border border-line rounded-[15px] [box-shadow:0_10px_25px_#0002] [&_:focus-visible]:outline-focus [&_:focus-visible]:[outline-offset:2px] dark:[&_:focus-visible]:outline-focus-night',
  menuButton:'text-left p-0',
  login:'login wood-small-button whitespace-nowrap text-[16px] py-13 px-20 min-h-48 upto-1250:py-12 upto-1250:px-15 phone:text-[14px] phone:py-10 phone:px-12 phone:min-h-44 upto-450:text-[12px] upto-450:py-8 upto-450:px-9 upto-450:min-h-38',
  language:'language quiet text-cream gap-6 whitespace-nowrap border border-[#ffffff4a] rounded-control py-11 px-14 min-h-48 phone:text-[14px] phone:p-10 phone:min-h-44 upto-450:text-[12px] upto-450:p-7 upto-450:min-h-38',
