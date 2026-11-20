@@ -97,6 +97,20 @@ suite('PostgreSQL room store locking',()=>{
   expect(before).toBeGreaterThan(0);expect(Number(writes.rows[0].x)-before).toBeLessThan(10);
  });
 
+ test('a race finished then reset inside one group of writes still has its results saved',async()=>{
+  const room=make('user:finish-reset');await seed(a,room);
+  const userId='00000000-0000-4000-8000-0000000000f1',startedAt=Date.now()-60_000;
+  await pool.query('DELETE FROM guepard_results WHERE user_id=$1',[userId]);
+  const held=gate(),entered=gate();
+  const blocker=a.roomTransaction(room.id,async()=>{entered.open();await held.promise});
+  await entered.promise;
+  const finish=a.roomTransaction(room.id,data=>{const r=data[room.id];Object.assign(r.people[0],{kind:'demo',userId,progress:r.people[0].progress,finishedAt:startedAt+30_000,typed:40});Object.assign(r,{phase:'finished',startedAt,endedAt:startedAt+30_000,text:'abc'})});
+  const reset=a.roomTransaction(room.id,data=>{Object.assign(data[room.id],{phase:'waiting',startedAt:undefined,endedAt:undefined})});
+  held.open();await Promise.all([blocker,finish,reset]);
+  expect((await pool.query('SELECT 1 FROM guepard_results WHERE user_id=$1 AND room_id=$2',[userId,room.id])).rowCount).toBe(1);
+  await pool.query('DELETE FROM guepard_results WHERE user_id=$1',[userId]);
+ });
+
  test('a lone failing room transaction leaves the room untouched',async()=>{
   const room=make('user:lone');await seed(a,room);
   await expect(a.roomTransaction(room.id,data=>{data[room.id].revision+=5;throw new Error('non')})).rejects.toThrow('non');
