@@ -10,7 +10,7 @@ const ui={
  fields:'mt-4 mb-8 mx-0 gap-0 grid grid-cols-[1fr]',
  row:'py-3 px-0 gap-10 grid items-center grid-cols-[minmax(120px,0.9fr)_minmax(0px,1fr)] compact:grid-cols-[minmax(95px,0.8fr)_minmax(0px,1fr)]',
  label:'m-0 font-[650] text-[#405448] text-[16px] leading-[1.25] compact:text-[14px] upto-620:block',
- control:'py-8 px-10 border border-[#7a6f55] rounded-[12px] bg-[#fff9ec] text-[#34433a] [box-shadow:#7d684026_0px_2px_5px] text-[16px] min-h-40 leading-[1.2] h-40 box-border in-[.room-settings-controls:disabled]:cursor-not-allowed',
+ control:'py-8 pl-10 pr-32 border border-[#7a6f55] rounded-control bg-[#fff9ec] text-[#34433a] [box-shadow:#7d684026_0px_2px_5px] text-[16px] min-h-40 leading-[1.2] h-40 box-border in-[.room-settings-controls:disabled]:cursor-not-allowed',
  free:'in-[.room-settings-controls:disabled]:bg-[#f2e6cc] in-[.room-settings-controls:disabled]:text-[#766e54] in-[.room-settings-controls:disabled]:cursor-not-allowed',
  disclosure:'group py-9 px-0 border-t border-t-[#d9c9ab] last:pb-0',
  summary:'flex justify-between font-bold cursor-pointer [list-style:none] [&::-webkit-details-marker]:hidden text-[#255338] text-[16px] leading-[1.35] group-open:mb-18',
