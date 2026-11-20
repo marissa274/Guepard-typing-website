@@ -4,9 +4,14 @@
    Colours are @theme tokens (app/globals.css); dark mode and widths are `@variant`s. */
 button:disabled{cursor:not-allowed;opacity:.5}
 .eyebrow{font-size:12px;letter-spacing:2.2px;font-weight:700;display:flex;align-items:center;gap:9px;color:var(--green);margin-bottom:20px}
-.button{display:inline-flex;align-items:center;justify-content:center;gap:27px;border:1.5px solid var(--green);border-radius:12px;padding:15px 23px;font-size:14px;font-weight:700;min-height:50px}
-.button:hover{transform:translateY(-2px)}
-.primary{background:var(--orange);color:var(--color-primary-ink);border:1.5px solid var(--color-primary-edge);box-shadow:0 4px 0 var(--shadow);border-radius:12px 15px 13px 11px}
+/* Buttons: three variants, one radius (--radius-control). Primary = mango (.primary, .wood-primary); secondary = parchment (.button, .wood-small-button); quiet = no fill (.quiet). */
+.button,.wood-small-button,.quiet{display:inline-flex;align-items:center;justify-content:center;gap:27px;border:2px solid var(--line-ui);border-radius:var(--radius-control);padding:12px 20px;font-size:15px;font-weight:700;min-height:48px;background:var(--color-parchment);color:var(--color-jungle);box-shadow:0 3px 0 var(--color-secondary-shadow)}
+.button:hover,.wood-small-button:hover{transform:translateY(-1px);background:var(--color-wood-small-hover)}
+.button:active,.wood-small-button:active,.primary:active,.wood-primary:active{transform:translateY(2px);box-shadow:none}
+.quiet{background:transparent;border-width:1px;box-shadow:none;color:var(--green)}
+.quiet:hover{background:var(--color-nav-active)}
+.primary,.wood-primary{border:2px solid var(--color-primary-edge);border-radius:var(--radius-control);background:var(--color-wood-orange);color:var(--color-primary-ink);box-shadow:0 4px 0 var(--shadow);font-weight:800}
+.primary:hover,.wood-primary:hover{transform:translateY(-1px);background:var(--color-wood-hover)}
 .inner{max-width:1180px;padding:65px 5% 105px;margin:auto;min-height:65vh}
 .inner h1{font-size:46px;margin:12px 0 20px}
 .inner>p{color:var(--muted);line-height:1.8}
@@ -69,11 +74,8 @@ main[tabindex="-1"]:focus{outline:none}
 .woodland-scenery{position:absolute;inset:0;z-index:-2;background:linear-gradient(#f7e7c6bc,#f7e7c6f2 70%),url('/assets/relief-background.webp') center top/cover;pointer-events:none}
 .woodland-shell{max-width:1260px;margin:auto;position:relative;z-index:2}
 .woodland-back{font-size:13px;color:var(--color-woodland-back);display:inline-block;min-height:35px;padding:7px 0}
-.wood-small-button{padding:10px 13px;border:1px solid var(--color-wood-small-edge);border-radius:9px;background:var(--color-wood-small-bg);color:var(--color-wood-small-ink);font-weight:700;white-space:nowrap}
-.wood-small-button:hover{background:var(--color-wood-small-hover)}
 .woodland-page input[type=checkbox]{width:17px;height:17px;min-height:0;accent-color:var(--color-jungle);padding:0}
-.wood-primary{display:flex;align-items:center;justify-content:space-between;gap:35px;min-height:57px;border:2px solid var(--color-wood-edge);background:var(--color-wood-orange);color:var(--color-wood-ink);border-radius:12px 15px 10px 14px;box-shadow:0 4px 0 var(--color-wood-shadow);padding:15px 24px;font-weight:800}
-.wood-primary:hover{background:var(--color-wood-hover)}
+.wood-primary{display:flex;justify-content:space-between;gap:35px;min-height:57px;padding:15px 24px;cursor:pointer}
 .wood-primary:disabled{background:var(--color-wood-off);border-color:var(--color-wood-off-edge);color:var(--color-wood-off-ink);box-shadow:0 3px 0 var(--color-wood-off-shadow);cursor:not-allowed}
 @variant dark{
  .woodland-page{background:var(--color-woodland-night);color:var(--color-cream)}

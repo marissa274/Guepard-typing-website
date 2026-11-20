@@ -80,6 +80,6 @@
 /* The inputs of the lobby, race included. */
 .lobby-page input,.lobby-page select,.lobby-page textarea{font-size:16px;min-height:49px}
 /* Animal picker of the creation page (rendered by AnimalPicker, shared with the sign-up page). */
-.animal-picker-arrows button{width:38px;height:38px;border:1px solid var(--color-arrow-edge);border-radius:50%;background:var(--color-cream);color:var(--color-jungle);font-size:22px;line-height:1}
+.animal-picker-arrows button{width:38px;height:38px;border:1px solid var(--color-arrow-edge);border-radius:var(--radius-control);background:var(--color-cream);color:var(--color-jungle);font-size:22px;line-height:1}
 .animal-picker-arrows button:hover{background:var(--color-arrow-hover)}
 /* Leftovers of the lot A forms: the code and filter fields of the race browser. */

@@ -10,8 +10,8 @@ const ui={
  dialog:'bg-card text-ink border border-line rounded-[23px] p-36 max-w-460 w-[calc(100%-32px)] [box-shadow:0_20px_80px_#0003] backdrop:bg-[#163d2c80] backdrop:[backdrop-filter:blur(4px)] [&_p]:leading-[1.8] [&_p]:text-[14px] [&_p]:mb-24 [&_p]:text-muted',
  close:'close absolute right-13 top-10 text-[27px]',
  title:'text-[27px] mb-16',
- primary:'button primary w-full my-15',
- secondary:'button w-full my-15',
+ primary:'button primary w-full mt-12',
+ secondary:'button w-full mt-12',
 };
 export default function AccountSettings(){
  const {setModal,state,save,c,fr}=useSite(),labels=accountCopy[fr?'fr':'en'],dialog=useRef<HTMLDialogElement>(null);

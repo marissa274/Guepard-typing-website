@@ -70,7 +70,7 @@ const ui={
  menuSummary:'p-5 [list-style:none] [&::-webkit-details-marker]:hidden cursor-pointer text-[23px] text-[#736342] text-center w-38 min-h-38',
  menuPanel:'p-7 top-30 right-0 border border-[#b9a379] rounded-[10px] absolute w-180 bg-[#fff6e2] [box-shadow:#67452030_0px_6px_20px] z-15',
  menuButton:'p-10 rounded-[5px] block w-full text-left text-[#4b4931] text-[14px] hover:bg-[#e8dcba]',
- botLevel:'m-0 p-5 flex-[0_1_125px] w-125 min-h-34 text-[13px] compact:basis-96 compact:w-96 compact:text-[12px]',
+ botLevel:'m-0 py-5 pl-5 pr-24 flex-[0_1_125px] w-125 min-h-34 text-[13px] compact:basis-96 compact:w-96 compact:text-[12px]',
  specGroup:'mt-9 pt-8 border-t border-t-[#dfcfaf]',
  specTitle:'mb-6 font-extrabold text-deep-forest text-[18px]',
  settings:'py-12 px-18 border border-[#dac8a4] rounded-[20px] relative isolate [box-shadow:#4b482535_0px_11px_25px,#ffffff_0px_2px_1px_inset,#e1c794_0px_2px_0px] text-canopy min-w-0 upto-1100:py-16 compact:py-14 compact:px-10',
@@ -90,7 +90,7 @@ const ui={
  entryEyebrow:'text-[12px] font-extrabold tracking-[2px] text-[#46531f]',
  entryAvatar:'w-80 h-80 justify-self-center',
  entryHint:'mt-12 mb-20 mx-0 text-[12px] leading-[1.65] text-[#4a4630]',
- addBot:'bg-[#fff9ec] border-2 border-[#427451] text-deep-forest rounded-[13px] [box-shadow:0_3px_0_#64806638] text-[15px] compact:text-[13px] py-10 px-17 min-h-44',
+ addBot:'wood-small-button whitespace-nowrap text-[15px] compact:text-[13px] py-10 px-17 min-h-44',
  error:'wood-error border border-[#cc9e73] bg-[#fff0dc] text-[#953e29] py-13 px-17 text-[13px] leading-[1.6] rounded-[10px] mb-20',
 };
 

@@ -23,7 +23,7 @@
   --color-white:#fff; --color-black:#000;
   --color-jungle:#2f6b3d; --color-cream:#f7e7c6; --color-canopy:#24432d; --color-sun:#f6c445;
   --color-parchment:#fff4d8; --color-deep-forest:#205331; --color-fresh-leaf:#5bae4a; --color-moss:#526753;
-  --color-focus:#1685ad; --color-focus-night:#7fd4f2;
+  --color-secondary-shadow:#a48c5d55; --color-focus:#1685ad; --color-focus-night:#7fd4f2;
   --color-placeholder:#6b6250; --color-placeholder-night:#a9ab97;
   /* Colours of the shared kit (buttons, woodland and lobby pages, form fields, animal picker). */
   --color-option-bg:#fff8e7; --color-option-edge:#c7bd9b; --color-option-ink:#24482f; --color-field-label:#4d4a31;
