@@ -18,7 +18,7 @@ function artworkSource(element:Element|null){const url=new URL(element?.getAttri
 afterEach(()=>{document.cookie='guepard-lang=; Max-Age=0; Path=/';document.cookie='guepard-theme=; Max-Age=0; Path=/';document.documentElement.lang='fr';document.documentElement.dataset.theme='light'});
 function mount(path='/'){mockNavigation.path=path;return render(<SiteProvider><Site/></SiteProvider>)}
 test('home has one scene, three real board links and preserved art',()=>{const {container}=mount();expect(container.querySelectorAll('main section')).toHaveLength(1);expect([...container.querySelector('#app')!.children].map(el=>el.tagName)).toEqual(['HEADER','MAIN','FOOTER']);expect(screen.getByRole('link',{name:/Rejoindre rapidement/}).getAttribute('href')).toBe('/play');expect(screen.getByRole('link',{name:/Créer une course/}).getAttribute('href')).toBe('/create');expect(screen.getAllByRole('link',{name:/Parcourir les courses/})[0].getAttribute('href')).toBe('/races');expect(container.querySelector('.sleeping-cheetah')).not.toBeNull();expect(artworkSource(container.querySelector('header img'))).toBe('/assets/guepard-logo.webp')});
-test('FR/EN, night mode and unavailable OAuth stay clear',async()=>{mount('/login');await new Promise(resolve=>setTimeout(resolve,0));fireEvent.click(screen.getByRole('button',{name:'Passer en anglais'}));expect(screen.getByRole('button',{name:'Continue with Discord'})).toBeTruthy();fireEvent.click(screen.getByRole('button',{name:'Switch to dark theme'}));await waitFor(()=>expect(document.documentElement.dataset.theme).toBe('dark'));fireEvent.click(screen.getByRole('button',{name:'Continue with GitHub'}));await screen.findByText(/GitHub login is not configured/);expect(screen.queryByText(/Demo account/)).toBeNull()});
+test('FR/EN, night mode and unavailable OAuth stay clear',async()=>{mount('/login');await new Promise(resolve=>setTimeout(resolve,0));fireEvent.click(screen.getByRole('button',{name:/passer en anglais/i}));expect(screen.getByRole('button',{name:'Continue with Discord'})).toBeTruthy();fireEvent.click(screen.getByRole('button',{name:'Switch to dark theme'}));await waitFor(()=>expect(document.documentElement.dataset.theme).toBe('dark'));fireEvent.click(screen.getByRole('button',{name:'Continue with GitHub'}));await screen.findByText(/GitHub login is not configured/);expect(screen.queryByText(/Demo account/)).toBeNull()});
 test('creation requires an account and a curated animal and sends its theme to the server',async()=>{auth.current.mockResolvedValueOnce({user:{id:'host-account',username:'HôteTest',avatar:'cheetah'}});mockedRoomRequest.mockResolvedValueOnce({room:roomViewFixture({id:'new-room'})});mount('/private');fireEvent.change(await screen.findByLabelText('Nom du salon'),{target:{value:'Amis du soir'}});fireEvent.click(screen.getByLabelText(/Perroquet/));fireEvent.click(screen.getByRole('button',{name:/Créer une course/}));await waitFor(()=>expect(mockNavigation.push).toHaveBeenLastCalledWith('/lobby/new-room'));expect(roomRequest).toHaveBeenCalledWith(null,expect.objectContaining({animal:'parrot',visibility:'public',capacity:8,role:'player'}))});
 test('race errors, completion, local results and replay',async()=>{mount('/race/canopy');const start=await screen.findByRole('button',{name:/Lancer la course/});fireEvent.click(start);const input=screen.getByRole<HTMLInputElement>('textbox');fireEvent.change(input,{target:{value:'X'}});expect(document.querySelector('.incorrect')).not.toBeNull();fireEvent.change(input,{target:{value:''}});let value='';for(const ch of raceService.text('FR')){value+=ch;fireEvent.change(input,{target:{value}})}expect(screen.getByText(/Belle course/)).toBeTruthy();await waitFor(()=>expect(JSON.parse(sessionStorage.getItem('guepard-results')??'null')).toHaveLength(1));fireEvent.click(screen.getByRole('button',{name:/Rejouer/}));expect(input.value).toBe('');expect(input.disabled).toBe(false)});
 test('local private lobbies survive a reload and do not show fake opponents',async()=>{const race=raceService.createPrivate({name:'Ma course',language:'FR'});sessionStorage.setItem('guepard-privateRaces',JSON.stringify([race]));mount('/race/'+race.id);await screen.findByRole('button',{name:/Lancer la course/});expect(screen.getByText(race.code!)).toBeTruthy();expect(screen.queryByText(/Coco/)).toBeNull()});
@@ -43,7 +43,7 @@ test('a delayed guest response keeps the default guest name in the language chos
  let finishCurrent!:(value:{user:null})=>void;
  auth.current.mockReturnValueOnce(new Promise<{user:null}>(resolve=>{finishCurrent=resolve}));
  mount();
- fireEvent.click(screen.getByRole('button',{name:'Passer en anglais'}));
+ fireEvent.click(screen.getByRole('button',{name:/passer en anglais/i}));
  finishCurrent({user:null});
  await waitFor(()=>expect(JSON.parse(sessionStorage.getItem('guepard-name')||'null')).toBe('CuriousCheetah'));
 });
@@ -65,12 +65,12 @@ test('a delayed account response preserves language and theme chosen after mount
  const current=new Promise<{user:null}>(resolve=>{finishCurrent=resolve});
  auth.current.mockReturnValueOnce(current);
  const {container}=mount();
- fireEvent.click(screen.getByRole('button',{name:'Passer en anglais'}));
+ fireEvent.click(screen.getByRole('button',{name:/passer en anglais/i}));
  fireEvent.click(screen.getByRole('button',{name:'Switch to dark theme'}));
  expect(artworkSource(container.querySelector('.giraffe-full'))).toBe('/assets/giraffe-night.webp');
  finishCurrent({user:null});
  await waitFor(()=>expect(document.documentElement.dataset.theme).toBe('dark'));
- expect(screen.getByRole('button',{name:'Switch to French'})).toBeTruthy();
+ expect(screen.getByRole('button',{name:/switch to french/i})).toBeTruthy();
  expect(artworkSource(container.querySelector('.giraffe-full'))).toBe('/assets/giraffe-night.webp');
 });
 
@@ -78,9 +78,9 @@ test('cookie preferences survive when localStorage has no saved preferences',asy
  document.cookie='guepard-lang=en; Path=/';document.cookie='guepard-theme=dark; Path=/';
  expect(localStorage.length).toBe(0);
  const {container}=mount();
- await screen.findByRole('button',{name:'Switch to French'});
+ await screen.findByRole('button',{name:/switch to french/i});
  await waitFor(()=>expect(document.documentElement.lang).toBe('en'));
  expect(document.documentElement.dataset.theme).toBe('dark');
- expect(screen.getByRole('button',{name:'Switch to French'})).toBeTruthy();
+ expect(screen.getByRole('button',{name:/switch to french/i})).toBeTruthy();
  expect(artworkSource(container.querySelector('.giraffe-full'))).toBe('/assets/giraffe-night.webp');
 });

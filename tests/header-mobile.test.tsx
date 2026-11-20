@@ -26,11 +26,11 @@ async function mount(path:string){
 }
 
 describe('DES-06 · header on narrow screens',()=>{
- test('under 450 px the language button drops its glyphs so the guest controls fit in 320 px (L1)',async()=>{
+ test('under 450 px the language button drops its glyph so the guest controls fit in 320 px (L1)',async()=>{
   await mount('/');
-  const button=screen.getByRole('button',{name:'Passer en anglais'});
+  const button=screen.getByRole('button',{name:/passer en anglais/i});
   const glyphs=[...button.querySelectorAll('span[aria-hidden="true"]')];
-  expect(glyphs).toHaveLength(2);
+  expect(glyphs).toHaveLength(1);
   for(const glyph of glyphs)expect(glyph.className).toContain('upto-450:hidden');
  });
  test('a long account name is truncated instead of cut in the middle of a word (L3)',async()=>{

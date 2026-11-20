@@ -25,9 +25,9 @@ test('browser language and dark preference default correctly and a selected lang
   await page.goto('/how');await expect(page.getByRole('heading',{name:/A KEYBOARD/})).toBeVisible();
   await expect(page.locator('html')).toHaveAttribute('lang','en');
   await expect(page.locator('html')).toHaveAttribute('data-theme','dark');
-  await page.getByRole('button',{name:'Switch to French'}).click();
+  await page.getByRole('button',{name:/switch to french/i}).click();
   await expect(page.locator('html')).toHaveAttribute('lang','fr');await page.reload();
-  await expect(page.getByRole('button',{name:'Passer en anglais'})).toBeVisible();
+  await expect(page.getByRole('button',{name:/passer en anglais/i})).toBeVisible();
   expect((await context.cookies()).find(cookie=>cookie.name==='guepard-lang')?.value).toBe('fr');
   await page.setViewportSize({width:360,height:800});await page.goto('/');
   expect(await page.locator('body').evaluate(element=>element.scrollWidth)).toBe(360);

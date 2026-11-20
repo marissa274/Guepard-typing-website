@@ -38,7 +38,7 @@ describe('A11Y-02 · page structure',()=>{
  test('each view sets a localised document title',async()=>{
   await mount('/how');
   await waitFor(()=>expect(document.title).toBe('Comment jouer · GUÉPARD'));
-  fireEvent.click(screen.getByRole('button',{name:'Passer en anglais'}));
+  fireEvent.click(screen.getByRole('button',{name:/passer en anglais/i}));
   await waitFor(()=>expect(document.title).toBe('How to play · GUÉPARD'));
   expect(pageTitle('/',copy.fr)).toBe(copy.fr.metaTitle);
   expect(pageTitle('/lobby/abc',copy.en)).toBe('Race lobby · GUÉPARD');
@@ -53,13 +53,17 @@ describe('A11Y-03 · control names',()=>{
   const theme=screen.getByRole('button',{name:'Passer au thème sombre'});
   fireEvent.click(theme);
   expect(screen.getByRole('button',{name:'Passer au thème clair'})).toBe(theme);
-  expect(screen.getByRole('button',{name:'Passer en anglais'}).textContent).toContain('FR');
+  const language=screen.getByRole('button',{name:/passer en anglais/i});
+  expect(language.textContent).toContain('FR');
+  expect(language.textContent).not.toContain('⌄');
+  expect(language.getAttribute('aria-label')).toMatch(/^FR\b/);
  });
- test('the language button names the action, and the landmark labels follow the language (A1, I18N-01)',async()=>{
+ test('the language button names the action, and the landmark labels follow the language (I18N-01)',async()=>{
   await mount('/how');
   expect(screen.getByRole('navigation',{name:'Navigation'})).toBeTruthy();
-  fireEvent.click(screen.getByRole('button',{name:'Passer en anglais'}));
-  expect(screen.getByRole('button',{name:'Switch to French'}).textContent).toContain('EN');
+  fireEvent.click(screen.getByRole('button',{name:/passer en anglais/i}));
+  expect(screen.getByRole('button',{name:/switch to french/i}).textContent).toContain('EN');
+  expect(screen.getByRole('button',{name:/switch to french/i}).getAttribute('aria-label')).toMatch(/^EN\b/);
   expect(copy.en.navigation).toBe('Navigation');
  });
  test('the default guest name follows the language but a typed name is kept (I18N-01)',async()=>{
