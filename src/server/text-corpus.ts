@@ -17,10 +17,14 @@ async function database(){
  if(!runtime.guepardCorpus){
   const pool=new Pool({connectionString:process.env.DATABASE_URL,max:3});
   const ready=(async()=>{await pool.query(corpusSchema);for(const passage of initialCorpus)await pool.query('INSERT INTO guepard_corpus(id,language,complexity,kind,content,source) VALUES($1,$2,$3,$4,$5,$6) ON CONFLICT(id) DO NOTHING',[passage.id,passage.language,passage.complexity,passage.kind,passage.content,passage.source])})();
-  runtime.guepardCorpus={pool,ready};
+  const entry={pool,ready};
+  runtime.guepardCorpus=entry;
+  /* A failed initialisation must not stay cached until the process restarts: the next call starts over. */
+  ready.catch(()=>{if(runtime.guepardCorpus===entry)runtime.guepardCorpus=undefined;void pool.end().catch(()=>undefined)});
  }
- await runtime.guepardCorpus.ready;
- return runtime.guepardCorpus.pool;
+ const entry=runtime.guepardCorpus;
+ await entry.ready;
+ return entry.pool;
 }
 export async function prepareConfiguredText(settings:Settings){
  const pool=await database();
