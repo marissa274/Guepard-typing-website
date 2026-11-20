@@ -73,7 +73,7 @@ Modèle : `.env.example` (copié dans `.env.local`, non versionné). Variables l
 | Variable | Rôle | Obligatoire |
 | --- | --- | --- |
 | `DATABASE_URL` | connexion PostgreSQL ; sans elle, les salons utilisent le secours JSON local à instance unique | oui (hors secours local) |
-| `AUTH_SECRET` | secret stable pour signer l'identité invitée | oui en production |
+| `AUTH_SECRET` | secret stable pour signer l'identité invitée ; générer avec `openssl rand -hex 32` (le serveur de production refuse de démarrer sans lui) | oui en production |
 | `APP_URL` | URL publique canonique, sans chemin ; contrôle d'origine et OAuth | oui en production pour OAuth |
 | `RAILWAY_PUBLIC_DOMAIN` | fournie par Railway, utilisée si `APP_URL` est absente | non |
 | `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET` | application OAuth GitHub | non |

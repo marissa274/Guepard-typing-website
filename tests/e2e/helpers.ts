@@ -45,3 +45,7 @@ export async function openLobby(page:Page,id:string,token:string){
 export async function closeRoom(request:APIRequestContext,id:string,token:string){
  await request.post('/api/rooms/'+id,{headers:memberHeaders(token),data:{action:'close'}});
 }
+/** Waits until React has hydrated the page (a pre-hydration fill would be wiped by the controlled input). */
+export async function waitForHydration(page:Page,selector='#auth-username'){
+ await page.waitForFunction(query=>{const element=document.querySelector(query);return Boolean(element)&&Object.keys(element!).some(key=>key.startsWith('__reactProps$'))},selector);
+}

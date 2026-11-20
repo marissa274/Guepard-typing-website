@@ -9,7 +9,7 @@ export const guestLifetime=30*24*60*60;
 let developmentSecret:Promise<string>|undefined;
 export function guestSecret():Promise<string>{
  if(process.env.AUTH_SECRET)return Promise.resolve(process.env.AUTH_SECRET);
- if(process.env.NODE_ENV==='production')throw new Error('AUTH_SECRET est requis pour signer les sessions invitées.');
+ if(process.env.NODE_ENV==='production')throw new Error('AUTH_SECRET est requis pour signer les sessions invitées. Générez-en un avec : openssl rand -hex 32');
  return developmentSecret??=loadDevelopmentSecret();
 }
 async function loadDevelopmentSecret(){

@@ -1,5 +1,5 @@
 import {jest} from '@jest/globals';
-import {clientAddress,clientAddressWarning,guestNickname,newGuest,requestIpHash,signGuestIdentity,verifyGuestIdentity,warnAboutClientAddress} from '../src/server/guest-identity';
+import {guestSecret,clientAddress,clientAddressWarning,guestNickname,newGuest,requestIpHash,signGuestIdentity,verifyGuestIdentity,warnAboutClientAddress} from '../src/server/guest-identity';
 
 test('guest cookies preserve a stable signed identity and reject tampering, expiry and another secret',()=>{
  const guest=newGuest('Invité Jungle'),token=signGuestIdentity(guest,'test-secret');
@@ -79,4 +79,7 @@ test('C2-B3: IPv6 clients are grouped by /64 prefix, IPv4 clients keep their ful
  await withEnv({GUEPARD_CLIENT_IP_HEADER:'CF-Connecting-IP'},async()=>{
   expect(clientAddress(fakeRequest({'cf-connecting-ip':'2001:db8:9:8:7:6:5:4'}))).toBe('2001:db8:9:8::/64');
  });
+}));
+test('production without AUTH_SECRET refuses to start and tells how to generate one',()=>withEnv({NODE_ENV:'production',AUTH_SECRET:undefined},async()=>{
+ expect(()=>guestSecret()).toThrow(/openssl rand -hex 32/);
 }));
