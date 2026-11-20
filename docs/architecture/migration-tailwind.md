@@ -66,6 +66,20 @@ Pièges vérifiés en compilant Tailwind 4.3.3 :
 - Jamais de classe construite dynamiquement (`'bg-'+x`).
 - `motion-reduce:` remplace `@media(prefers-reduced-motion)`.
 
+Pièges découverts pendant le lot A (chacun a produit un diff de styles calculés) :
+- `@theme inline` doit venir **après** `@theme { --color-*: initial }`, sinon les jetons `paper`, `card`, `ink`, `leaf`, `muted`, `line`… sont effacés et `bg-card`, `text-ink`… ne génèrent rien.
+- Pas de preflight : `border-dashed` / `border-solid` posent le style sur les **quatre** côtés (largeur `medium` = 3 px). Un bord d'un seul côté s'écrit `border-b border-b-<couleur>` ou `[border-bottom:3px_dashed_#hex]`. `border-0` pose `border-style: solid`, alors que `border:0` donne `none` : écrire `[border:0]`, ou ne rien écrire quand l'élément n'a pas de bord.
+- Une couleur de bord `border-<couleur>` change aussi les côtés à largeur 0 (`currentcolor` dans l'original) : préférer `border-t-…`, `border-b-…` côté par côté.
+- `list-none` ne remet pas `list-style-position` à `outside` (`summary` l'a à `inside`) : écrire `[list-style:none]`.
+- `transition-[transform]` + `duration-180` laisse `transition-delay` et `transition-behavior` de la règle de base (`a,button{transition:…}` en liste de deux) : sur `a`/`button`, écrire `[transition:transform_.18s]` ; pour deux propriétés, toujours le raccourci (`duration` seul donne une liste de longueur 1).
+- `transform` : écrire `[transform:rotate(-6deg)]` et non `rotate-*` (la propriété `rotate` change le style calculé), `[box-shadow:…]` et non `shadow-[…]` (les variables `--tw-ring-*` s'ajoutent à la valeur).
+- Une seule utilité par propriété et par élément : Tailwind ordonne les utilitaires lui-même, pas la chaîne de classes (`aspect-square` + `aspect-[2/3]` : celle qui gagne est arbitraire). Les cas exclusifs se construisent avec une constante par variante, jamais par concaténation.
+- `@variant dark { règle }` au niveau racine donne `:scope:where([data-theme=dark], …) règle` : même spécificité que `[data-theme=dark] règle` (et valide avec un pseudo-élément). Imbriqué dans une règle (`règle { @variant dark { … } }`), le sélecteur devient `règle:where(…)` : spécificité plus basse d'une classe et **invalide** quand `règle` se termine par `::before`/`::after`. `@variant <largeur>` imbriqué est sans risque.
+- `@tailwindcss/postcss` passe désormais tout le CSS maison dans lightningcss (`optimize`), ce que les anciennes feuilles ne subissaient pas : `background:none` devient `0 0`, `linear-gradient(0deg,…)` est réécrit à l'envers et `background: … ` sans position reçoit `0 0` (styles calculés `0px 0px` au lieu de `0% 0%`). `postcss.config.json` passe `optimize:false` (Next minifie ensuite le CSS lui-même, comme avant).
+- Ce que le CSS d'origine laissait gagner par ordre de feuilles est un comportement : `.course-code-entry` (woodland) écrasait `.home-code-entry` (jungle) pour la marge et le padding ; `.sleeping-cheetah` (lobby-compact) écrasait le fond et le ratio de jungle. Une déclaration morte ne se migre pas, elle se supprime.
+- `h1`, `p`… sans couche écrasaient `sr-only` (marge `-1px`) : `sr-only m-0`.
+- Les références de styles calculés contiennent l'URL des images avec le port (`localhost:5180`) : toujours `GUEPARD_TEST_PORT=5180`.
+
 ## Stratégie
 
 La cascade se joue par élément : on migre par paire « élément × propriété ». Pour un élément, on rassemble toutes les règles qui le ciblent (media, sombre, hover, contexte) et on les traduit ensemble en classes, puis on supprime ces déclarations.

@@ -1,14 +1,3 @@
-import '../src/fonts.css';
-import '../src/style.css';
-import '../src/jungle.css';
-import '../src/auth.css';
-import '../src/expeditions.css';
-import '../src/woodland.css';
-import '../src/race-tracks.css';
-import '../src/lobby-compact.css';
-import '../src/play-experience.css';
-import '../src/results.css';
-import '../src/results-reference.css';
 import './globals.css';
 import type {ReactNode} from 'react';
 import {cookies,headers} from 'next/headers';
