@@ -64,7 +64,7 @@ describe('real-time progress messages',()=>{
   expect(rejection(heatmapSchema,huge).message).toBe('Les statistiques du clavier sont invalides.');
   accepts(roomActionSchema,{action:'progress',value:'abc',typed:3,heatmap:{a:{hits:1,errors:0}}});
  });
- test('C2-B4: heatmap keys are one grapheme (base + combining marks), even when lower-casing produced two code units',()=>{
+ test('heatmap keys are one grapheme (base + combining marks), even when lower-casing produced two code units',()=>{
   for(const key of ['İ'.toLowerCase(),'e\u0301','\u0301','é','\uD83D'])accepts(heatmapSchema,{[key]:{hits:1,errors:0}});
   for(const key of ['','ab','i\u0307x','e'+'\u0301'.repeat(4)])expect(rejection(heatmapSchema,{[key]:{hits:1,errors:0}}).message).toBe('Les statistiques du clavier sont invalides.');
  });

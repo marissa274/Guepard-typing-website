@@ -8,7 +8,7 @@ const story=(values:Partial<Settings>):Settings=>({...defaultSettings,textType:'
 const words=(values:Partial<Settings>):Settings=>({...defaultSettings,textType:'words',...values});
 const first=()=>0;
 
-test('C1-B5: a long coherent text chains different passages instead of looping over one',()=>{
+test('a long coherent text chains different passages instead of looping over one',()=>{
  const settings=story({language:'FR',complexity:'medium',numbers:true});
  const passages=initialCorpus.filter(p=>p.language==='FR'&&p.complexity==='medium'&&p.kind==='story');
  expect(passages.length).toBeGreaterThanOrEqual(3);
@@ -25,12 +25,12 @@ test('C1-B5: a long coherent text chains different passages instead of looping o
  expect(starts.length).toBe(passages.length);
 });
 
-test('C1-B5: past the corpus size, passages start over without repeating the same one back to back',()=>{
+test('past the corpus size, passages start over without repeating the same one back to back',()=>{
  const text=generateConfiguredText(story({language:'EN',complexity:'hard',length:400,punctuation:false,uppercase:false}),initialCorpus,first);
  expect(text.split(' ')).toHaveLength(400);
 });
 
-test('C1-B6: uppercase and punctuation change random word texts',()=>{
+test('uppercase and punctuation change random word texts',()=>{
  const base=words({language:'FR',complexity:'easy',length:60});
  const plain=generateConfiguredText({...base,uppercase:false,punctuation:false},initialCorpus,first);
  const rich=generateConfiguredText({...base,uppercase:true,punctuation:true},initialCorpus,first);
@@ -39,7 +39,7 @@ test('C1-B6: uppercase and punctuation change random word texts',()=>{
  expect(rich.endsWith('.')).toBe(true);
 });
 
-test('C1-B6: numbers have an effect in coherent mode by choosing passages that contain them first',()=>{
+test('numbers have an effect in coherent mode by choosing passages that contain them first',()=>{
  const base=story({language:'FR',complexity:'hard',length:20});
  expect(generateConfiguredText({...base,numbers:true},initialCorpus,first)).toMatch(/\d/);
  expect(generateConfiguredText({...base,numbers:false},initialCorpus,first)).not.toMatch(/\d/);

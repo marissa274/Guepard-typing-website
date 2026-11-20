@@ -16,7 +16,7 @@ function race(text=longText,guests=1):{room:Room;host:Person;others:Person[]}{
  return {room,host,others};
 }
 
-test('C1-B13: progress requests sample at most one telemetry point per second per player, only when it changed',()=>{
+test('progress requests sample at most one telemetry point per second per player, only when it changed',()=>{
  const {room,host,others}=race(longText,5);
  const typists=[host,...others.slice(0,4)],idle=others[4];
  for(let step=1;step<=15;step++){
@@ -31,7 +31,7 @@ test('C1-B13: progress requests sample at most one telemetry point per second pe
  expect((idle.telemetry??[]).length).toBeLessThanOrEqual(1);
 });
 
-test('C1-B13: the final telemetry point still matches the authoritative result for every racer',()=>{
+test('the final telemetry point still matches the authoritative result for every racer',()=>{
  const {room,host,others}=race(longText,2);
  for(let step=1;step<=10;step++){now+=300;act(room,host,{action:'progress',value:longText.slice(0,step),typed:step})}
  act(room,others[0],{action:'abandon'});
@@ -45,7 +45,7 @@ test('C1-B13: the final telemetry point still matches the authoritative result f
  }
 });
 
-test('C1-B15: errors come from the characters the server validates, not from the client heatmap',()=>{
+test('errors come from the characters the server validates, not from the client heatmap',()=>{
  const {room,host}=race();
  act(room,host,{action:'progress',value:'axc',typed:3,heatmap:{a:{hits:1,errors:0},b:{hits:1,errors:0},c:{hits:1,errors:0}}});
  expect(host.errors).toBe(1);
@@ -53,7 +53,7 @@ test('C1-B15: errors come from the characters the server validates, not from the
  expect(accuracy).toBe(67);
 });
 
-test('C1-B15: the client heatmap only distributes errors and cannot exceed what the server can account for',()=>{
+test('the client heatmap only distributes errors and cannot exceed what the server can account for',()=>{
  const {room,host}=race();
  now+=1000;
  // Two keypresses were typed then erased inside the same batch: the server never saw them.
@@ -68,7 +68,7 @@ test('C1-B15: the client heatmap only distributes errors and cannot exceed what 
  expect(host.heatmap?.c).toEqual({hits:1,errors:0});
 });
 
-test('C1-B16: in free mode reaching the end of the text finishes the race, errors included (COURSE-09)',()=>{
+test('in free mode reaching the end of the text finishes the race, errors included (COURSE-09)',()=>{
  const text='abc def ghi';
  const {room,host,others}=race(text);
  now+=1000;
@@ -81,7 +81,7 @@ test('C1-B16: in free mode reaching the end of the text finishes the race, error
  expect(raceResults(snapshot(room,host))[0]).toMatchObject({rank:1,errors:1,status:'Terminé'});
 });
 
-test('C1-B16: in blocking mode an uncorrected text still cannot be submitted',()=>{
+test('in blocking mode an uncorrected text still cannot be submitted',()=>{
  const {room,person:host}=createRoom({name:'Jungle',nickname:'Alice',animal:'cheetah',visibility:'public'});
  joinRoom(room,{nickname:'Bastien'});
  act(room,host,{action:'settings',settings:{blockErrors:true}});
@@ -90,7 +90,7 @@ test('C1-B16: in blocking mode an uncorrected text still cannot be submitted',()
  expect(host.finishedAt).toBeUndefined();
 });
 
-test('C1-B18: a custom text is only visible to the host before the countdown',()=>{
+test('a custom text is only visible to the host before the countdown',()=>{
  const {room,person:host}=createRoom({name:'Jungle',nickname:'Alice',animal:'cheetah',visibility:'public'});
  const guest=joinRoom(room,{nickname:'Bastien'});
  const secret='Un passage secret que personne ne doit lire avant le départ.';
@@ -101,7 +101,7 @@ test('C1-B18: a custom text is only visible to the host before the countdown',()
  expect(snapshot(room,guest).text).toBe(secret);
 });
 
-test('C1-B20: a batch sent during the leader pause is ignored without error, then accepted after the pause',()=>{
+test('a batch sent during the leader pause is ignored without error, then accepted after the pause',()=>{
  const {room,host}=race();
  now+=500;
  act(room,host,{action:'progress',value:'abc',typed:3});
@@ -115,7 +115,7 @@ test('C1-B20: a batch sent during the leader pause is ignored without error, the
  expect(host.progress).toBe(6);
 });
 
-test('C1-B7: invitations and removals are no longer handled by the engine (room-service owns them)',()=>{
+test('invitations and removals are no longer handled by the engine (room-service owns them)',()=>{
  const {room,person:host}=createRoom({name:'Jungle',nickname:'Alice',animal:'cheetah',visibility:'private'});
  const guest:Person={...host,id:'guest-id',token:'guest-token',name:'Bastien'};room.people.push(guest);
  expect(()=>act(room,host,{action:'invite'})).toThrow('Action inconnue');
@@ -124,7 +124,7 @@ test('C1-B7: invitations and removals are no longer handled by the engine (room-
  expect(room.people.some(person=>person.id===guest.id)).toBe(true);
 });
 
-test('C2-B4: a key whose lower case spans several code units (İ → i̇) is recorded and accepted, the race goes on',()=>{
+test('a key whose lower case spans several code units (İ → i̇) is recorded and accepted, the race goes on',()=>{
  const text='İstanbul ville',{room,host}=race(text);
  const key='İ'.toLowerCase();
  expect(key.length).toBe(2);

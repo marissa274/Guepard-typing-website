@@ -21,13 +21,13 @@ async function withEnv(values:Record<string,string|undefined>,run:()=>Promise<vo
  for(const [name,value]of Object.entries(values))if(value===undefined)delete process.env[name];else process.env[name]=value;
  try{await run()}finally{for(const [name,value]of saved)if(value===undefined)delete process.env[name];else process.env[name]=value}
 }
-test('C1-B4: behind a declared proxy distinct client addresses get distinct fingerprints instead of one site-wide bucket',()=>withEnv({GUEPARD_TRUST_PROXY:'1'},async()=>{
+test('behind a declared proxy distinct client addresses get distinct fingerprints instead of one site-wide bucket',()=>withEnv({GUEPARD_TRUST_PROXY:'1'},async()=>{
  const first=await requestIpHash(fakeRequest({'x-forwarded-for':'203.0.113.9'})),second=await requestIpHash(fakeRequest({'x-forwarded-for':'198.51.100.4'}));
  expect(first).not.toBe(second);
  expect(first).not.toContain('203.0.113.9');
  expect(await requestIpHash(fakeRequest({'x-forwarded-for':'203.0.113.9'}))).toBe(first);
 }));
-test('C1-B4: spoofed left-most forwarded entries are ignored; the address appended by the trusted proxy wins',()=>withEnv({GUEPARD_TRUST_PROXY:'1'},async()=>{
+test('spoofed left-most forwarded entries are ignored; the address appended by the trusted proxy wins',()=>withEnv({GUEPARD_TRUST_PROXY:'1'},async()=>{
  const real=await requestIpHash(fakeRequest({'x-forwarded-for':'203.0.113.9'}));
  expect(await requestIpHash(fakeRequest({'x-forwarded-for':'1.1.1.1, 203.0.113.9','x-real-ip':'8.8.8.8'}))).toBe(real);
  expect(await requestIpHash(fakeRequest({'x-forwarded-for':'2.2.2.2,203.0.113.9:4411'}))).toBe(real);
@@ -35,7 +35,7 @@ test('C1-B4: spoofed left-most forwarded entries are ignored; the address append
  expect(await requestIpHash(fakeRequest({'x-forwarded-for':'203.0.113.9, 1.1.1.1'}))).not.toBe(real);
  expect(await requestIpHash(fakeRequest({'x-forwarded-for':'1.1.1.1, not-an-ip'}))).toBe(await requestIpHash(fakeRequest({})));
 }));
-test('C1-B4: proxy hop count and a platform client-IP header are configurable',async()=>{
+test('proxy hop count and a platform client-IP header are configurable',async()=>{
  await withEnv({GUEPARD_TRUST_PROXY:'2'},async()=>{
   expect(await requestIpHash(fakeRequest({'x-forwarded-for':'1.1.1.1, 203.0.113.9, 10.0.0.2'}))).toBe(await requestIpHash(fakeRequest({'x-forwarded-for':'9.9.9.9, 203.0.113.9, 10.0.0.7'})));
  });
@@ -45,19 +45,19 @@ test('C1-B4: proxy hop count and a platform client-IP header are configurable',a
   expect(real).not.toBe(await requestIpHash(fakeRequest({'x-real-ip':'198.51.100.4','x-forwarded-for':'10.0.0.2'})));
  });
 });
-test('C2-B2: without a declared proxy, a client-written X-Forwarded-For is never trusted',()=>withEnv({},async()=>{
+test('without a declared proxy, a client-written X-Forwarded-For is never trusted',()=>withEnv({},async()=>{
  const shared=await requestIpHash(fakeRequest({}));
  for(const forged of ['203.0.113.9','198.51.100.4','1.1.1.1, 203.0.113.9'])expect(await requestIpHash(fakeRequest({'x-forwarded-for':forged}))).toBe(shared);
  expect(clientAddress(fakeRequest({'x-forwarded-for':'203.0.113.9','x-real-ip':'198.51.100.4'}))).toBe('unknown');
 }));
-test('C2-B2: an invalid proxy count is not trusted either, and a configured platform header is used without GUEPARD_TRUST_PROXY',async()=>{
+test('an invalid proxy count is not trusted either, and a configured platform header is used without GUEPARD_TRUST_PROXY',async()=>{
  await withEnv({GUEPARD_TRUST_PROXY:'true'},async()=>{expect(clientAddress(fakeRequest({'x-forwarded-for':'203.0.113.9'}))).toBe('unknown')});
  await withEnv({GUEPARD_CLIENT_IP_HEADER:'X-Real-IP'},async()=>{
   expect(clientAddress(fakeRequest({'x-real-ip':'203.0.113.9','x-forwarded-for':'198.51.100.4'}))).toBe('203.0.113.9');
   expect(clientAddress(fakeRequest({'x-forwarded-for':'198.51.100.4'}))).toBe('unknown');
  });
 });
-test('C2-B2: production without a declared proxy (or with an invalid count) logs a warning at start-up',async()=>{
+test('production without a declared proxy (or with an invalid count) logs a warning at start-up',async()=>{
  await withEnv({NODE_ENV:'production'},async()=>{
   expect(clientAddressWarning()).toMatch(/GUEPARD_TRUST_PROXY/);
   const warn=jest.spyOn(console,'warn').mockImplementation(()=>undefined);
@@ -68,7 +68,7 @@ test('C2-B2: production without a declared proxy (or with an invalid count) logs
  await withEnv({NODE_ENV:'production',GUEPARD_CLIENT_IP_HEADER:'X-Real-IP'},async()=>{expect(clientAddressWarning()).toBeUndefined()});
  await withEnv({NODE_ENV:'development'},async()=>{expect(clientAddressWarning()).toBeUndefined()});
 });
-test('C2-B3: IPv6 clients are grouped by /64 prefix, IPv4 clients keep their full address',()=>withEnv({GUEPARD_TRUST_PROXY:'1'},async()=>{
+test('IPv6 clients are grouped by /64 prefix, IPv4 clients keep their full address',()=>withEnv({GUEPARD_TRUST_PROXY:'1'},async()=>{
  const hash=(address:string)=>requestIpHash(fakeRequest({'x-forwarded-for':address}));
  const prefix=await hash('2001:db8:1:2::1');
  for(const same of ['2001:db8:1:2:ffff:abcd:1234:9','2001:0DB8:0001:0002:0000:0000:0000:0001','[2001:db8:1:2::42]:443','2001:db8:1:2::10.0.0.1'])expect(await hash(same)).toBe(prefix);

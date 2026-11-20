@@ -17,7 +17,7 @@ function running(people:Person[],extra:Partial<RoomView>={}):RoomView{
  return {id:'track',name:'La jungle',animal:'cheetah',code:'',hostId:'a',people,settings:defaultSettings,phase:'running',createdAt:now-20_000,revision:4,startedAt:now-10_000,text:'abc def ghi',me:'a',isHost:true,players:people.length,serverNow:now,...extra};
 }
 
-test('C1-B21: each lane shows the participant avatar: account photo, chosen animal or bot animal',()=>{
+test('each lane shows the participant avatar: account photo, chosen animal or bot animal',()=>{
  const people=[racer({id:'a',name:'Alex',kind:'demo',animal:'parrot',avatarUrl:'/api/avatars/a?v=2'}),racer({id:'b',name:'Bea',animal:'monkey',kind:'demo'}),racer({id:'c',name:'Bot 1',kind:'bot',animal:'toucan'})];
  const {container}=render(<VisualRace room={running(people)} connected onError={jest.fn()}/>);
  expect(container.querySelector('[data-player-id="a"] .race-lane-label img')?.getAttribute('src')).toBe('/api/avatars/a?v=2');
@@ -25,7 +25,7 @@ test('C1-B21: each lane shows the participant avatar: account photo, chosen anim
  expect(container.querySelector('[data-player-id="c"] .race-lane-label .avatar-toucan')).not.toBeNull();
 });
 
-test('C1-B20: input ignored by the server during the leader pause is kept and sent again when the pause ends',async()=>{
+test('input ignored by the server during the leader pause is kept and sent again when the pause ends',async()=>{
  const people=[racer({id:'a',name:'Alex',input:''}),racer({id:'b',name:'Bea'})];
  const onError=jest.fn<(message:string)=>void>();
  const view=render(<VisualRace room={running(people)} connected onError={onError}/>);

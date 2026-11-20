@@ -40,7 +40,7 @@ let clock:{mockRestore:()=>void};
 beforeEach(()=>{mockStore.data={};mockStore.writes=0;mockStore.retired=[];now=10_000_000;clock=jest.spyOn(Date,'now').mockImplementation(()=>now)});
 afterEach(()=>clock.mockRestore());
 
-test('C1-B1: a present member reconnects with an expired or deleted invitation',async()=>{
+test('a present member reconnects with an expired or deleted invitation',async()=>{
  const created=await open({...account('host'),visibility:'private'});
  const invite=await call(created.room.id,created.token,{action:'invite'});
  const token=invite.invitation?.token;if(!token)throw new Error('no invitation');
@@ -54,7 +54,7 @@ test('C1-B1: a present member reconnects with an expired or deleted invitation',
  expect(third.token).toBe(joined.token);
 });
 
-test('C1-B1: the bound recipient may reuse an old used link to come back, a stranger may not',async()=>{
+test('the bound recipient may reuse an old used link to come back, a stranger may not',async()=>{
  const created=await open({...account('host'),visibility:'private'});
  const token=(await call(created.room.id,created.token,{action:'invite'})).invitation?.token;if(!token)throw new Error('no invitation');
  const joined=await call(created.room.id,'',{...guest('ami'),action:'join',invite:token});
@@ -64,7 +64,7 @@ test('C1-B1: the bound recipient may reuse an old used link to come back, a stra
  await expect(call(created.room.id,'',{...guest('autre'),action:'join',invite:token})).rejects.toMatchObject({status:403});
 });
 
-test('C1-B2: a kicked guest cannot return with a fresh guest identity from the same IP',async()=>{
+test('a kicked guest cannot return with a fresh guest identity from the same IP',async()=>{
  const created=await open(account('host'));
  const joined=await call(created.room.id,'',{...guest('intrus','ip-shared'),action:'join'});
  expect(joined.room.id).toBe(created.room.id);
@@ -75,7 +75,7 @@ test('C1-B2: a kicked guest cannot return with a fresh guest identity from the s
  await expect(call(created.room.id,'',{...guest('ailleurs','ip-other'),action:'join'})).resolves.toMatchObject({room:{id:created.room.id}});
 });
 
-test('C2-B1: kicking a guest never refuses the other guests already present behind the same IP',async()=>{
+test('kicking a guest never refuses the other guests already present behind the same IP',async()=>{
  const created=await open(account('host'));
  const classmate=await call(created.room.id,'',{...guest('camarade','ip-shared'),action:'join'});
  const intruder=await call(created.room.id,'',{...guest('intrus','ip-shared'),action:'join'});
@@ -86,7 +86,7 @@ test('C2-B1: kicking a guest never refuses the other guests already present behi
  await expect(call(created.room.id,'',{...guest('intrus','ip-shared'),action:'join'})).rejects.toMatchObject({status:403});
 });
 
-test('C2-B1: the IP ban only holds new guest identities for ten minutes; the kicked identity stays banned',async()=>{
+test('the IP ban only holds new guest identities for ten minutes; the kicked identity stays banned',async()=>{
  const created=await open(account('host'));
  const intruder=await call(created.room.id,'',{...guest('intrus','ip-shared'),action:'join'});
  await call(created.room.id,created.token,{action:'kick',personId:intruder.room.me});
@@ -97,7 +97,7 @@ test('C2-B1: the IP ban only holds new guest identities for ten minutes; the kic
  await expect(call(created.room.id,'',{...guest('intrus','ip-shared'),action:'join'})).rejects.toMatchObject({status:403});
 });
 
-test('C1-B3: a host unseen for more than 30 seconds hands over to the oldest connected human',async()=>{
+test('a host unseen for more than 30 seconds hands over to the oldest connected human',async()=>{
  const created=await open(account('host'));
  const first=await call(created.room.id,'',{...guest('premier'),action:'join'});
  now+=1000;
@@ -112,7 +112,7 @@ test('C1-B3: a host unseen for more than 30 seconds hands over to the oldest con
  expect(room(created.room.id).hostId).toBe(first.room.me);
 });
 
-test('C1-B3: a host reloading within the grace period keeps the role',async()=>{
+test('a host reloading within the grace period keeps the role',async()=>{
  const created=await open(account('host'));
  const joined=await call(created.room.id,'',{...guest('ami'),action:'join'});
  now+=25_000;
@@ -120,7 +120,7 @@ test('C1-B3: a host reloading within the grace period keeps the role',async()=>{
  expect(room(created.room.id).hostId).toBe(created.room.me);
 });
 
-test('C1-B3: the room closes when the absent host leaves nobody connected',async()=>{
+test('the room closes when the absent host leaves nobody connected',async()=>{
  const created=await open(account('host'));
  now+=36_000;
  expect((await listRooms()).map(entry=>entry.id)).not.toContain(created.room.id);
@@ -128,7 +128,7 @@ test('C1-B3: the room closes when the absent host leaves nobody connected',async
  expect(mockStore.data[created.room.id]).toBeUndefined();
 });
 
-test('C1-B14: polling an unchanged room neither writes nor bumps the revision',async()=>{
+test('polling an unchanged room neither writes nor bumps the revision',async()=>{
  const created=await open(account('host'));
  const joined=await call(created.room.id,'',{...guest('ami'),action:'join'});
  const writes=mockStore.writes,revision=room(created.room.id).revision;
@@ -145,7 +145,7 @@ test('C1-B14: polling an unchanged room neither writes nor bumps the revision',a
  expect(mockStore.writes).toBe(runningWrites);
 });
 
-test('C1-B14: presence is still persisted every few seconds without a new revision',async()=>{
+test('presence is still persisted every few seconds without a new revision',async()=>{
  const created=await open(account('host'));
  const joined=await call(created.room.id,'',{...guest('ami'),action:'join'});
  const revision=room(created.room.id).revision;
@@ -154,7 +154,7 @@ test('C1-B14: presence is still persisted every few seconds without a new revisi
  expect(room(created.room.id).revision).toBe(revision);
 });
 
-test('C1-B17: closing a running room keeps the result of a human who already finished',async()=>{
+test('closing a running room keeps the result of a human who already finished',async()=>{
  const created=await open(account('host'));
  const joined=await call(created.room.id,'',{...account('rapide'),action:'join'});
  await call(created.room.id,'',{...guest('lent'),action:'join'});
@@ -172,7 +172,7 @@ test('C1-B17: closing a running room keeps the result of a human who already fin
  expect(saved[0].result).toMatchObject({rank:1,abandoned:false});
 });
 
-test('C1-B17: a host leaving a running room alone still persists finished humans',async()=>{
+test('a host leaving a running room alone still persists finished humans',async()=>{
  const created=await open(account('host'));
  const joined=await call(created.room.id,'',{...account('rapide'),action:'join'});
  await call(created.room.id,created.token,{action:'start'});

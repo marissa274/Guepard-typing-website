@@ -44,7 +44,7 @@ function requireSingleRoom(data:Data,key:string,id?:string){const active=members
 function account(body:Command){requireRoomAccess(body.kind==='demo'&&typeof body.userId==='string'&&body.identityKey==='user:'+body.userId,'Connectez-vous pour créer un salon.',403)}
 function requireHost(room:Room,person:Person){requireRoomAccess(room.hostId===person.id,'Seul l’hôte peut effectuer cette action.')}
 /**
- * SALLE-07 kick bans (C2-B1).
+ * SALLE-07 kick bans.
  * - The kicked identity (account or guest cookie) is banned from the room for good.
  * - Its IP fingerprint is also banned, but only for `ipBanDuration` and only for *new* guest identities, so the
  *   kicked guest cannot come straight back with a fresh cookie while a class or household behind the same NAT
@@ -54,7 +54,7 @@ function requireHost(room:Room,person:Person){requireRoomAccess(room.hostId===pe
  */
 export const ipBanDuration=10*60*1000;
 function identityBanned(room:Room,body:Command){return !!room.bannedIdentities?.includes(String(body.identityKey))}
-/** Entries persisted before C2-B1 were bare strings without expiry: `until` is then undefined and they no longer apply. */
+/** Entries persisted in the earlier format were bare strings without expiry: `until` is then undefined and they no longer apply. */
 function ipBanned(room:Room,body:Command,now:number){return body.kind!=='demo'&&typeof body.ipHash==='string'&&!!room.bannedIpHashes?.some(ban=>ban.hash===body.ipHash&&ban.until>now)}
 /** Whether a newcomer (not a present member) is refused by a kick ban. */
 function banned(room:Room,body:Command,now=Date.now()){return identityBanned(room,body)||ipBanned(room,body,now)}
@@ -118,7 +118,7 @@ export async function resolveCode(code:string,ipHash='local'){
 }
 /** Everything a client can observe; `seen` (presence) and the tick cursor are bookkeeping. */
 function observable(room:Room){const {revision,lastTick,...rest}=room;void revision;void lastTick;return JSON.stringify({...rest,people:rest.people.map(({seen,...person})=>{void seen;return person})})}
-/** Brings a room up to date for a reader. Returns whether anything must be persisted; the revision only moves when observable state changed (C1-B14). */
+/** Brings a room up to date for a reader. Returns whether anything must be persisted; the revision only moves when observable state changed. */
 function refresh(data:Data,room:Room,person:Person){
  const now=Date.now(),revision=room.revision,lastTick=room.lastTick,before=observable(room);
  let persist=false;

@@ -29,7 +29,7 @@ export function verifyGuestIdentity(value:string|undefined,secret:string):GuestI
 }
 export function guestNickname(value:unknown){if(typeof value!=='string'||value.trim().length<3||value.trim().length>20||[...value].some(character=>character.charCodeAt(0)<32||character.charCodeAt(0)===127))throw new RoomAccessError('Le pseudo invité doit contenir de 3 à 20 caractères.',400);return value.trim()}
 export function newGuest(name:string):GuestIdentity{return {id:randomUUID(),name,expires:Date.now()+guestLifetime*1000}}
-/** C2-B3: an IPv6 subscriber usually owns a whole /64 and can pick any address inside it; the prefix is the client. */
+/** an IPv6 subscriber usually owns a whole /64 and can pick any address inside it; the prefix is the client. */
 function ipv6Prefix(address:string){
  let value=address;
  const tail=/(\d{1,3}(?:\.\d{1,3}){3})$/.exec(value);
@@ -57,12 +57,12 @@ const unknownAddress='unknown';
 /**
  * Client address used for SALLE-10 rate limits, invitation binding and kick bans.
  * Next.js only writes the socket address into X-Forwarded-For when the request has none (`??=`), so
- * without a proxy every entry of that header may come from the client (C2-B2). It is therefore trusted
+ * without a proxy every entry of that header may come from the client. It is therefore trusted
  * only when GUEPARD_TRUST_PROXY declares how many proxies append to it (the entry is then counted from
  * the right), and GUEPARD_CLIENT_IP_HEADER names a header the platform always overwrites (e.g. X-Real-IP).
  * Route handlers expose no socket address, so with neither setting every request shares one conservative
  * bucket: limits are stricter, never bypassable. Production start-up warns about it (see instrumentation.ts).
- * IPv6 addresses are reduced to their /64 prefix (C2-B3).
+ * IPv6 addresses are reduced to their /64 prefix.
  */
 export function clientAddress(request?:Request){
  if(!request)return unknownAddress;

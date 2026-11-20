@@ -14,7 +14,7 @@ import {createRoom,joinRoom} from '../src/server/room-engine';
 const previous=process.env.DATABASE_URL;
 afterEach(()=>{if(previous===undefined)delete process.env.DATABASE_URL;else process.env.DATABASE_URL=previous});
 
-test('C1-B17: a retired room is deleted and its finished human results are inserted in the same transaction',async()=>{
+test('a retired room is deleted and its finished human results are inserted in the same transaction',async()=>{
  process.env.DATABASE_URL='postgresql://test/guepard';
  const {room,person}=createRoom({name:'Jungle',nickname:'Alice',animal:'cheetah',kind:'demo',userId:'11111111-1111-1111-1111-111111111111',identityKey:'user:alice'});
  const other=joinRoom(room,{nickname:'Bastien',identityKey:'guest:b'},{accessVerified:true});

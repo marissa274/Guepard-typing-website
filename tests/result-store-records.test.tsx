@@ -13,7 +13,7 @@ const quitter:Person={...finisher,id:'p2',userId:'user2',name:'Bastien',progress
 const room:Room={id:'room1',name:'Jungle',animal:'cheetah',code:'CODE23',hostId:'p1',people:[finisher,quitter],settings:defaultSettings,phase:'finished',createdAt:1000,startedAt:1000,endedAt:61_000,revision:3,invites:[]};
 const storedResult=(sql:string,values:unknown[]|undefined)=>{if(!sql.startsWith('INSERT'))return null;return JSON.parse(String(values?.[5])) as {abandoned:boolean;personalBest:boolean;speed:number}};
 
-test('C1-B19: an abandoned race is never a personal best, and earlier abandons do not raise the record',async()=>{
+test('an abandoned race is never a personal best, and earlier abandons do not raise the record',async()=>{
  const query=jest.fn<Query>(async()=>({rows:[{best_speed:'10'}]}));
  await saveFinishedResults({query} as unknown as Parameters<typeof saveFinishedResults>[0],[room]);
  const stored=query.mock.calls.map(([sql,values])=>storedResult(sql,values)).filter(entry=>entry!==null);
@@ -28,7 +28,7 @@ test('C1-B19: an abandoned race is never a personal best, and earlier abandons d
 
 const originalUrl=process.env.DATABASE_URL;
 afterEach(()=>{process.env.DATABASE_URL=originalUrl;delete (globalThis as {guepardResults?:unknown}).guepardResults});
-test('C1-B19: the best speed shown in the summary excludes abandoned races',async()=>{
+test('the best speed shown in the summary excludes abandoned races',async()=>{
  process.env.DATABASE_URL='postgres://test-only';
  const query=jest.fn<Query>(async sql=>sql.includes('COUNT(*)')?{rows:[{races:2,wins:1,best_speed:50,average_speed:40,average_accuracy:90}]}:{rows:[]});
  jest.mocked(Pool).mockImplementation(()=>({query}) as unknown as MockedObject<Pool>);
