@@ -38,6 +38,15 @@ test('saved appearance is restored while the account request is still pending',a
  await waitFor(()=>expect(artworkSource(container.querySelector('.giraffe-full'))).toBe('/assets/giraffe-night.webp'));
 });
 
+test('a delayed guest response keeps the default guest name in the language chosen meanwhile',async()=>{
+ sessionStorage.removeItem('guepard-name');
+ let finishCurrent!:(value:{user:null})=>void;
+ auth.current.mockReturnValueOnce(new Promise<{user:null}>(resolve=>{finishCurrent=resolve}));
+ mount();
+ fireEvent.click(screen.getByRole('button',{name:'Passer en anglais'}));
+ finishCurrent({user:null});
+ await waitFor(()=>expect(JSON.parse(sessionStorage.getItem('guepard-name')||'null')).toBe('CuriousCheetah'));
+});
 test('a delayed account response preserves language and theme chosen after mounting',async()=>{
  let finishCurrent!:(value:{user:null})=>void;
  const current=new Promise<{user:null}>(resolve=>{finishCurrent=resolve});

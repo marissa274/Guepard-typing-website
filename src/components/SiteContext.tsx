@@ -41,8 +41,8 @@ export function SiteProvider({children,initialLang='fr',initialDark=false}:{chil
   authService.current().then(async({user})=>{
    if(!active||sessionGeneration.current!==generation)return;
    if(user){account.current=user.id;setState(previous=>({...restored,lang:previous.lang,dark:previous.dark,user:true,name:user.username,avatar:animalFor(user.avatar).id,avatarUrl:user.avatarUrl,results:[],privateRaces:[]}));await refreshResults()}
-   else setState(previous=>({...restored,lang:previous.lang,dark:previous.dark}));
-  }).catch(()=>{if(active&&sessionGeneration.current===generation)setState(previous=>({...restored,lang:previous.lang,dark:previous.dark}))}).finally(()=>{if(active&&sessionGeneration.current===generation)setReady(true)});
+   else setState(previous=>({...restored,lang:previous.lang,dark:previous.dark,name:guestNameFor(restored.name,previous.lang)}));
+  }).catch(()=>{if(active&&sessionGeneration.current===generation)setState(previous=>({...restored,lang:previous.lang,dark:previous.dark,name:guestNameFor(restored.name,previous.lang)}))}).finally(()=>{if(active&&sessionGeneration.current===generation)setReady(true)});
   return()=>{active=false;account.current=null;sessionGeneration.current++};
  },[refreshResults]);
  useEffect(()=>{
