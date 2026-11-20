@@ -27,7 +27,7 @@ test('real finishers retain private keyboard data, time series, record and spect
   await expect(page.locator('.heat-clean').first()).toBeVisible();
   await expect(page.getByText('Nouveau record personnel !')).toBeVisible();
   await page.getByLabel('Disposition').selectOption('QWERTY');
-  await page.locator('.heat-key').first().focus();await expect(page.locator('.heat-detail')).toContainText('1 :');
+  await page.mouse.move(0,0);await page.locator('.heat-key').first().focus();await expect(page.locator('.heat-detail')).toContainText('1 :');
   await view.getByRole('button',{name:'Voir mes statistiques'}).click();
   await expect(view.getByText('Tu as suivi cette course')).toBeVisible();
   await expect(view.locator('.personal-metrics')).toHaveCount(0);
