@@ -6,7 +6,8 @@ import {readLimitedBody} from './request-body';
 import {bearerSchema,parseInput} from './schemas';
 /** Jeton de salon lu dans `Authorization: Bearer …` ; un en-tête malformé équivaut à l'absence de jeton. */
 export function bearer(r:Request){const parsed=bearerSchema.safeParse(r.headers.get('authorization'));return parsed.success?parsed.data:''}
-export function failure(e:unknown){return Response.json({error:e instanceof RoomError?e.message:'Le serveur ne peut pas répondre. Réessayez.',...(e instanceof RoomAccessError?{code:e.code,roomId:e.roomId,canCreate:e.canCreate}:{})},{status:e instanceof RoomError?e.status:500})}
+/** Unexpected errors are logged server-side (the client only gets a generic message), so production failures stay diagnosable. */
+export function failure(e:unknown){if(!(e instanceof RoomError))console.error('[guepard] unexpected API error',e);return Response.json({error:e instanceof RoomError?e.message:'Le serveur ne peut pas répondre. Réessayez.',...(e instanceof RoomAccessError?{code:e.code,roomId:e.roomId,canCreate:e.canCreate}:{})},{status:e instanceof RoomError?e.status:500})}
 /** Validate any non-body input (route params, query strings) and report it as a room error. */
 export function input<S extends z.ZodType>(schema:S,value:unknown):z.output<S>{return parseInput(schema,value,issue=>new RoomError(issue.message,issue.status))}
 /** Read a same-origin JSON body (64 Kio maximum) and validate it against `schema`. */
