@@ -11,14 +11,10 @@ nav{align-items:center;font-size:13px;font-weight:600}
 }
 .canopy-header :focus-visible,.compact-footer :focus-visible{outline-color:var(--color-parchment)}
 /* Reference-inspired navigation, connected to one continuous botanical branch. */
-.canopy-header .main-navigation a.active{background:var(--color-nav-active);color:var(--color-parchment)}
-.canopy-header .main-navigation .nav-races{background:var(--color-sun);color:var(--color-nav-races-ink)}
+.canopy-header .main-navigation a.active{background:var(--color-sun);color:var(--color-nav-races-ink);font-weight:800}
 .compact-footer{padding:85px 5% 24px;min-height:190px}
 .essential-links a{display:flex}
 .footer-cheetah{background:url('/assets/cheetahs-3d-marker.webp') 100% 0/200% 100% no-repeat}
-@variant dark{
- .canopy-header .main-navigation .nav-races{background:var(--color-sun);color:var(--color-nav-races-ink)}
-}
 @variant upto-1250{
  .canopy-header:has(.account) .main-navigation{flex-wrap:wrap}
 }
@@ -49,7 +45,6 @@ nav{align-items:center;font-size:13px;font-weight:600}
 #app:has(>.lobby-page){min-height:100svh;display:flex;flex-direction:column}
 #app:has(>.lobby-page)>.canopy-header,#app:has(>.lobby-page)>.compact-footer{flex-shrink:0;width:100%;margin:0}
 /* Results-specific composition matching the supplied 1536 × 1024 reference. */
-#app:has(.lobby-results) .canopy-header .main-navigation .nav-races:not(.active){background:none;color:var(--color-parchment)}
 #app:has(.celebration-results)>.compact-footer .footer-cheetah{display:none}
 #app:has(.celebration-results)>.compact-footer{min-height:95px;padding:24px 5% 18px}
 #app:has(.celebration-results)>.compact-footer .essential-links>a[href="/"],#app:has(.celebration-results)>.compact-footer .essential-links>a[href="/races"],#app:has(.celebration-results)>.compact-footer .essential-links>a[href="/how"]{display:none}
