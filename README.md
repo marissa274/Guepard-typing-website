@@ -40,7 +40,13 @@ npm run db:stop
 
 ### Compte de démonstration
 
-Le seed crée notamment le compte **GuepardDemo**. Son mot de passe est défini avec `GUEPARD_DEMO_PASSWORD` et doit être communiqué au correcteur par un canal privé. Aucune valeur de mot de passe n’est reproduite dans ce README. Les courses synthétiques sont identifiées comme des démonstrations.
+Sur le site en ligne (https://guepard-typing-website-production.up.railway.app), un compte de démonstration avec un historique de courses est disponible :
+
+| Nom d'utilisateur | Mot de passe |
+|---|---|
+| `GuepardDemo` | `JungleDemo2026` |
+
+Ce compte est réservé à la démonstration et à la correction : ce mot de passe n'est utilisé nulle part ailleurs. Il est créé par le seed à partir de `GUEPARD_DEMO_PASSWORD` ; en local, le seed utilise la valeur de cette variable dans `.env.local`. Les courses synthétiques sont identifiées comme des démonstrations.
 
 ### Variables d’environnement
 
