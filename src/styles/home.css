@@ -8,7 +8,7 @@
 .animal-crocodile{background-size:251.8033% 200%;background-position:46.9762% 100%}
 .animal-toucan{background-size:312.831% 200%;background-position:100% 100%}
 /* Three individual wooden planks, hung on two continuous ropes from the navbar canopy. */
-.board-ropes::before,.board-ropes::after{content:'';position:absolute;top:0;bottom:0;width:10px;border:1px solid #4e3925;border-radius:4px;background:repeating-linear-gradient(18deg,#765334 0 12px,#a0784b 12px 18px,#685030 18px 23px);box-shadow:inset 2px 0 0 #c5a06d70,2px 2px 3px #243b2330;@variant phone{width:7px}}
+.board-ropes::before,.board-ropes::after{content:'';position:absolute;top:0;bottom:0;width:10px;border:1px solid var(--color-home-edge-1);border-radius:4px;background:repeating-linear-gradient(18deg,var(--color-home-tint-1) 0 12px,var(--color-home-tint-2) 12px 18px,var(--color-home-tint-3) 18px 23px);box-shadow:inset 2px 0 0 var(--color-home-shadow-1),2px 2px 3px var(--color-home-shadow-2);@variant phone{width:7px}}
 .board-ropes::before{left:5.1%}
 .board-ropes::after{right:5.1%}
 @keyframes wooden-sign-sway{from{transform:rotate(-.9deg)}to{transform:rotate(.9deg)}}

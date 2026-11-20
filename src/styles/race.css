@@ -5,7 +5,7 @@
    - the sprite animation of the runner on a lane (keyframes, and overridden by the data-motion rules of kit.css and results.css). */
 .room-target{font-size:18px!important;line-height:1.8!important;margin:15px 0!important;background:var(--color-target-bg)!important;padding:18px!important;color:var(--color-target-ink)!important}
 .lobby-page .race-typing .room-target{font-size:22px!important}
-.race-lane-road{background:linear-gradient(transparent 72%,#a0be764f 72% 82%,transparent 82%),repeating-linear-gradient(90deg,transparent 0 48px,#63894726 48px 50px)}
-.lane-finish::before{content:'';position:absolute;width:5px;height:65px;background:repeating-linear-gradient(#24432d 0 5px,#f7e7c6 5px 10px);right:0;bottom:14px}
+.race-lane-road{background:linear-gradient(transparent 72%,var(--color-race-tint-1) 72% 82%,transparent 82%),repeating-linear-gradient(90deg,transparent 0 48px,var(--color-race-tint-2) 48px 50px)}
+.lane-finish::before{content:'';position:absolute;width:5px;height:65px;background:repeating-linear-gradient(var(--color-canopy) 0 5px,var(--color-cream) 5px 10px);right:0;bottom:14px}
 .lane-position .race-runner{animation:runner-appear .2s ease-out}
 @keyframes runner-appear{from{opacity:.2;scale:.85}to{opacity:1;scale:1}}

@@ -68,12 +68,12 @@ main[tabindex="-1"]:focus{outline:none}
 .animal-options label.selected{border-color:var(--color-jungle);box-shadow:0 0 0 2px var(--color-option-ring)}
 .animal-options label:focus-within{outline:3px solid var(--color-focus-warm);outline-offset:3px}
 .animal-option-landscape{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:-2}
-.animal-picker-landscape label::after{content:'';position:absolute;inset:40% 0 0;z-index:-1;background:linear-gradient(transparent,#f7e7c6 75%)}
+.animal-picker-landscape label::after{content:'';position:absolute;inset:40% 0 0;z-index:-1;background:linear-gradient(transparent,var(--color-cream) 75%)}
 .animal-picker-landscape label span{padding:4px 10px;border-radius:10px;background:var(--color-option-chip)}
 .animal-picker-landscape label strong{color:var(--color-field-ink)}
 .animal-picker-landscape label.selected{border-color:var(--color-wood-orange);box-shadow:0 0 0 3px var(--color-option-ring-landscape)}
 .woodland-page{position:relative;isolation:isolate;background:var(--color-cream);padding:80px 5% 220px;min-height:75vh;color:var(--color-woodland-ink);overflow-x:clip}
-.woodland-scenery{position:absolute;inset:0;z-index:-2;background:linear-gradient(#f7e7c6bc,#f7e7c6f2 70%),url('/assets/relief-background.webp') center top/cover;pointer-events:none}
+.woodland-scenery{position:absolute;inset:0;z-index:-2;background:linear-gradient(var(--color-kit-tint-1),var(--color-kit-tint-2) 70%),url('/assets/relief-background.webp') center top/cover;pointer-events:none}
 .woodland-shell{max-width:1260px;margin:auto;position:relative;z-index:2}
 .woodland-back{font-size:13px;color:var(--color-woodland-back);display:inline-block;min-height:35px;padding:7px 0}
 .woodland-page input[type=checkbox]{width:17px;height:17px;min-height:0;accent-color:var(--color-jungle);padding:0}
@@ -83,7 +83,7 @@ main[tabindex="-1"]:focus{outline:none}
  .woodland-page{background:var(--color-woodland-night);color:var(--color-cream)}
 }
 @variant dark{
- .woodland-scenery{background:linear-gradient(#132b4ac9,#132e33eb 75%),url('/assets/jungle-blue-night.webp') center top/cover}
+ .woodland-scenery{background:linear-gradient(var(--color-kit-tint-3),var(--color-kit-tint-4) 75%),url('/assets/jungle-blue-night.webp') center top/cover}
 }
 @variant dark{
  .woodland-back{color:var(--color-woodland-back-night)}
@@ -122,10 +122,10 @@ main[tabindex="-1"]:focus{outline:none}
 /* Host controls stay focusable while a request is pending (A11Y-04). */
 .woodland-page button[aria-disabled=true]{cursor:progress}
 .lobby-page .woodland-shell{position:relative}
-.lobby-page .woodland-shell::before,.lobby-page .woodland-shell::after{content:'';position:absolute;width:9px;background:repeating-linear-gradient(35deg,#ad814a 0 5px,#e5c08b 5px 9px);border-radius:7px;box-shadow:2px 0 1px #513f2a}
+.lobby-page .woodland-shell::before,.lobby-page .woodland-shell::after{content:'';position:absolute;width:9px;background:repeating-linear-gradient(35deg,var(--color-kit-tint-5) 0 5px,var(--color-kit-tint-6) 5px 9px);border-radius:7px;box-shadow:2px 0 1px var(--color-kit-shadow-1)}
 .lobby-page .woodland-shell::before{left:24px}
 .lobby-page .woodland-shell::after{right:24px}
-.race-runner{background:url('/assets/race-runners.webp') 0 0/300% 200% no-repeat;filter:drop-shadow(1px 4px 2px #58421d26)}
+.race-runner{background:url('/assets/race-runners.webp') 0 0/300% 200% no-repeat;filter:drop-shadow(1px 4px 2px var(--color-kit-shadow-2))}
 .runner-cheetah{background-position:0 0}
 .runner-gazelle{background-position:50% 0}
 .runner-hare{background-position:100% 0}
@@ -140,11 +140,11 @@ main[tabindex="-1"]:focus{outline:none}
 }
 /* Compact waiting room: real controls inside a separate illustrated frame. */
 .lobby-page{--side-space:clamp(110px,17vw,350px);padding:34px var(--side-space) 100px;min-height:0}
-.lobby-page .woodland-shell{max-width:1400px;padding:18px 22px;border:14px solid transparent;border-radius:24px 19px 23px 18px;box-shadow:inset 0 0 0 2px #e7c392,0 3px 0 #664624,0 12px 26px #19372050}
+.lobby-page .woodland-shell{max-width:1400px;padding:18px 22px;border:14px solid transparent;border-radius:24px 19px 23px 18px;box-shadow:inset 0 0 0 2px var(--color-kit-shadow-3),0 3px 0 var(--color-kit-shadow-4),0 12px 26px var(--color-kit-shadow-5)}
 .lobby-page .woodland-shell::before,.lobby-page .woodland-shell::after{top:-50px;height:43px}
 .lobby-page .woodland-back{font-size:16px}
 @variant dark{
- .lobby-page .woodland-shell{background:linear-gradient(#173747ee,#173747ee) padding-box,repeating-linear-gradient(3deg,#684629 0 2px,#926a3f 3px 5px,#bb915d 6px,#72502f 8px,#926739 12px) border-box}
+ .lobby-page .woodland-shell{background:linear-gradient(var(--color-kit-tint-7),var(--color-kit-tint-7)) padding-box,repeating-linear-gradient(3deg,var(--color-kit-tint-8) 0 2px,var(--color-kit-tint-9) 3px 5px,var(--color-kit-tint-10) 6px,var(--color-kit-tint-11) 8px,var(--color-kit-tint-12) 12px) border-box}
 }
 @variant upto-1600{
  @variant from-1101{
@@ -160,7 +160,7 @@ main[tabindex="-1"]:focus{outline:none}
  .lobby-page .woodland-shell{padding:12px 10px;border-width:9px}
 }
 /* Final framing adjustments after the same-size screenshot comparison. */
-.lobby-page .woodland-shell{background:linear-gradient(#fff3df,#fff3df) padding-box,repeating-linear-gradient(3deg,#88572e 0 2px,#b78046 3px 5px,#d3a36c 6px,#986235 8px,#b78149 12px) border-box}
+.lobby-page .woodland-shell{background:linear-gradient(var(--color-kit-tint-13),var(--color-kit-tint-13)) padding-box,repeating-linear-gradient(3deg,var(--color-kit-tint-14) 0 2px,var(--color-kit-tint-15) 3px 5px,var(--color-kit-tint-16) 6px,var(--color-kit-tint-17) 8px,var(--color-kit-tint-18) 12px) border-box}
 @variant from-1101{
  .lobby-page .woodland-shell::before,.lobby-page .woodland-shell::after{top:-42px;height:35px}
 }

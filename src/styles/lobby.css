@@ -8,8 +8,8 @@
    - the descendant rules of the lobby page that also reach the race inputs, and the animal picker rules, which AnimalPicker renders;
    - the leftovers of the lot A forms (JoinByCode), kept here for their order. */
 /* Panels: wooden board of the entry, closed and quick join pages, paper cards of the lobby and of the creation form. */
-.wood-panel{background:var(--color-panel-wood);background-image:repeating-linear-gradient(1deg,transparent 0 91px,#ad804327 92px,#fff1cc75 94px,transparent 96px),repeating-linear-gradient(177deg,transparent 0 9px,#9e753608 11px,transparent 12px),linear-gradient(100deg,#f4ddb2,#eed3a0 70%,#e6c794)}
-.wood-panel::before,.wood-panel::after{content:'';position:absolute;top:13px;width:7px;height:7px;border-radius:50%;background:#a47c47;box-shadow:inset 1px 1px 2px #67472580,0 1px 0 #fff2ce;pointer-events:none}
+.wood-panel{background:var(--color-panel-wood);background-image:repeating-linear-gradient(1deg,transparent 0 91px,var(--color-lobby-tint-1) 92px,var(--color-lobby-tint-2) 94px,transparent 96px),repeating-linear-gradient(177deg,transparent 0 9px,var(--color-lobby-tint-3) 11px,transparent 12px),linear-gradient(100deg,var(--color-lobby-tint-4),var(--color-panel-wood) 70%,var(--color-lobby-tint-5))}
+.wood-panel::before,.wood-panel::after{content:'';position:absolute;top:13px;width:7px;height:7px;border-radius:50%;background:var(--color-lobby-fill-1);box-shadow:inset 1px 1px 2px var(--color-lobby-shadow-1),0 1px 0 var(--color-lobby-shadow-2);pointer-events:none}
 .wood-panel::before{left:13px}
 .wood-panel::after{right:13px}
 .lobby-page .wood-panel{background:var(--color-panel-lobby);background-image:radial-gradient(#bf94591a 1px,transparent 1px),linear-gradient(130deg,#fff8e9,#f6e6c9);background-size:8px 8px,auto}
@@ -54,27 +54,27 @@
 .lobby-page .lobby-giraffe,.lobby-page .lobby-parrot,.lobby-page .lobby-toucan{animation:none}
 .lobby-page .lobby-monkey .animal-cutout{animation:lobby-blink 11s steps(1) infinite}
 /* Scenery: perches and vine. */
-.lobby-page .lobby-parrot::before{content:'';position:absolute;border:2px solid #634624;border-radius:50% 20% 30% 30%;background:repeating-linear-gradient(5deg,#8c6036 0 2px,#bb8b52 3px 5px,#a57542 6px 8px);transform-origin:left center;box-shadow:0 4px 4px #233b2433}
+.lobby-page .lobby-parrot::before{content:'';position:absolute;border:2px solid var(--color-lobby-edge-1);border-radius:50% 20% 30% 30%;background:repeating-linear-gradient(5deg,var(--color-lobby-tint-12) 0 2px,var(--color-lobby-tint-13) 3px 5px,var(--color-lobby-tint-14) 6px 8px);transform-origin:left center;box-shadow:0 4px 4px var(--color-lobby-shadow-3)}
 .lobby-page .lobby-parrot::before{top:77%;left:48%;right:-20%;height:7%;transform:rotate(-12deg);z-index:-1}
 .lobby-page .lobby-giraffe::after{content:'';position:absolute;left:2%;right:-15%;z-index:-1}
-.lobby-page .lobby-giraffe::after{height:12%;bottom:-2%;border-radius:60% 60% 0 0;background:radial-gradient(ellipse at 50% 0,#8a9865,#586d41 55%,#3a5933);box-shadow:none}
-.lobby-page .lobby-toucan::before{content:'';position:absolute;left:-12%;width:63%;top:74%;height:7%;border-radius:30%;background:repeating-linear-gradient(6deg,#986333 0 3px,#c29153 4px 7px,#805830 8px);transform:rotate(8deg);z-index:-1}
-.monkey-vine{background:repeating-linear-gradient(35deg,#4b642e 0 9px,#83a34b 10px 14px,#674d2d 15px 20px)}
+.lobby-page .lobby-giraffe::after{height:12%;bottom:-2%;border-radius:60% 60% 0 0;background:radial-gradient(ellipse at 50% 0,var(--color-lobby-tint-15),var(--color-lobby-tint-16) 55%,var(--color-lobby-tint-17));box-shadow:none}
+.lobby-page .lobby-toucan::before{content:'';position:absolute;left:-12%;width:63%;top:74%;height:7%;border-radius:30%;background:repeating-linear-gradient(6deg,var(--color-lobby-tint-18) 0 3px,var(--color-lobby-tint-19) 4px 7px,var(--color-lobby-tint-20) 8px);transform:rotate(8deg);z-index:-1}
+.monkey-vine{background:repeating-linear-gradient(35deg,var(--color-lobby-tint-21) 0 9px,var(--color-lobby-tint-22) 10px 14px,var(--color-lobby-tint-23) 15px 20px)}
 /* Scenery: the sleeping cheetah sprite (shared with the home page) and the background images. */
 .lobby-page .lobby-sleeping-cheetah,.sleeping-cheetah{background:url('/_next/image?url=%2Fassets%2Fsleeping-tail.webp&w=1080&q=75') 0 0/200% 200% no-repeat;aspect-ratio:1;animation:sleeping-tail 6s steps(1,end) infinite}
 @variant dark{
  .lobby-page .lobby-sleeping-cheetah{background-image:url('/_next/image?url=%2Fassets%2Fsleeping-tail.webp&w=1080&q=75')}
 }
-.create-room-page .woodland-scenery{background:linear-gradient(#f7e7c6bf,#f7e7c6e4),url('/assets/relief-background.webp') center/cover}
+.create-room-page .woodland-scenery{background:linear-gradient(var(--color-lobby-tint-24),var(--color-lobby-tint-25)),url('/assets/relief-background.webp') center/cover}
 .lobby-page .woodland-scenery{background:url('/assets/relief-background.webp') center/cover}
 .lobby-results .woodland-scenery{background:url('/assets/results-celebration-jungle-v3.webp') center bottom/cover}
 @variant dark{
- .create-room-page .woodland-scenery{background:linear-gradient(#132b4aca,#132b4ad5),url('/assets/jungle-blue-night.webp') center/cover}
+ .create-room-page .woodland-scenery{background:linear-gradient(var(--color-lobby-tint-26),var(--color-lobby-tint-27)),url('/assets/jungle-blue-night.webp') center/cover}
  .lobby-page .woodland-scenery{background:url('/assets/jungle-blue-night.webp') center/cover}
- .lobby-results .woodland-scenery{background:linear-gradient(#11293977,#11293977),url('/assets/results-celebration-jungle-v3.webp') center bottom/cover;filter:none}
+ .lobby-results .woodland-scenery{background:linear-gradient(var(--color-lobby-tint-28),var(--color-lobby-tint-28)),url('/assets/results-celebration-jungle-v3.webp') center bottom/cover;filter:none}
 }
 /* Results lobby: the launch bar only shows when the details are open. */
-.lobby-results .room-launch{display:flex;max-width:890px;background:linear-gradient(#fcf0d8,#fcf0d8) padding-box,url('/assets/results-wood-marker.webp') center/cover border-box}
+.lobby-results .room-launch{display:flex;max-width:890px;background:linear-gradient(var(--color-lobby-tint-29),var(--color-lobby-tint-29)) padding-box,url('/assets/results-wood-marker.webp') center/cover border-box}
 .lobby-results:not(:has(.details-open)) .room-launch{display:none}
 .lobby-results:has(.details-open) .room-launch{max-width:none;width:100%}
 /* The inputs of the lobby, race included. */
