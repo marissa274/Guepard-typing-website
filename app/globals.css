@@ -89,7 +89,7 @@
 }
 @custom-variant dark (&:where([data-theme=dark], [data-theme=dark] *));
 @custom-variant hover (&:hover);
-/* du plus large au plus étroit : l'ordre de déclaration fixe la cascade */
+/* Declaration order sets the cascade: min-width (from-*) variants go from narrowest to widest, then max-width (upto-*, tablet, phone...) variants from widest to narrowest, so the narrower rule wins. */
 @custom-variant from-1101 (@media (min-width:1101px)); @custom-variant from-1151 (@media (min-width:1151px));
 @custom-variant from-1500 (@media (min-width:1500px)); @custom-variant from-1800 (@media (min-width:1800px));
 @custom-variant upto-1600 (@media (max-width:1600px)); @custom-variant upto-1370 (@media (max-width:1370px));
