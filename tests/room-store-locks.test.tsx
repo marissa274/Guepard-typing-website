@@ -85,6 +85,24 @@ suite('PostgreSQL room store locking',()=>{
   await expect(b.roomTransaction(other.id,data=>{data[other.id].people[0].identityKey=key})).rejects.toMatchObject({status:409});
  });
 
+ test('writes to one room that arrive together are grouped into few commits, each keeps its own result, and a failing one does not affect the others',async()=>{
+  const room=make('user:group');await seed(a,room);
+  const before=Number((await pool.query('SELECT xmin::text::bigint AS x FROM guepard_rooms WHERE id=$1',[room.id])).rows[0].x);
+  const jobs=Array.from({length:30},(_,i)=>a.roomTransaction(room.id,data=>{if(i===7){data[room.id].revision+=1000;throw new Error('refus '+i)}data[room.id].revision++;return i}).then(value=>({value}),error=>({error:(error as Error).message})));
+  const outcomes=await Promise.all(jobs);
+  expect(outcomes.filter(o=>'error' in o)).toEqual([{error:'refus 7'}]);
+  expect(outcomes.filter(o=>'value' in o).map(o=>(o as {value:number}).value)).toEqual(Array.from({length:30},(_,i)=>i).filter(i=>i!==7));
+  expect(await revisionOf(room.id)).toBe(room.revision+29);
+  const writes=await pool.query('SELECT xmin::text::bigint AS x FROM guepard_rooms WHERE id=$1',[room.id]);
+  expect(before).toBeGreaterThan(0);expect(Number(writes.rows[0].x)-before).toBeLessThan(10);
+ });
+
+ test('a lone failing room transaction leaves the room untouched',async()=>{
+  const room=make('user:lone');await seed(a,room);
+  await expect(a.roomTransaction(room.id,data=>{data[room.id].revision+=5;throw new Error('non')})).rejects.toThrow('non');
+  expect(await revisionOf(room.id)).toBe(room.revision);
+ });
+
  test('read-only calls take no lock and see only the requested room',async()=>{
   const first=make('user:ro-a'),second=make('user:ro-b');await seed(a,first,second);
   const held=gate(),entered=gate();
