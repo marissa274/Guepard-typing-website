@@ -155,6 +155,8 @@ Mesuré par `scripts/tailwind-metrics.ts` :
 | 6. Règles layout / typo seules | 213 | **40** |
 | 7. Styles calculés et pixels | — | 384 cas sur 385 identiques ; `npm test`, `typecheck`, `lint`, `build`, `test:e2e` verts |
 
+Périmètre du critère 5 : la mesure « hex restants » ne compte que les feuilles CSS (`app/globals.css` hors `@theme`, `src/styles/`). Elle ne voit pas les classes à valeur arbitraire écrites dans le TSX (`bg-[#…]`, `text-[#…]`…), où les couleurs ont surtout été déplacées plutôt que supprimées. Après le remplacement des hex qui avaient exactement un jeton `@theme` de même valeur (15 classes, dont `bg-[#f28c28]` devenu `bg-wood-orange`), il reste **171 classes à hex arbitraire** dans `src/` et `app/` (`grep -rhoE '[A-Za-z0-9:_-]+-\[#[0-9a-fA-F]{3,8}\](/[0-9]+)?' src app --include='*.tsx' --include='*.ts'`). Ce sont des valeurs sans jeton équivalent ; les transformer en jetons reste à faire si l'on veut une palette unique.
+
 Ce qui a été fait : environ 780 déclarations mortes ou redondantes retirées des feuilles (`kit.css` perd 22 Ko), les règles d'un seul composant déplacées dans leur JSX (dialogue du compte, blocs « salons publics » vides ou en chargement, avatars de « Comment jouer », marqueurs de `details`, mise en page du sélecteur d'animal, rangée `course-code-entry`, bandeaux des expéditions), les variables du thème (`:root`, sombre) et une cinquantaine de couleurs du kit (boutons de bois, pages de la forêt et du salon, champs, sélecteur d'animal, anneaux de focus) devenues des jetons `@theme` ; tout le CSS restant utilise `@variant dark` et les `@variant` de largeur, et les feuilles sont reformatées une règle par ligne.
 
 Ce qui reste, et pourquoi (le critère 7 est tenu hors un cas) :
