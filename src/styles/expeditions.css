@@ -2,8 +2,8 @@
    utilities in Races.tsx. What remains, because it cannot be written as a utility:
    - the gradient veil over each card (::after, direction follows the card side and the viewport);
    - the focus rings of the page (descendant :focus-visible colours, dark and on the dark cards). */
-.expedition-card::after{content:'';position:absolute;inset:0;z-index:1;pointer-events:none;background:linear-gradient(90deg,#102e20ee,#173b2bdc 35%,#173b2b56 68%,transparent 90%)}
-.expedition-card:nth-child(even)::after{background:linear-gradient(270deg,#102e20ee,#173b2bdc 35%,#173b2b56 68%,transparent 90%)}
+.expedition-card::after{content:'';position:absolute;inset:0;z-index:1;pointer-events:none;background:linear-gradient(90deg,#102e20f2,#173b2be8 40%,#173b2b9e 68%,transparent 92%)}
+.expedition-card:nth-child(even)::after{background:linear-gradient(270deg,#102e20f2,#173b2be8 40%,#173b2b9e 68%,transparent 92%)}
 /* On narrow screens the veil rises from the bottom, for both sides. */
 .expedition-card::after,.expedition-card:nth-child(even)::after{@variant upto-550{background:linear-gradient(0deg,#102e20f7 0%,#173b2be7 50%,#173b2b43 91%)}}
 /* Accessibility (A11Y-04): dark focus ring on the cream page, yellow ring on dark cards and in the dark theme. */

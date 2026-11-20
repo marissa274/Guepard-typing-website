@@ -8,7 +8,7 @@ import {useSite} from './SiteContext';
 const entryBase='course-code-entry max-w-1560 mb-30 mx-auto flex gap-12 items-center text-[17px] [&_input]:max-w-240 [&_input]:uppercase [&_input]:text-[16px] [&_input]:min-h-48 [&_button]:text-[16px] [&_button]:min-h-48 [&_select]:text-[16px] [&_select]:min-h-48';
 export const codeEntry=entryBase+' mt-0 py-0 px-36 upto-800:p-0 upto-800:flex-wrap upto-550:py-0 upto-550:px-5';
 /* Home: a wooden board hanging under the three signs, same wood and edge as the rest of the creation pages. */
-const homeEntry=entryBase+' home-code-entry mt-26 flex-wrap py-14 pr-20 pl-90 tablet:pl-20 bg-panel-wood text-woodland-ink border-2 border-wood-small-edge rounded-panel drop-shadow-board dark:[&_input]:bg-field-bg dark:[&_input]:text-field-ink dark:[&_input]:border-field-edge';
+const homeEntry=entryBase+' home-code-entry mt-26 flex-wrap py-14 pr-20 pl-90 tablet:pl-20 bg-panel-wood text-woodland-ink border-2 border-wood-small-edge rounded-panel drop-shadow-board dark:[&_input]:bg-field-bg dark:[&_input]:text-field-ink dark:[&_input]:border-field-edge dark:[&_input::placeholder]:text-placeholder';
 export default function JoinByCode({home=false}:{home?:boolean}){
  const {fr}=useSite(),copy=roomCopy(fr),router=useRouter(),id=useId();
  const [code,setCode]=useState(''),[error,setError]=useState(''),[busy,setBusy]=useState(false);

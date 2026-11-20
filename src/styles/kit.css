@@ -69,6 +69,8 @@ main[tabindex="-1"]:focus{outline:none}
 .animal-options label:focus-within{outline:3px solid var(--color-focus-warm);outline-offset:3px}
 .animal-option-landscape{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:-2}
 .animal-picker-landscape label::after{content:'';position:absolute;inset:40% 0 0;z-index:-1;background:linear-gradient(transparent,#f7e7c6 75%)}
+.animal-picker-landscape label span{padding:4px 10px;border-radius:10px;background:var(--color-option-chip)}
+.animal-picker-landscape label strong{color:var(--color-field-ink)}
 .animal-picker-landscape label.selected{border-color:var(--color-wood-orange);box-shadow:0 0 0 3px var(--color-option-ring-landscape)}
 .woodland-page{position:relative;isolation:isolate;background:var(--color-cream);padding:80px 5% 220px;min-height:75vh;color:var(--color-woodland-ink);overflow-x:clip}
 .woodland-scenery{position:absolute;inset:0;z-index:-2;background:linear-gradient(#f7e7c6bc,#f7e7c6f2 70%),url('/assets/relief-background.webp') center top/cover;pointer-events:none}
@@ -97,6 +99,8 @@ main[tabindex="-1"]:focus{outline:none}
 }
 .woodland-page .animal-options input[type=radio]{width:16px;height:16px;min-height:0;padding:0;margin:0;box-shadow:none;accent-color:var(--color-jungle)}
 /* The lobby is another clearing in the same illustrated forest as the home scene. */
+/* The entry panel is wood in both themes: its back link keeps the dark green (A11Y-01). */
+.room-entry .woodland-back{color:var(--color-woodland-back)}
 .lobby-page .woodland-back{font-weight:750;background:var(--color-lobby-back)}
 .lobby-page .wood-small-button{font-size:16px;padding:13px 17px;min-height:50px}
 .lobby-page .wood-primary{font-size:21px;min-height:65px}

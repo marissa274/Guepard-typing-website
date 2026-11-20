@@ -28,8 +28,8 @@
   /* Colours of the shared kit (buttons, woodland and lobby pages, form fields, animal picker). */
   --color-option-bg:#fff8e7; --color-option-edge:#c7bd9b; --color-option-ink:#24482f; --color-field-label:#4d4a31;
   --color-field-edge:#7a6f55; --color-field-bg:#fff7e6; --color-field-ink:#3f432d; --color-nav-active:#ffffff24;
-  --color-nav-races-ink:#354125; --color-option-note:#526b45; --color-primary-ink:#392916; --color-primary-edge:#9c571a;
-  --color-focus-warm:#9a4a00; --color-wood-orange:#f28c28; --color-woodland-ink:#303a24; --color-woodland-back:#426b3d;
+  --color-nav-races-ink:#354125; --color-primary-ink:#392916; --color-primary-edge:#9c571a;
+  --color-focus-warm:#9a4a00; --color-wood-orange:#f28c28; --color-woodland-ink:#303a24; --color-woodland-back:#294b2f;
   --color-wood-small-edge:#a48c5d; --color-wood-small-bg:#fff3d6; --color-wood-small-ink:#48572c; --color-wood-small-hover:#ffebbd;
   --color-wood-edge:#d88a32; --color-wood-ink:#3f2d16; --color-wood-shadow:#a9662b; --color-wood-hover:#f49b3f;
   --color-wood-off:#d5c399; --color-wood-off-edge:#b7a579; --color-wood-off-ink:#897750; --color-wood-off-shadow:#ac986b;
@@ -40,6 +40,9 @@
   --color-field-shadow:#6c512008; --color-focus-expedition:#8a5a00; --color-focus-woodland:#1b3a2b; --color-how-note:#5b6d52;
   --color-option-ring:#5bae4a40; --color-option-ring-landscape:#f28c2850; --color-shell-night-edge:#6c5436; --color-panel-wood:#eed3a0;
   --color-panel-lobby:#fff5e2f2; --color-panel-create:#fff5e3f4; --color-results-block-veil:#44362266; --color-results-post-veil:#42362266;
+  /* Contrast fixes (A11Y-01): entry panel title, small notes, lane labels, results veil. */
+  --color-entry-title:#294b2f; --color-settings-access:#625a3b; --color-launch-note:#58633f; --color-lane-label:#4f5c33;
+  --color-results-veil:#0f241bd9; --color-option-chip:#f7e7c6f5;
   --font-sans:'DM Sans',sans-serif; --font-display:'Nunito',sans-serif; --font-hand:'Kalam',cursive;
   --font-weight-ultra:1000;
   --spacing:1px;

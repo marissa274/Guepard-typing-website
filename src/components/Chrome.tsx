@@ -38,7 +38,7 @@ const ui={
  row:'compact-footer-row flex items-center justify-between max-w-1400 m-auto gap-45 upto-1250:gap-30 tablet:items-start phone:flex-col phone:gap-18',
  footerBrand:'brand shrink-0 flex items-center gap-5 font-display font-ultra text-[30px] tracking-[-1px] text-cream phone:text-[28px]',
  essential:'essential-links flex flex-wrap items-center justify-end gap-x-25 gap-y-12 p-0 [border:0] rounded-[40px] bg-transparent text-[16px] leading-[1.45] font-semibold text-cream upto-1250:gap-x-20 upto-1250:gap-y-10 tablet:justify-start phone:gap-x-22 phone:gap-y-4',
- essentialLink:'items-center min-h-44 p-0 aria-[current=page]:underline aria-[current=page]:underline-offset-8 aria-[current=page]:decoration-2 aria-[current=page]:text-sun',
+ essentialLink:'items-center min-h-44 p-0 aria-[current=page]:underline aria-[current=page]:underline-offset-8 aria-[current=page]:decoration-2 aria-[current=page]:text-cream',
  copyright:'compact-copyright block max-w-1400 mt-15 mx-auto mb-0 text-right text-[13px] text-[#d8e3ca] phone:text-left phone:text-[12px]',
 };
 const navClass=(active:boolean,extra='')=>[extra,ui.link,active?'active':''].filter(Boolean).join(' ');
