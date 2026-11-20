@@ -13,3 +13,6 @@ output/
 # Visual references are machine-specific (regenerated from a worktree of the pre-migration commit)
 tests/visual/__screenshots__/
 .tmp-probe/
+
+# Claude Code agent worktrees (temporary)
+.claude/worktrees/
