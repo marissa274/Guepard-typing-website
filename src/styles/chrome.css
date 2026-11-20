@@ -19,7 +19,6 @@ nav{align-items:center;font-size:13px;font-weight:600}
  .canopy-header:has(.account) .main-navigation{flex-wrap:wrap}
 }
 @variant phone{
- .canopy-header .main-navigation{flex-wrap:wrap}
  .compact-footer{padding:85px 6% 22px}
 }
 /* Keep botanical details legible and align the branch with the monkey's grip. */
