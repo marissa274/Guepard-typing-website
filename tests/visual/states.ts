@@ -1,5 +1,5 @@
 import {expect,request,type Page} from '@playwright/test';
-import {closeRoom,configureShortRace,createTestRoom,openLobby,roomCommand,waitForRace} from '../e2e/helpers';
+import {closeRoom,configureShortRace,createTestRoom,openLobby,roomCommand,sendProgress,waitForRace} from '../e2e/helpers';
 import type {RoomView} from '../../src/lib/room-types';
 
 /**
@@ -25,6 +25,7 @@ const base:Viewport[]=[{width:360,height:780},{width:1440,height:1050}];
 const boundaries:Viewport[]=[...[380,650,700,701,1000,1100,1101,1150,1151,1550].map(width=>({width,height:900})),{width:2688,height:1680}];
 const everywhere=[...base,...boundaries].sort((a,b)=>a.width-b.width);
 const masks=['.room-code','.race-clock','.typing-metrics'];
+const hostMasks=[...masks,'.person-copy>strong','.room-invitation li'];
 
 const visit=(path:string)=>async(page:Page)=>{await page.goto(path)};
 const fakeUser={id:'visual-user',username:'Explorateur',avatar:'cheetah'};
@@ -40,18 +41,40 @@ async function openAccountMenu(page:Page){
  await menu.evaluate(element=>{(element as HTMLDetailsElement).open=true});
  await expect(menu).toHaveAttribute('open','');
 }
-/** A fixed host account (created on first use) opens the room; the page joins it as a guest. */
-async function guestRoom(page:Page){
- const host=await request.newContext({baseURL:new URL(page.url()).origin}),credentials={username:'VisuelHote',password:'GuepardVisuel42!'};
+/** A fixed host account (created on first use), not in any room. */
+async function hostAccount(origin:string){
+ const host=await request.newContext({baseURL:origin}),credentials={username:'VisuelHote',password:'GuepardVisuel42!'};
  const login=await host.post('/api/auth',{data:{action:'login',...credentials}});
  if(!login.ok())expect((await host.post('/api/auth',{data:{action:'signup',...credentials,confirmation:credentials.password,avatar:'cheetah'}})).ok()).toBeTruthy();
  // A previous interrupted run may have left the host in a room.
  await host.post('/api/rooms',{data:{action:'leave-current'}});
+ return host;
+}
+/** The fixed host opens the room; the page joins it as a guest. */
+async function guestRoom(page:Page){
+ const host=await hostAccount(new URL(page.url()).origin);
  const {room,token}=await createTestRoom(host,{name:'Clairière visuelle'});
  const joined=await page.request.post('/api/rooms/'+room.id,{data:{action:'join',nickname:'Explorateur'}});
  expect(joined.ok(),await joined.text()).toBeTruthy();
  const guest=await joined.json() as {room:RoomView;token:string};
  return {room,host,token,guest:guest.token,cleanup:async()=>{await closeRoom(host,room.id,token);await host.dispose()}};
+}
+/** The room code is random and its width moves the invitation grid: a fixed text keeps the layout stable. */
+async function fixCode(page:Page){
+ await expect(page.locator('.room-code')).toBeVisible();
+ await page.locator('.room-code').evaluate(element=>{element.textContent='K7M2QX'});
+}
+/** The host's own view of a waiting room: a bot, a spectator and two invitations. */
+async function hostRoom(page:Page,patch:Record<string,unknown>={}){
+ const origin=new URL(page.url()).origin,host=await hostAccount(origin);
+ const {room,token}=await createTestRoom(host,{name:'Clairière visuelle',visibility:'semi',...patch});
+ // An invitation seats the spectator without a room code (code attempts are rate limited).
+ const invited=await roomCommand(host,room.id,token,{action:'invite',count:2});
+ const spectator=await request.newContext({baseURL:origin});
+ const seat=await spectator.post('/api/rooms/'+room.id,{data:{action:'join',nickname:'Observateur',role:'spectator',invite:invited.room.invitations![0].token}});
+ expect(seat.ok(),await seat.text()).toBeTruthy();
+ await roomCommand(host,room.id,token,{action:'bot'});
+ return {room,host,token,cleanup:async()=>{await closeRoom(host,room.id,token);await host.dispose();await spectator.dispose()}};
 }
 const privateRace={id:'private-visual',name:{fr:'Course privée visuelle',en:'Visual private race'},language:'FR',players:1,max:6,animal:'🐆',color:'green',state:'waiting',private:true,code:'VISUAL42'};
 
@@ -80,6 +103,25 @@ export const scenarios:Record<string,Scenario>={
  'podium-details':{open:async page=>{await page.goto('/demo/podium');await page.getByRole('button',{name:'Voir mes statistiques'}).click();await expect(page.locator('.results-table')).toBeVisible()},viewports:base},
  lobby:{open:async page=>{await page.goto('/');const {room,guest,cleanup}=await guestRoom(page);await openLobby(page,room.id,guest);await expect(page.locator('.room-code')).toBeVisible();return cleanup},masks,viewports:everywhere},
  'lobby-settings':{open:async page=>{await page.goto('/');const {room,guest,cleanup}=await guestRoom(page);await openLobby(page,room.id,guest);await page.locator('details.wood-disclosure summary').first().click();return cleanup},masks,viewports:base},
+ 'create-room':{open:async page=>{await signedIn(page);await page.goto('/create')},viewports:base},
+ 'lobby-host':{open:async page=>{await page.goto('/');const {room,token,cleanup}=await hostRoom(page);await openLobby(page,room.id,token);await fixCode(page);await expect(page.locator('.room-roster li')).toHaveCount(3);return cleanup},masks:hostMasks,viewports:base},
+ 'lobby-host-menu':{open:async page=>{await page.goto('/');const {room,token,cleanup}=await hostRoom(page);await openLobby(page,room.id,token);await fixCode(page);await page.locator('.room-invitation details summary').click();await page.locator('details.person-menu summary').first().click();await expect(page.locator('details.person-menu[open]')).toHaveCount(1);return cleanup},masks:hostMasks,viewports:base},
+ 'lobby-entry':{open:async page=>{await page.goto('/');const host=await hostAccount(new URL(page.url()).origin),{room,token}=await createTestRoom(host,{name:'Clairière visuelle'});await page.goto('/lobby/'+room.id);await expect(page.locator('#join-name')).toBeVisible();return async()=>{await closeRoom(host,room.id,token);await host.dispose()}},viewports:base},
+ 'lobby-closed':{open:async page=>{await page.goto('/');const {room,host,token,guest,cleanup}=await guestRoom(page);await openLobby(page,room.id,guest);await expect(page.locator('.room-code')).toBeVisible();await closeRoom(host,room.id,token);await expect(page.locator('main#main').getByRole('link',{name:'Parcourir les courses'})).toBeVisible();return cleanup},viewports:base},
+ 'lobby-finished':{open:async page=>{
+  await page.goto('/');const {room,host,token,guest,cleanup}=await guestRoom(page);
+  await configureShortRace(host,room.id,token);await roomCommand(host,room.id,token,{action:'start'});const running=await waitForRace(host,room.id,token);
+  await roomCommand(page.request,room.id,guest,{action:'abandon'});await sendProgress(host,room.id,token,running.text!);
+  await openLobby(page,room.id,guest);await expect(page.locator('main.lobby-results')).toBeVisible();
+  return cleanup;
+ },masks:[...masks,'.race-board'],viewports:base},
+ 'lobby-finished-details':{open:async page=>{
+  await page.goto('/');const {room,host,token,guest,cleanup}=await guestRoom(page);
+  await configureShortRace(host,room.id,token);await roomCommand(host,room.id,token,{action:'start'});const running=await waitForRace(host,room.id,token);
+  await roomCommand(page.request,room.id,guest,{action:'abandon'});await sendProgress(host,room.id,token,running.text!);
+  await openLobby(page,room.id,guest);await page.getByRole('button',{name:'Voir mes statistiques'}).click();await expect(page.locator('.room-launch')).toBeVisible();
+  return cleanup;
+ },masks:[...masks,'.race-board'],viewports:base},
  race:{open:async page=>{
   await page.goto('/');const {room,host,token,guest,cleanup}=await guestRoom(page);
   await configureShortRace(host,room.id,token);await roomCommand(host,room.id,token,{action:'start'});await waitForRace(host,room.id,token);
