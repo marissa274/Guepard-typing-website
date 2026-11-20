@@ -4,14 +4,15 @@ import type {Language} from '../lib/site-types';
 const numberFormats=new Map<string,Intl.NumberFormat>(),dateFormats=new Map<string,Intl.DateTimeFormat>();
 function numberFormat(lang:Language,options:Intl.NumberFormatOptions={}){
  const key=lang+JSON.stringify(options);let format=numberFormats.get(key);
- if(!format){format=new Intl.NumberFormat(lang,options);numberFormats.set(key,format)}
+ if(!format){format=new Intl.NumberFormat(locales[lang],options);numberFormats.set(key,format)}
  return format;
 }
 function dateFormat(lang:Language,options:Intl.DateTimeFormatOptions){
  const key=lang+JSON.stringify(options);let format=dateFormats.get(key);
- if(!format){format=new Intl.DateTimeFormat(lang,options);dateFormats.set(key,format)}
+ if(!format){format=new Intl.DateTimeFormat(locales[lang],options);dateFormats.set(key,format)}
  return format;
 }
+const locales:Record<Language,string>={fr:'fr-FR',en:'en-US'};
 export const languageOf=(fr:boolean):Language=>fr?'fr':'en';
 /** Plain number (counts, WPM, ranks). One decimal at most by default. */
 export function formatNumber(lang:Language,value:number,options:Intl.NumberFormatOptions={maximumFractionDigits:1}){return numberFormat(lang,options).format(value)}

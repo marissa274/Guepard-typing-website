@@ -5,13 +5,16 @@ import {animalFor} from '../lib/animals';
 import {authService} from '../services/auth';
 import {resultService} from '../services/results';
 import type {Account,SiteState,Language} from '../lib/site-types';
-const defaults:SiteState={lang:'fr',dark:false,user:false,name:'GuépardCurieux',avatar:'cheetah',avatarUrl:undefined,results:[],privateRaces:[],summary:null};
+const defaults:SiteState={lang:'fr',dark:false,user:false,name:copy.fr.guestName,avatar:'cheetah',avatarUrl:undefined,results:[],privateRaces:[],summary:null};
+/** The default guest name follows the language; a name the visitor typed is never touched. */
+const defaultGuestNames=[copy.fr.guestName,copy.en.guestName];
+const guestNameFor=(name:string,lang:Language)=>defaultGuestNames.includes(name)?copy[lang].guestName:name;
 const identityKeys=['name','avatar','results','privateRaces'];
 type Save=<K extends keyof SiteState>(key:K,value:SiteState[K]|((previous:SiteState[K])=>SiteState[K]))=>void;
 interface SiteContextValue {state:SiteState;save:Save;setAccount:(user:Account)=>void;signOut:()=>Promise<void>;ready:boolean;modal:string|null;setModal:Dispatch<SetStateAction<string|null>>;reset:()=>void;refreshResults:()=>Promise<void>;resultsError:string;c:typeof copy.fr;fr:boolean}
 const Context=createContext<SiteContextValue|null>(null);
 export function SiteProvider({children,initialLang='fr',initialDark=false}:{children:ReactNode;initialLang?:Language;initialDark?:boolean}){
- const [state,setState]=useState<SiteState>({...defaults,lang:initialLang,dark:initialDark}),[ready,setReady]=useState(false),[modal,setModal]=useState<string|null>(null),[resultsError,setResultsError]=useState('');
+ const [state,setState]=useState<SiteState>({...defaults,lang:initialLang,dark:initialDark,name:copy[initialLang].guestName}),[ready,setReady]=useState(false),[modal,setModal]=useState<string|null>(null),[resultsError,setResultsError]=useState('');
  const account=useRef<string|null>(null);
  const sessionGeneration=useRef(0);
  const refreshResults=useCallback(async()=>{
@@ -29,6 +32,7 @@ export function SiteProvider({children,initialLang='fr',initialDark=false}:{chil
    try{const storage=identityKeys.includes(key)?sessionStorage:localStorage;const value=JSON.parse(storage.getItem('guepard-'+key)||'null');if(value!==null)Object.assign(restored,{[key]:value})}catch{/* Storage can be unavailable in private browsing. */}
   }
   if(!['fr','en'].includes(restored.lang))restored.lang='fr';
+  restored.name=guestNameFor(typeof restored.name==='string'?restored.name:defaults.name,restored.lang);
   restored.avatar=animalFor(restored.avatar).id;
   if(!Array.isArray(restored.results))restored.results=[];
   if(!Array.isArray(restored.privateRaces))restored.privateRaces=[];
@@ -54,9 +58,9 @@ export function SiteProvider({children,initialLang='fr',initialDark=false}:{chil
    }catch{/* Storage can be unavailable in private browsing. */}
   }
  },[state,ready]);
- const save:Save=(key,value)=>{if(key==='results'&&account.current){void refreshResults();return}setState(previous=>({...previous,[key]:typeof value==='function'?(value as (old:SiteState[typeof key])=>SiteState[typeof key])(previous[key]):value}))};
+ const save:Save=(key,value)=>{if(key==='results'&&account.current){void refreshResults();return}setState(previous=>{const next=typeof value==='function'?(value as (old:SiteState[typeof key])=>SiteState[typeof key])(previous[key]):value;return key==='lang'&&!previous.user?{...previous,lang:next as Language,name:guestNameFor(previous.name,next as Language)}:{...previous,[key]:next}})};
  const setAccount=(user:Account)=>{sessionGeneration.current++;account.current=user.id;setReady(true);setState(previous=>({...previous,user:true,name:user.username,avatar:animalFor(user.avatar).id,avatarUrl:user.avatarUrl,results:[],privateRaces:[],summary:null}));void refreshResults()};
- const signOut=async()=>{sessionGeneration.current++;await authService.logout();account.current=null;setReady(true);setResultsError('');setState(previous=>({...previous,user:false,name:defaults.name,avatar:'cheetah',avatarUrl:undefined,results:[],privateRaces:[],summary:null}))};
+ const signOut=async()=>{sessionGeneration.current++;await authService.logout();account.current=null;setReady(true);setResultsError('');setState(previous=>({...previous,user:false,name:copy[previous.lang].guestName,avatar:'cheetah',avatarUrl:undefined,results:[],privateRaces:[],summary:null}))};
  const reset=()=>{for(const key of Object.keys(defaults)){localStorage.removeItem('guepard-'+key);sessionStorage.removeItem('guepard-'+key)}setState(previous=>previous.user?{...previous,lang:defaults.lang,dark:defaults.dark}:{...defaults})};
  return <Context.Provider value={{state,save,setAccount,signOut,ready,modal,setModal,reset,refreshResults,resultsError,c:copy[state.lang],fr:state.lang==='fr'}}>{children}</Context.Provider>
 }

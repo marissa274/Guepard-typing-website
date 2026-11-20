@@ -1,4 +1,4 @@
-import {clientError} from '../i18n/errors';
+import {clientError,clientText} from '../i18n/errors';
 import type {Account,Credentials} from '../lib/auth-types';
 import {isProfileAnimal} from '../lib/animals';
 export function validateCredentials({username,password,confirmation}:Credentials,mode:string){
@@ -13,13 +13,13 @@ export function validateCredentials({username,password,confirmation}:Credentials
 async function jsonResponse(response:Response):Promise<Record<string,unknown>>{
  const value:unknown=await response.json();
  const result=value&&typeof value==='object'&&!Array.isArray(value)?value as Record<string,unknown>:{};
- if(!response.ok)throw new Error(clientError(typeof result.error==='string'?result.error:'La connexion a échoué.'));
+ if(!response.ok)throw new Error(typeof result.error==='string'?clientError(result.error):clientText('loginFailed'));
  return result;
 }
 function account(value:unknown):Account{
- if(!value||typeof value!=='object')throw new Error('Compte indisponible.');
+ if(!value||typeof value!=='object')throw new Error(clientText('accountUnavailable'));
  const row=value as Record<string,unknown>;
- if(typeof row.id!=='string'||typeof row.username!=='string'||!isProfileAnimal(row.avatar))throw new Error('Compte indisponible.');
+ if(typeof row.id!=='string'||typeof row.username!=='string'||!isProfileAnimal(row.avatar))throw new Error(clientText('accountUnavailable'));
  return {id:row.id,username:row.username,avatar:row.avatar,...(typeof row.avatarUrl==='string'?{avatarUrl:row.avatarUrl}:{})};
 }
 async function request(body:Record<string,unknown>){return jsonResponse(await fetch('/api/auth',{method:'POST',headers:{'Content-Type':'application/json'},credentials:'same-origin',body:JSON.stringify(body)}))}
@@ -34,7 +34,7 @@ export const authService={
  async provider(name:string):Promise<ProviderResult>{
   if(!['discord','github'].includes(name))throw new Error('Unsupported provider');
   const result=await jsonResponse(await fetch(`/api/auth/${name}?format=json`,{credentials:'same-origin',cache:'no-store'}));
-  if(result.kind!=='redirect'||typeof result.url!=='string')throw new Error('La connexion est indisponible.');
+  if(result.kind!=='redirect'||typeof result.url!=='string')throw new Error(clientText('loginUnavailable'));
   return {kind:'redirect',url:result.url};
  },
  async uploadPhoto(photo:File){const body=new FormData();body.set('photo',photo);const result=await jsonResponse(await fetch('/api/auth/avatar',{method:'POST',credentials:'same-origin',body}));return {user:account(result.user)}},
