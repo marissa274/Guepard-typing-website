@@ -42,7 +42,6 @@ Cette recherche limitée ne démontre donc pas l'unicité du nom ni du concept. 
 
 **Le croquis personnel.** Dans mon explication rétrospective, je décris un croquis de clavier à partir duquel j’imagine le guépard endormi. Les deux exports ne contiennent pas de photo identifiée de ce croquis personnel, ni sa date. La référence de tigre visible à la page 5 de la conversation Guépard est une référence de style ; le dessin de guépard noir et blanc de la page 4 est une étape de la génération.
 
-<!-- À COMPLÉTER : ajouter la photo du croquis personnel du clavier et sa date si cette pièce est retrouvée. L’image exploratoire ci-dessus est générée, pas dessinée à la main par l’autrice. -->
 
 **Réalisation avec l’aide de l’IA.** La conversation de conception montre les étapes suivantes :
 
