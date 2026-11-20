@@ -5,59 +5,51 @@
    - decorative backgrounds (`url()`, sprites, image-cache variants per breakpoint);
    - the footer padding and the footer link display, overridden in context by `#app:has(...)`;
    - descendant `:focus-visible` colours and the `#app:has(...)` page compositions. */
-nav{display:flex;align-items:center;border:1px solid #c8cfae;border-radius:40px;padding:6px;background:#dce4c15c;gap:8px;font-size:13px;font-weight:600}
-nav a{padding:13px 21px}
-nav a.active{background:var(--green);color:#fff;border-radius:30px}
-[data-theme=dark] nav{background:#2c412e}
-[data-theme=dark] nav .active{color:#182a22}
-@media (max-width:1000px){
+nav{align-items:center;font-size:13px;font-weight:600}
+@variant tablet{
  nav{font-size:12px}
- nav a{padding:11px 12px}
 }
-@media (max-width:700px){
- nav a{padding:5px 10px}
-}
-.canopy-header :focus-visible,.compact-footer :focus-visible{outline-color:#fff4d8}
-.compact-footer{padding:55px 5% 18px;min-height:150px}
-.compact-footer .peek-sprite{width:140px;height:186px;top:-135px;right:14%;z-index:1}
-@media (max-width:700px){
- .compact-footer{padding:58px 6% 16px}
- .compact-footer .peek-sprite{width:100px;height:133px;top:-95px;right:5%}
-}
+.canopy-header :focus-visible,.compact-footer :focus-visible{outline-color:var(--color-parchment)}
 /* Reference-inspired navigation, connected to one continuous botanical branch. */
-.canopy-header .main-navigation a.active{background:#ffffff24;color:#fff4d8}
-.canopy-header .main-navigation .nav-races{background:#f6c445;color:#354125}
+.canopy-header .main-navigation a.active{background:var(--color-nav-active);color:var(--color-parchment)}
+.canopy-header .main-navigation .nav-races{background:var(--color-sun);color:var(--color-nav-races-ink)}
 .compact-footer{padding:85px 5% 24px;min-height:190px}
 .essential-links a{display:flex}
 .footer-cheetah{background:url('/assets/cheetahs-3d-marker.webp') 100% 0/200% 100% no-repeat}
-[data-theme=dark] .canopy-header .main-navigation .nav-races{background:#f6c445;color:#354125}
-@media (max-width:1250px){
+@variant dark{
+ .canopy-header .main-navigation .nav-races{background:var(--color-sun);color:var(--color-nav-races-ink)}
+}
+@variant upto-1250{
  .canopy-header:has(.account) .main-navigation{flex-wrap:wrap}
 }
-@media (max-width:700px){
+@variant phone{
  .canopy-header .main-navigation{flex-wrap:wrap}
  .compact-footer{padding:85px 6% 22px}
 }
 /* Keep botanical details legible and align the branch with the monkey's grip. */
 .footer-cheetah{background-size:212.7098% 100%}
-[data-theme=dark] .footer-cheetah{background-image:url('/_next/image?url=%2Fassets%2Fcheetahs-night.webp&w=1200&q=75')}
+@variant dark{
+ .footer-cheetah{background-image:url('/_next/image?url=%2Fassets%2Fcheetahs-night.webp&w=1200&q=75')}
+}
 /* Serve the existing decorative branch through the image cache. */
 .header-branch{background:url('/_next/image?url=%2Fassets%2Fheader-branch.webp&w=1920&q=75') center/100% 100% no-repeat}
 /* The footer cheetah sheet is far larger than its rendered size. */
 .footer-cheetah{background-image:url('/_next/image?url=%2Fassets%2Fcheetahs-3d-marker.webp&w=1200&q=75')}
 /* Phones only need the decorative layers at their rendered device-pixel width. */
-@media (max-width:700px){
+@variant phone{
  .header-branch{background-image:url('/_next/image?url=%2Fassets%2Fheader-branch.webp&w=750&q=75')}
  .footer-cheetah{background-image:url('/_next/image?url=%2Fassets%2Fcheetahs-3d-marker.webp&w=750&q=75')}
- [data-theme=dark] .footer-cheetah{background-image:url('/_next/image?url=%2Fassets%2Fcheetahs-night.webp&w=750&q=75')}
+ @variant dark{
+  .footer-cheetah{background-image:url('/_next/image?url=%2Fassets%2Fcheetahs-night.webp&w=750&q=75')}
+ }
 }
 /* split: kept after .account small (same specificity, original order) */
-.animal-options small{font-size:12px;color:#526b45;display:block;margin-top:3px}
+.animal-options small{font-size:12px;color:var(--color-option-note);display:block;margin-top:3px}
 /* Use the original home artwork, without stretching the footer mascot. */
 #app:has(>.lobby-page){min-height:100svh;display:flex;flex-direction:column}
 #app:has(>.lobby-page)>.canopy-header,#app:has(>.lobby-page)>.compact-footer{flex-shrink:0;width:100%;margin:0}
 /* Results-specific composition matching the supplied 1536 × 1024 reference. */
-#app:has(.lobby-results) .canopy-header .main-navigation .nav-races:not(.active){background:none;color:#fff4d8}
+#app:has(.lobby-results) .canopy-header .main-navigation .nav-races:not(.active){background:none;color:var(--color-parchment)}
 #app:has(.celebration-results)>.compact-footer .footer-cheetah{display:none}
 #app:has(.celebration-results)>.compact-footer{min-height:95px;padding:24px 5% 18px}
 #app:has(.celebration-results)>.compact-footer .essential-links>a[href="/"],#app:has(.celebration-results)>.compact-footer .essential-links>a[href="/races"],#app:has(.celebration-results)>.compact-footer .essential-links>a[href="/how"]{display:none}

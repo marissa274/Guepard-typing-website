@@ -7,9 +7,9 @@
 /* On narrow screens the veil rises from the bottom, for both sides. */
 .expedition-card::after,.expedition-card:nth-child(even)::after{@variant upto-550{background:linear-gradient(0deg,#102e20f7 0%,#173b2be7 50%,#173b2b43 91%)}}
 /* Accessibility (A11Y-04): dark focus ring on the cream page, yellow ring on dark cards and in the dark theme. */
-.expeditions-page a:focus-visible,.expeditions-page button:focus-visible,.expeditions-page summary:focus-visible{outline:3px solid #8a5a00;outline-offset:5px}
-.expeditions-page .expedition-card :focus-visible{outline-color:#f6c445}
+.expeditions-page a:focus-visible,.expeditions-page button:focus-visible,.expeditions-page summary:focus-visible{outline:3px solid var(--color-focus-expedition);outline-offset:5px}
+.expeditions-page .expedition-card :focus-visible{outline-color:var(--color-sun)}
 @variant dark{
- .expeditions-page :focus-visible{outline-color:#f6c445}
+ .expeditions-page :focus-visible{outline-color:var(--color-sun)}
 }
-.woodland-page :focus-visible{outline:3px solid #1b3a2b;outline-offset:2px;box-shadow:0 0 0 2px #fff4d8}
+.woodland-page :focus-visible{outline:3px solid var(--color-focus-woodland);outline-offset:2px;box-shadow:0 0 0 2px var(--color-parchment)}

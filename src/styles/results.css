@@ -4,7 +4,6 @@
    - the pseudo-element decor of the wooden blocks and plaques;
    - `!important` declarations (they would invert in a layer);
    - rules whose outcome depends on the cascade against kit.css (`.lobby-page .woodland-back`); */
-
 /* Runner sprite: animation states (override each other by order) and the portraits of the results atlas. */
 .race-runner[data-motion=running]{animation:gait-cycle .62s steps(1,end) infinite}
 .runner-gazelle[data-motion=running]{animation-duration:.8s}
@@ -12,9 +11,8 @@
 .runner-panda[data-motion=running]{animation-duration:1.1s}
 .runner-tortoise[data-motion=running]{animation-duration:1.6s}
 .race-runner[data-motion=arrived]{animation:finish-nod 1s ease-out 1}
-.results-place.podium-place>.race-runner{background-image:url('/assets/results-winners.webp');background-size:300% 200%;animation:results-settle .9s ease-out 1,results-breathe 7s ease-in-out 1s infinite}
+.results-place.podium-place>.race-runner{background-image:url('/assets/results-winners.webp');animation:results-settle .9s ease-out 1,results-breathe 7s ease-in-out 1s infinite}
 .result-player .race-runner{background-image:url('/assets/results-winners.webp')}
-
 /* Confetti of the podium. */
 .podium-confetti i{animation:podium-confetti 2s ease-out both}
 @keyframes podium-confetti{from{top:0;opacity:1;transform:rotate(0)}to{top:90%;opacity:0;transform:rotate(210deg)}}
@@ -23,35 +21,30 @@
 @media (prefers-reduced-motion:reduce){
  .results-place.podium-place>.race-runner{animation:none}
 }
-
 /* Wooden podium blocks and plaques: image backgrounds and decorative pseudo-elements. */
 .results-wood-block{background:url('/assets/results-podium-block.webp') center/100% 100% no-repeat}
 .results-wood-block::before{content:'';position:absolute;left:-3px;right:-12px;top:-22px;height:23px;clip-path:polygon(12px 0,100% 0,calc(100% - 10px) 100%,0 100%);background:linear-gradient(#f8d99465,#b8874850),url('/assets/results-wood-marker.webp') center/cover;border-top:2px solid #e3b36b;z-index:1}
 .results-wood-block::after{content:'';position:absolute;right:-15px;top:-12px;bottom:-2px;width:14px;background:linear-gradient(#55371b50,#55371b70),url('/assets/results-wood-marker.webp') center/cover;transform:skewY(-37deg);transform-origin:top left;border-radius:0 4px 4px 0;z-index:-1}
-@variant compact {
+@variant compact{
  .results-wood-block::after{width:8px;right:-9px}
  .results-wood-block::before{right:-8px;top:-15px;height:16px}
 }
 .celebration-results .results-wood-block::before{display:none}
-.celebration-results .results-wood-block::after{content:'';display:block;position:absolute;bottom:0;left:5%;top:auto;width:90%;height:12px;border:0;border-radius:50%;transform:none;background:#44362266;filter:blur(5px);z-index:-1}
+.celebration-results .results-wood-block::after{content:'';display:block;position:absolute;bottom:0;left:5%;top:auto;width:90%;height:12px;border:0;border-radius:50%;transform:none;background:var(--color-results-block-veil);filter:blur(5px);z-index:-1}
 .results-plaque::before,.results-plaque::after{content:'';position:absolute;top:9px;width:5px;height:5px;border:1px solid #715337;border-radius:50%;background:#c8a373;box-shadow:0 1px #efd8aa}
 .results-plaque::before{left:8px}
 .results-plaque::after{right:8px}
 .celebration-results .results-plaque::before,.celebration-results .results-plaque::after{display:none}
 .results-plaque :is(h2,h3){background:#c79358 url('/assets/results-wood.webp') center/cover;background-blend-mode:soft-light}
-
 /* Panels with a wooden frame (border box image). */
 .results-panel{background:linear-gradient(#fcf0d8,#fcf0d8) padding-box,url('/assets/results-wood-marker.webp') center/cover border-box}
-
 /* Sign of the call to action. */
 .celebration-cta{background:url('/assets/results-celebration-sign.webp') center/100% 100% no-repeat}
 .celebration-sign-post{background:#9b673c url('/assets/results-wood.webp') center/cover}
-.celebration-sign-post::after{content:'';position:absolute;bottom:-4px;left:-15px;width:60px;height:12px;background:#42362266;border-radius:50%;filter:blur(4px)}
+.celebration-sign-post::after{content:'';position:absolute;bottom:-4px;left:-15px;width:60px;height:12px;background:var(--color-results-post-veil);border-radius:50%;filter:blur(4px)}
 /* The lobby kit sizes `.lobby-page .woodland-back` with a higher specificity: the stand-alone history page keeps this size. */
-.results-back{font-size:18px}
 /* `!important`: the layout of the label is shared with the form kit. */
 .heatmap-heading label{margin:0!important}
-
 /* Botanicals around the podium: sprites, sway animations (delays and durations per plant) and their keyframes. */
 .podium-leaf{background:url('/assets/relief-foliage.webp') left center/200% 100% no-repeat;animation:leaf-sway 9s ease-in-out infinite alternate}
 .podium-leaf-left{animation-delay:-3s}

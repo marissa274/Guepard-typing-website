@@ -13,7 +13,7 @@ const ui={
  control:'py-8 px-10 border border-[#7a6f55] rounded-[12px] bg-[#fff9ec] text-[#34433a] [box-shadow:#7d684026_0px_2px_5px] text-[16px] min-h-40 leading-[1.2] h-40 box-border in-[.room-settings-controls:disabled]:cursor-not-allowed',
  free:'in-[.room-settings-controls:disabled]:bg-[#f2e6cc] in-[.room-settings-controls:disabled]:text-[#766e54] in-[.room-settings-controls:disabled]:cursor-not-allowed',
  disclosure:'group py-9 px-0 border-t border-t-[#d9c9ab] last:pb-0',
- summary:'flex justify-between font-bold cursor-pointer [list-style:none] text-[#255338] text-[16px] leading-[1.35] group-open:mb-18',
+ summary:'flex justify-between font-bold cursor-pointer [list-style:none] [&::-webkit-details-marker]:hidden text-[#255338] text-[16px] leading-[1.35] group-open:mb-18',
  checks:'mb-18 gap-14 grid grid-cols-[1fr_1fr]',
  check:'m-0 gap-10 font-medium flex items-center',
  hint:'wood-hint mt-5 mb-10 mx-0 text-moss text-[14px] leading-[1.4]',

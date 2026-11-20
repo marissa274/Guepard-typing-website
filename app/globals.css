@@ -24,6 +24,22 @@
   --color-jungle:#2f6b3d; --color-cream:#f7e7c6; --color-canopy:#24432d; --color-sun:#f6c445;
   --color-parchment:#fff4d8; --color-deep-forest:#205331; --color-fresh-leaf:#5bae4a; --color-moss:#526753;
   --color-focus:#1685ad; --color-focus-night:#7fd4f2;
+  --color-placeholder:#6b6250; --color-placeholder-night:#a9ab97;
+  /* Colours of the shared kit (buttons, woodland and lobby pages, form fields, animal picker). */
+  --color-option-bg:#fff8e7; --color-option-edge:#c7bd9b; --color-option-ink:#24482f; --color-field-label:#4d4a31;
+  --color-field-edge:#7a6f55; --color-field-bg:#fff7e6; --color-field-ink:#3f432d; --color-nav-active:#ffffff24;
+  --color-nav-races-ink:#354125; --color-option-note:#526b45; --color-primary-ink:#392916; --color-primary-edge:#9c571a;
+  --color-focus-warm:#9a4a00; --color-wood-orange:#f28c28; --color-woodland-ink:#303a24; --color-woodland-back:#426b3d;
+  --color-wood-small-edge:#a48c5d; --color-wood-small-bg:#fff3d6; --color-wood-small-ink:#48572c; --color-wood-small-hover:#ffebbd;
+  --color-wood-edge:#d88a32; --color-wood-ink:#3f2d16; --color-wood-shadow:#a9662b; --color-wood-hover:#f49b3f;
+  --color-wood-off:#d5c399; --color-wood-off-edge:#b7a579; --color-wood-off-ink:#897750; --color-wood-off-shadow:#ac986b;
+  --color-woodland-night:#142d32; --color-woodland-back-night:#bdd0a7; --color-lobby-back:#f7e7c6de; --color-lobby-back-night:#173b48dd;
+  --color-scrollbar-track:#e5d4ad; --color-lobby-ink:#20442d; --color-lobby-night:#152b48; --color-arrow-edge:#8da66f;
+  --color-arrow-hover:#e5eecb; --color-target-bg:#fff5dc; --color-target-ink:#6b6b4d;
+  /* More shared-kit colours: expedition and woodland focus rings, panel veneers, picker rings. */
+  --color-field-shadow:#6c512008; --color-focus-expedition:#8a5a00; --color-focus-woodland:#1b3a2b; --color-how-note:#5b6d52;
+  --color-option-ring:#5bae4a40; --color-option-ring-landscape:#f28c2850; --color-shell-night-edge:#6c5436; --color-panel-wood:#eed3a0;
+  --color-panel-lobby:#fff5e2f2; --color-panel-create:#fff5e3f4; --color-results-block-veil:#44362266; --color-results-post-veil:#42362266;
   --font-sans:'DM Sans',sans-serif; --font-display:'Nunito',sans-serif; --font-hand:'Kalam',cursive;
   --font-weight-ultra:1000;
   --spacing:1px;
@@ -39,6 +55,34 @@
   --color-leaf: var(--green); --color-ink: var(--ink); --color-muted: var(--muted);
   --color-line: var(--line); --color-line-ui: var(--line-ui);
   --color-accent: var(--orange); --color-accent-shadow: var(--shadow); --color-forest: var(--forest);
+}
+/* Theme variables: the values change with data-theme, @theme inline above exposes them as utilities. */
+@layer base {
+  :root {
+    --paper:#f7edda;
+    --paper-alt:#f2e5ca;
+    --card:#fffaf0;
+    --green:#2f6b3d;
+    --ink:#4a3522;
+    --muted:#6b624c;
+    --line-ui:#857a60;
+    --line:#dacfb7;
+    --orange:#f28c28;
+    --shadow:#c66c1d;
+    --forest:#2f6b3d;
+  }
+  [data-theme=dark] {
+    --paper:#182a22;
+    --paper-alt:#263e2d;
+    --card:#22392d;
+    --green:#b5d595;
+    --ink:#f3e6cd;
+    --muted:#c2c3ac;
+    --line:#49624c;
+    --forest:#10241b;
+    --shadow:#87531e;
+    --line-ui:#6f8f72;
+  }
 }
 @custom-variant dark (&:where([data-theme=dark], [data-theme=dark] *));
 @custom-variant hover (&:hover);

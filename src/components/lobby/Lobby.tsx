@@ -67,7 +67,7 @@ const ui={
  tag:'p-0 rounded-[5px] bg-transparent text-[#59665a] text-[13px] compact:text-[12px]',
  hostTag:'p-0 rounded-[5px] text-[13px] bg-transparent text-jungle compact:text-[12px]',
  menu:'shrink-0 relative self-center',
- menuSummary:'p-5 [list-style:none] cursor-pointer text-[23px] text-[#736342] text-center w-38 min-h-38',
+ menuSummary:'p-5 [list-style:none] [&::-webkit-details-marker]:hidden cursor-pointer text-[23px] text-[#736342] text-center w-38 min-h-38',
  menuPanel:'p-7 top-30 right-0 border border-[#b9a379] rounded-[10px] absolute w-180 bg-[#fff6e2] [box-shadow:#67452030_0px_6px_20px] z-15',
  menuButton:'p-10 rounded-[5px] block w-full text-left text-[#4b4931] text-[14px] hover:bg-[#e8dcba]',
  botLevel:'m-0 p-5 flex-[0_1_125px] w-125 min-h-34 text-[13px] compact:basis-96 compact:w-96 compact:text-[12px]',

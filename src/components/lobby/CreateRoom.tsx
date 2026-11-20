@@ -18,7 +18,7 @@ const ui={
  form:'wood-panel create-room-form p-38 border border-[#dac8a4] rounded-[25px] relative isolate [box-shadow:#4b482535_0px_11px_25px,#ffffff_0px_2px_1px_inset] text-canopy dark:[filter:brightness(0.9)] upto-1050:p-23 upto-800:p-24 upto-450:py-23 upto-450:px-19',
  fields:'wood-fields my-20 mx-0 gap-18 grid grid-cols-[1fr_1fr] upto-1050:gap-14 upto-450:grid-cols-[1fr]',
  field:'text-[16px]',
- picker:'mt-28 mb-0 mx-0 min-w-0',
+ picker:'mt-28 mb-0 mx-0 min-w-0 [&_legend]:text-[20px] [&_label]:text-[16px] [&_input]:text-[16px]',
  identity:'create-identity flex items-center gap-13 my-20 text-[13px] leading-[1.6]',
  error:'wood-error border border-[#cc9e73] bg-[#fff0dc] text-[#953e29] py-13 px-17 text-[13px] leading-[1.6] rounded-[10px] mb-20',
  submit:'wood-primary mt-25 min-w-240',
