@@ -67,7 +67,8 @@ for(const visual of cases){
    if(!existsSync(file)){if(mode==='none')throw new Error('Missing reference '+file);write();return}
    const lines=differences(expand(JSON.parse(gunzipSync(readFileSync(file)).toString('utf8')) as Snapshot),expand(compress(current)));
    if(lines.length&&(mode==='all'||mode==='changed')){write();return}
-   expect(lines.slice(0,80).join('\n')+(lines.length>80?`\n… ${lines.length-80} more`:''),`${lines.length} computed-style differences`).toBe('');
+   const shown=Number(process.env.GUEPARD_DIFF_LINES||80);
+   expect(lines.slice(0,shown).join('\n')+(lines.length>shown?`\n… ${lines.length-shown} more`:''),`${lines.length} computed-style differences`).toBe('');
   }finally{await cleanup?.()}
  });
 }
