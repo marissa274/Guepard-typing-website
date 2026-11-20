@@ -1,8 +1,7 @@
 /* Race browser (lot A). Imported in @layer components. Layout, spacing, typography, colours, dark mode and responsive rules are
    utilities in Races.tsx. What remains, because it cannot be written as a utility:
    - the gradient veil over each card (::after, direction follows the card side and the viewport);
-   - the focus rings of the page (descendant :focus-visible colours, dark and on the dark cards);
-   - the lobby-page form buttons, which are rendered by the lot B pages. */
+   - the focus rings of the page (descendant :focus-visible colours, dark and on the dark cards). */
 .expedition-card::after{content:'';position:absolute;inset:0;z-index:1;pointer-events:none;background:linear-gradient(90deg,#102e20ee,#173b2bdc 35%,#173b2b56 68%,transparent 90%)}
 .expedition-card:nth-child(even)::after{background:linear-gradient(270deg,#102e20ee,#173b2bdc 35%,#173b2b56 68%,transparent 90%)}
 /* On narrow screens the veil rises from the bottom, for both sides. */
@@ -14,4 +13,3 @@
  .expeditions-page :focus-visible{outline-color:#f6c445}
 }
 .woodland-page :focus-visible{outline:3px solid #1b3a2b;outline-offset:2px;box-shadow:0 0 0 2px #fff4d8}
-.lobby-page .wood-small-button{background:#fff9ec;border:2px solid #427451;color:#205331;border-radius:13px;box-shadow:0 3px 0 #64806638;font-size:15px;padding:8px 11px;min-height:38px;@variant compact{font-size:13px}}

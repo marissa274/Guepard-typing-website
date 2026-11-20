@@ -80,6 +80,14 @@ Pièges découverts pendant le lot A (chacun a produit un diff de styles calcul�
 - `h1`, `p`… sans couche écrasaient `sr-only` (marge `-1px`) : `sr-only m-0`.
 - Les références de styles calculés contiennent l'URL des images avec le port (`localhost:5180`) : toujours `GUEPARD_TEST_PORT=5180`.
 
+Pièges découverts pendant le lot B :
+- Une classe construite par concaténation (`prefixe+'cursor-not-allowed'`) n'est pas générée : chaque classe s'écrit en entier. Un état de page (attente, course, résultats) se traduit par une chaîne de classes par mode, pas par des variantes `in-[…]`.
+- Les règles `:has()`, `:empty`, `:last-child`, `[open]` gardent leur sens : `has-[…]:`, `empty:`, `last:`, `group-open:`. Un utilitaire l'emporte sur toute règle de la couche `components`, donc une propriété pilotée par une règle `:has()` laissée en CSS (affichage de la barre de lancement des résultats) reste entièrement en CSS.
+- Une règle de descendant qui atteint aussi des éléments du lot C (`.lobby-page input`, `.woodland-scenery`) reste en CSS : les utilitaires ne couvrent que les éléments du lot.
+- Les classes sont posées par `AnimalPicker`/`AnimalAvatar` : ils acceptent désormais `className`.
+- Outil de travail : `getComputedStyle` + cascade par élément (règle gagnante, bande de largeur, thème) a servi à écrire les classes ; le diff de styles calculés reste l'arbitre (`GUEPARD_DIFF_LINES=4000` affiche tout). Les tests de salon enchaînés peuvent buter sur les limites de débit : relancer par lots.
+- Les cas visuels du salon couvrent aussi la vue de l'hôte (bot, observateur, invitations, menu ouvert), le formulaire d'entrée, le salon fermé, les résultats (invité et hôte, détails ouverts) et le formulaire de création.
+
 ## Stratégie
 
 La cascade se joue par élément : on migre par paire « élément × propriété ». Pour un élément, on rassemble toutes les règles qui le ciblent (media, sombre, hover, contexte) et on les traduit ensemble en classes, puis on supprime ces déclarations.

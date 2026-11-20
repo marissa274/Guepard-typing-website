@@ -217,7 +217,7 @@ html[data-decor=pending] :is(.header-branch,.animal-cutout,.leaves-cutout,.vines
 .avatar-toucan{background-position:100% 100%}
 [data-theme=dark] .animal-avatar{background-image:url('/assets/animal-portraits-night.webp')}
 .expeditions-identity summary .animal-avatar{width:32px;height:32px}
-.guest-animal,.create-identity{display:flex;align-items:center;gap:13px;margin:20px 0;font-size:13px;line-height:1.6}
+.guest-animal{display:flex;align-items:center;gap:13px;margin:20px 0;font-size:13px;line-height:1.6}
 .animal-picker{border:0;margin:0;padding:0;min-width:0}
 .animal-picker legend{font-size:14px;font-weight:800;margin-bottom:12px}
 .animal-options{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
@@ -254,7 +254,7 @@ html[data-decor=pending] :is(.header-branch,.animal-cutout,.leaves-cutout,.vines
 .room-ranking small{display:block;font-size:12px;color:#756b4c;margin-top:4px}
 [data-theme=dark] .woodland-page{background:#142d32;color:#f7e7c6}
 [data-theme=dark] .woodland-scenery{background:linear-gradient(#132b4ac9,#132e33eb 75%),url('/assets/jungle-blue-night.webp') center top/cover}
-[data-theme=dark] .woodland-title>p,[data-theme=dark] .room-launch p,[data-theme=dark] .woodland-back,[data-theme=dark] .room-connection,[data-theme=dark] .room-host{color:#bdd0a7}
+[data-theme=dark] .woodland-back{color:#bdd0a7}
 @media (max-width:1050px){
  .woodland-page{padding-inline:4%}
 }
@@ -278,11 +278,11 @@ html[data-decor=pending] :is(.header-branch,.animal-cutout,.leaves-cutout,.vines
 .lobby-page .woodland-scenery{background:linear-gradient(90deg,#163a2445 0%,#f7e7c633 24%,#f7e7c638 75%,#153e294e 100%),linear-gradient(180deg,#f7e7c622,#f7e7c66b 65%,#f7e7c66a),url('/assets/relief-background.webp') center top/cover}
 .lobby-page .woodland-shell{max-width:1480px}
 .lobby-page .woodland-back{font-size:17px;font-weight:750;background:#f7e7c6de;border-radius:24px;padding:9px 15px}
-.lobby-page .wood-hint,.lobby-page .settings-access,.lobby-page .roster-note{font-size:15px;line-height:1.55}
+.lobby-page .roster-note{font-size:15px;line-height:1.55}
 .lobby-page .wood-small-button{font-size:16px;padding:13px 17px;min-height:50px}
 .lobby-page .wood-primary{font-size:21px;min-height:65px}
 [data-theme=dark] .lobby-page .woodland-scenery{background:linear-gradient(90deg,#071b33aa,#122c4770 28%,#122c4770 73%,#071b33af),url('/assets/jungle-blue-night.webp') center top/cover}
-[data-theme=dark] .lobby-page .woodland-title,[data-theme=dark] .lobby-page .room-connection,[data-theme=dark] .lobby-page .woodland-back{background:#173b48dd;color:#f7e7c6}
+[data-theme=dark] .lobby-page .woodland-back{background:#173b48dd;color:#f7e7c6}
 .course-code-entry{font-size:17px}
 .public-rooms-empty{position:relative;overflow:hidden;max-width:1680px;margin:auto;min-height:500px;border-radius:34px;display:flex;align-items:center;padding:60px;color:#fff1d3;background:#255637;box-shadow:0 8px 0 #173a25,0 24px 40px #173a2538}
 .public-rooms-empty-art{position:absolute;inset:0;background:linear-gradient(90deg,#173c2cf2 0%,#173c2cbf 48%,#173c2c19 100%),url('/assets/relief-background.webp') center/cover}
@@ -358,7 +358,7 @@ html[data-decor=pending] :is(.header-branch,.animal-cutout,.leaves-cutout,.vines
 .lobby-page .woodland-shell{max-width:1400px;padding:18px 22px;border:14px solid transparent;border-radius:24px 19px 23px 18px;background:linear-gradient(#fff3dfea,#fff3dfea) padding-box,repeating-linear-gradient(3deg,#88572e 0 2px,#b78046 3px 5px,#d3a36c 6px,#986235 8px,#b78149 12px) border-box;box-shadow:inset 0 0 0 2px #e7c392,0 3px 0 #664624,0 12px 26px #19372050}
 .lobby-page .woodland-shell::before,.lobby-page .woodland-shell::after{top:-50px;height:43px}
 .lobby-page .woodland-back{font-size:16px;padding:4px 0;min-height:30px}
-.lobby-page .room-invitation>small,.lobby-page .invitation-result{grid-column:1/-1;margin:0}
+.lobby-page .invitation-result{grid-column:1/-1;margin:0}
 [data-theme=dark] .lobby-page .woodland-shell{background:linear-gradient(#173747ee,#173747ee) padding-box,repeating-linear-gradient(3deg,#684629 0 2px,#926a3f 3px 5px,#bb915d 6px,#72502f 8px,#926739 12px) border-box}
 @media (max-width:1600px) and (min-width:1101px){
  .lobby-page{--side-space:11vw}
@@ -438,7 +438,7 @@ html[data-decor=pending] :is(.header-branch,.animal-cutout,.leaves-cutout,.vines
 }
 .lobby-results{padding-top:30px;padding-bottom:100px;--side-space:clamp(30px,7vw,150px)}
 .lobby-results .woodland-shell{background:none!important;border:0;box-shadow:none;padding:0;max-width:1500px}
-.lobby-results .woodland-shell::before,.lobby-results .woodland-shell::after,.lobby-results .lobby-topbar,.lobby-results .lobby-title-row{display:none}
+.lobby-results .woodland-shell::before,.lobby-results .woodland-shell::after{display:none}
 .results-rule{max-width:950px;margin:12px auto 0;text-align:center;font-size:13px;line-height:1.5;color:#40573b;background:#fff5dfcf;border-radius:10px;padding:8px 14px}
 .guest-end-actions{display:flex;align-items:center;gap:20px;flex-wrap:wrap}
 @media (max-width:1100px){
