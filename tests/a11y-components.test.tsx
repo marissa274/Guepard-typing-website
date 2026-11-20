@@ -126,8 +126,12 @@ describe('A11Y-04 · keyboard heatmap',()=>{
  test('opening the detailed statistics moves focus to the details panel',async()=>{
   const room:RoomView={...baseRoom,phase:'finished',startedAt:now-60000,endedAt:now,people:[{...person('host','Alice'),progress:10,typed:10,finishedAt:now}]};
   const {rerender}=render(<RaceResults room={room}/>);
-  fireEvent.click(screen.getByRole('button',{name:'Voir mes statistiques'}));
+  const toggle=screen.getByRole('button',{name:/mes statistiques/i}),label=toggle.textContent;
+  expect(toggle.getAttribute('aria-expanded')).toBe('false');
+  fireEvent.click(toggle);
   mockSearch.value='view=results';rerender(<RaceResults room={{...room}}/>);
+  expect(screen.getByRole('button',{name:/mes statistiques/i}).getAttribute('aria-expanded')).toBe('true');
+  expect(screen.getByRole('button',{name:/mes statistiques/i}).textContent).toBe(label);
   await waitFor(()=>expect(document.activeElement?.id).toBe('course-result-details'));
  });
 });

@@ -11,7 +11,7 @@ test('four-person demo matches the reference viewport and fills the detailed pag
  await expect(page.locator('.podium-cheering-monkey')).toBeVisible();await expect(page.locator('.podium-flower')).toHaveCount(3);expect(await page.locator('.podium-flower-left').evaluate(el=>getComputedStyle(el).animationName)).toBe('podium-flower-sway');
  expect(await page.locator('body').evaluate(el=>el.scrollWidth)).toBe(2688);
  const footer=await page.locator('.compact-footer').boundingBox();expect(footer!.y+footer!.height).toBeLessThanOrEqual(1681);const monkey=await page.locator('.podium-cheering-monkey').boundingBox();expect(monkey!.y+monkey!.height).toBeLessThan(ground[0]+55);const title=await page.locator('.results-heading').boundingBox();expect(title!.y+title!.height).toBeLessThan((await places.nth(1).boundingBox())!.y);await page.screenshot({path:'/tmp/guepard-podium-demo-2688.png'});
- await page.getByRole('button',{name:'Voir mes statistiques'}).click();await expect(page).toHaveURL(/view=results/);
+ await page.getByRole('button',{name:/mes statistiques/i}).click();await expect(page).toHaveURL(/view=results/);
  await expect(page.locator('.results-table tbody tr')).toHaveCount(4);
  const width=await page.locator('.results-panels').evaluate(el=>el.getBoundingClientRect().width/window.innerWidth);expect(width).toBeGreaterThan(.8);
  await page.screenshot({path:'/tmp/guepard-demo-statistiques.png',fullPage:true});

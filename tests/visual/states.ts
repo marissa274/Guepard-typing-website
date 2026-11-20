@@ -104,7 +104,7 @@ export const scenarios:Record<string,Scenario>={
  'legacy-race':{open:visit('/race/canopy'),viewports:base},
  'legacy-private-race':{open:async page=>{await page.addInitScript(race=>{sessionStorage.setItem('guepard-privateRaces',JSON.stringify([race]));localStorage.setItem('guepard-privateRaces',JSON.stringify([race]))},privateRace);await page.goto('/race/'+privateRace.id)},viewports:base},
  podium:{open:async page=>{await visit('/demo/podium')(page);await finiteAnimationsDone(page)},viewports:everywhere},
- 'podium-details':{open:async page=>{await page.goto('/demo/podium');await finiteAnimationsDone(page);await page.getByRole('button',{name:'Voir mes statistiques'}).click();await expect(page.locator('.results-table')).toBeVisible()},viewports:base},
+ 'podium-details':{open:async page=>{await page.goto('/demo/podium');await finiteAnimationsDone(page);await page.getByRole('button',{name:/mes statistiques/i}).click();await expect(page.locator('.results-table')).toBeVisible()},viewports:base},
  lobby:{open:async page=>{await page.goto('/');const {room,guest,cleanup}=await guestRoom(page);await openLobby(page,room.id,guest);await expect(page.locator('.room-code')).toBeVisible();return cleanup},masks,viewports:everywhere},
  'lobby-settings':{open:async page=>{await page.goto('/');const {room,guest,cleanup}=await guestRoom(page);await openLobby(page,room.id,guest);await page.locator('details.wood-disclosure summary').first().click();return cleanup},masks,viewports:base},
  'create-room':{open:async page=>{await signedIn(page);await page.goto('/create')},viewports:base},
@@ -123,7 +123,7 @@ export const scenarios:Record<string,Scenario>={
   await page.goto('/');const {room,host,token,guest,cleanup}=await guestRoom(page);
   await configureShortRace(host,room.id,token);await roomCommand(host,room.id,token,{action:'start'});const running=await waitForRace(host,room.id,token);
   await roomCommand(page.request,room.id,guest,{action:'abandon'});await sendProgress(host,room.id,token,running.text!);
-  await openLobby(page,room.id,guest);await page.getByRole('button',{name:'Voir mes statistiques'}).click();await expect(page.locator('.room-launch')).toBeVisible();
+  await openLobby(page,room.id,guest);await page.getByRole('button',{name:/mes statistiques/i}).click();await expect(page.locator('.room-launch')).toBeVisible();
   return cleanup;
  },masks:[...masks,'.race-board'],viewports:base},
  'lobby-finished-host':{open:async page=>{
@@ -137,7 +137,7 @@ export const scenarios:Record<string,Scenario>={
   await page.goto('/');const {room,host,token,guest,cleanup}=await guestRoom(page);
   await configureShortRace(host,room.id,token);await roomCommand(host,room.id,token,{action:'start'});const running=await waitForRace(host,room.id,token);
   await roomCommand(page.request,room.id,guest,{action:'abandon'});await sendProgress(host,room.id,token,running.text!);
-  await openLobby(page,room.id,token);await page.getByRole('button',{name:'Voir mes statistiques'}).click();await expect(page.locator('.room-launch')).toBeVisible();
+  await openLobby(page,room.id,token);await page.getByRole('button',{name:/mes statistiques/i}).click();await expect(page.locator('.room-launch')).toBeVisible();
   return cleanup;
  },masks:[...masks,'.race-board'],viewports:base},
  race:{open:async page=>{

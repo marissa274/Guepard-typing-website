@@ -87,7 +87,7 @@ test('fixed lanes retain stable transformations, complete results and a reset re
   for(let index=0;index<members.length;index++)await progress(index,1);
   await expect(page.getByRole('heading',{name:'Bravo à tous !'})).toBeVisible();
   await expect(page.locator('.podium-place')).toHaveCount(3);
-  await page.getByRole('button',{name:'Voir mes statistiques'}).click();
+  await page.getByRole('button',{name:/mes statistiques/i}).click();
   await expect(page.locator('.results-table tbody tr')).toHaveCount(4);
   await expect(page.locator('.race-timeline svg polyline')).toHaveCount(4);
   await expect(page.getByRole('columnheader',{name:'Bonus reçus'})).toBeVisible();

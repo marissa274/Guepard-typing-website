@@ -21,7 +21,7 @@ test('results include gross speed, errors, time, status and earned bonus count',
  for(const name of ['MPM brut','Erreurs','Temps','Statut'])expect(screen.getByRole('columnheader',{name})).toBeTruthy();
  expect(screen.getByText('60 s')).toBeTruthy();
  expect(screen.getByRole('columnheader',{name:'Bonus reçus'})).toBeTruthy();
- fireEvent.click(screen.getByRole('button',{name:'Masquer les statistiques'}));
+ fireEvent.click(screen.getByRole('button',{name:/mes statistiques/i}));
  expect(mockPush).toHaveBeenCalledWith('/lobby/metrics');
 });
 
