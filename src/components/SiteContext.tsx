@@ -17,6 +17,8 @@ export function SiteProvider({children,initialLang='fr',initialDark=false}:{chil
  const [state,setState]=useState<SiteState>({...defaults,lang:initialLang,dark:initialDark,name:copy[initialLang].guestName}),[ready,setReady]=useState(false),[modal,setModal]=useState<string|null>(null),[resultsError,setResultsError]=useState('');
  const account=useRef<string|null>(null);
  const sessionGeneration=useRef(0);
+ // Identity fields the guest edited since mounting: a late account response must not overwrite them.
+ const edited=useRef({name:false,avatar:false});
  const refreshResults=useCallback(async()=>{
   const id=account.current,generation=sessionGeneration.current;if(!id)return;
   try{const page=await resultService.list();if(account.current===id&&sessionGeneration.current===generation){setState(previous=>({...previous,results:page.results,summary:page.summary}));setResultsError('')}}
@@ -42,11 +44,15 @@ export function SiteProvider({children,initialLang='fr',initialDark=false}:{chil
   if(!Array.isArray(restored.privateRaces))restored.privateRaces=[];
   // Appearance preferences do not depend on the account request completing.
   setState(previous=>({...previous,lang:restored.lang,dark:restored.dark}));
+  const guestState=(previous:SiteState):SiteState=>{
+   const name=edited.current.name?previous.name:restored.name,nameIsDefault=edited.current.name?previous.nameIsDefault:restored.nameIsDefault;
+   return {...restored,lang:previous.lang,dark:previous.dark,name:guestNameFor(name,nameIsDefault,previous.lang),nameIsDefault,avatar:edited.current.avatar?previous.avatar:restored.avatar};
+  };
   authService.current().then(async({user})=>{
    if(!active||sessionGeneration.current!==generation)return;
    if(user){account.current=user.id;setState(previous=>({...restored,lang:previous.lang,dark:previous.dark,user:true,name:user.username,avatar:animalFor(user.avatar).id,avatarUrl:user.avatarUrl,results:[],privateRaces:[]}));await refreshResults()}
-   else setState(previous=>({...restored,lang:previous.lang,dark:previous.dark,name:guestNameFor(restored.name,restored.nameIsDefault,previous.lang)}));
-  }).catch(()=>{if(active&&sessionGeneration.current===generation)setState(previous=>({...restored,lang:previous.lang,dark:previous.dark,name:guestNameFor(restored.name,restored.nameIsDefault,previous.lang)}))}).finally(()=>{if(active&&sessionGeneration.current===generation)setReady(true)});
+   else setState(previous=>(guestState(previous)));
+  }).catch(()=>{if(active&&sessionGeneration.current===generation)setState(previous=>(guestState(previous)))}).finally(()=>{if(active&&sessionGeneration.current===generation)setReady(true)});
   return()=>{active=false;account.current=null;sessionGeneration.current++};
  },[refreshResults]);
  useEffect(()=>{
@@ -62,7 +68,7 @@ export function SiteProvider({children,initialLang='fr',initialDark=false}:{chil
    }catch{/* Storage can be unavailable in private browsing. */}
   }
  },[state,ready]);
- const save:Save=(key,value)=>{if(key==='results'&&account.current){void refreshResults();return}setState(previous=>{const next=typeof value==='function'?(value as (old:SiteState[typeof key])=>SiteState[typeof key])(previous[key]):value;return key==='lang'&&!previous.user?{...previous,lang:next as Language,name:guestNameFor(previous.name,previous.nameIsDefault,next as Language)}:key==='name'?{...previous,name:next as string,nameIsDefault:false}:key==='nameIsDefault'&&next?{...previous,nameIsDefault:true,name:copy[previous.lang].guestName}:{...previous,[key]:next}})};
+ const save:Save=(key,value)=>{if(key==='name'||key==='nameIsDefault')edited.current.name=true;if(key==='avatar')edited.current.avatar=true;if(key==='results'&&account.current){void refreshResults();return}setState(previous=>{const next=typeof value==='function'?(value as (old:SiteState[typeof key])=>SiteState[typeof key])(previous[key]):value;return key==='lang'&&!previous.user?{...previous,lang:next as Language,name:guestNameFor(previous.name,previous.nameIsDefault,next as Language)}:key==='name'?{...previous,name:next as string,nameIsDefault:false}:key==='nameIsDefault'&&next?{...previous,nameIsDefault:true,name:copy[previous.lang].guestName}:{...previous,[key]:next}})};
  const setAccount=(user:Account)=>{sessionGeneration.current++;account.current=user.id;setReady(true);setState(previous=>({...previous,user:true,name:user.username,avatar:animalFor(user.avatar).id,avatarUrl:user.avatarUrl,results:[],privateRaces:[],summary:null}));void refreshResults()};
  const signOut=async()=>{sessionGeneration.current++;await authService.logout();account.current=null;setReady(true);setResultsError('');setState(previous=>({...previous,user:false,name:copy[previous.lang].guestName,nameIsDefault:true,avatar:'cheetah',avatarUrl:undefined,results:[],privateRaces:[],summary:null}))};
  const reset=()=>{for(const key of Object.keys(defaults)){localStorage.removeItem('guepard-'+key);sessionStorage.removeItem('guepard-'+key)}setState(previous=>previous.user?{...previous,lang:defaults.lang,dark:defaults.dark}:{...defaults})};

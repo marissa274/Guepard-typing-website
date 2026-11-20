@@ -47,6 +47,19 @@ test('a delayed guest response keeps the default guest name in the language chos
  finishCurrent({user:null});
  await waitFor(()=>expect(JSON.parse(sessionStorage.getItem('guepard-name')||'null')).toBe('CuriousCheetah'));
 });
+test('a delayed guest response keeps the name and avatar typed while it was pending',async()=>{
+ sessionStorage.removeItem('guepard-name');sessionStorage.removeItem('guepard-avatar');sessionStorage.removeItem('guepard-nameIsDefault');
+ let finishCurrent!:(value:{user:null})=>void;
+ auth.current.mockReturnValueOnce(new Promise<{user:null}>(resolve=>{finishCurrent=resolve}));
+ const {container}=mount('/races');
+ const nickname=()=>container.querySelector<HTMLInputElement>('#nickname')!;
+ mockedRoomRequest.mockResolvedValue({rooms:[]});
+ await waitFor(()=>expect(nickname()).not.toBeNull());
+ fireEvent.change(nickname(),{target:{value:'Léopold'}});
+ finishCurrent({user:null});
+ await waitFor(()=>expect(JSON.parse(sessionStorage.getItem('guepard-name')||'null')).toBe('Léopold'));
+ expect(nickname().value).toBe('Léopold');
+});
 test('a delayed account response preserves language and theme chosen after mounting',async()=>{
  let finishCurrent!:(value:{user:null})=>void;
  const current=new Promise<{user:null}>(resolve=>{finishCurrent=resolve});
