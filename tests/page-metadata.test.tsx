@@ -25,4 +25,17 @@ describe('A11Y-02 · the server renders the document title of each view in the r
   expect((await metadata(['privacy'])).title).toBe('Privacy policy · GUÉPARD');
   expect((await metadata(['nowhere'])).title).toBe(pageTitle('/nowhere',copy.en));
  });
+ test('login and signup titles follow the request language and match the client title',async()=>{
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const login=require('../app/login/page') as typeof import('../app/login/page');
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const signup=require('../app/signup/page') as typeof import('../app/signup/page');
+  mockPreferences.mockResolvedValue({lang:'en',dark:false});
+  expect((await login.generateMetadata()).title).toBe(pageTitle('/login',copy.en));
+  expect((await signup.generateMetadata()).title).toBe(pageTitle('/signup',copy.en));
+  expect((await login.generateMetadata()).title).not.toMatch(/Connexion/);
+  mockPreferences.mockResolvedValue({lang:'fr',dark:false});
+  expect((await login.generateMetadata()).title).toBe(pageTitle('/login',copy.fr));
+  expect((await signup.generateMetadata()).title).toBe(pageTitle('/signup',copy.fr));
+ });
 });
