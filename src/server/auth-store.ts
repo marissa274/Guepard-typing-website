@@ -33,6 +33,8 @@ function cleanUsername(value:unknown){
 function cleanPassword(value:unknown){if(typeof value!=='string'||value.length<8||value.length>128)throw new AuthError('Le mot de passe doit contenir entre 8 et 128 caractères.');return value}
 async function hashPassword(password:string){const salt=randomBytes(16).toString('hex');const hash=await scrypt(password,salt,64) as Buffer;return `scrypt$${salt}$${hash.toString('hex')}`}
 async function checkPassword(password:string,stored:string|null|undefined){if(!stored)return false;const [algorithm,salt,hex]=stored.split('$');if(algorithm!=='scrypt'||!salt||!hex)return false;const expected=Buffer.from(hex,'hex');const actual=await scrypt(password,salt,expected.length) as Buffer;return expected.length===actual.length&&timingSafeEqual(expected,actual)}
+/** Verified when the username is unknown (or has no password) so that a login attempt costs one scrypt either way and response time does not reveal which accounts exist. */
+const decoyHash=`scrypt$decoy-salt$${'0'.repeat(128)}`;
 const tokenHash=(token:string)=>createHash('sha256').update(token).digest('hex');
 export async function createSession(pool:Pick<Pool,'query'>,user:Account){const token=randomBytes(32).toString('base64url');await pool.query('INSERT INTO guepard_sessions(token_hash,user_id,expires_at) VALUES($1,$2,$3)',[tokenHash(token),user.id,new Date(Date.now()+lifetime)]);return {user,token}}
 export async function signup(body:AccountBody){
@@ -51,7 +53,8 @@ export async function login(body:AccountBody){
  const {pool,ready}=authDatabase();await ready;
  const result=await pool.query('SELECT u.id,u.username,u.avatar,u.password_hash,a.version AS avatar_version FROM guepard_users u LEFT JOIN guepard_avatars a ON a.user_id=u.id WHERE u.username_key=$1',[username.toLocaleLowerCase('fr')]);
  const row=result.rows[0];
- if(!row||!await checkPassword(password,row.password_hash))throw new AuthError('Nom d’utilisateur ou mot de passe incorrect.',401);
+ const passwordMatches=await checkPassword(password,row?.password_hash||decoyHash);
+ if(!row||!passwordMatches)throw new AuthError('Nom d’utilisateur ou mot de passe incorrect.',401);
  return createSession(pool,accountView(row));
 }
 export async function currentUser(token:string|undefined){
