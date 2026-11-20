@@ -1,7 +1,7 @@
 import type React from 'react';
 import {act,fireEvent,render,screen,waitFor,within} from '@testing-library/react';
 import {jest,expect,test,afterEach,describe} from '@jest/globals';
-import {SiteProvider} from '../src/components/SiteContext';
+import {SiteProvider,useSite} from '../src/components/SiteContext';
 import Site,{pageTitle} from '../src/components/Site';
 import {copy} from '../src/i18n';
 import {authService} from '../src/services/auth';
@@ -38,7 +38,7 @@ describe('A11Y-02 · page structure',()=>{
  test('each view sets a localised document title',async()=>{
   await mount('/how');
   await waitFor(()=>expect(document.title).toBe('Comment jouer · GUÉPARD'));
-  fireEvent.click(screen.getByRole('button',{name:'Choisir la langue : FR'}));
+  fireEvent.click(screen.getByRole('button',{name:'Passer en anglais'}));
   await waitFor(()=>expect(document.title).toBe('How to play · GUÉPARD'));
   expect(pageTitle('/',copy.fr)).toBe(copy.fr.metaTitle);
   expect(pageTitle('/lobby/abc',copy.en)).toBe('Race lobby · GUÉPARD');
@@ -53,7 +53,23 @@ describe('A11Y-03 · control names',()=>{
   const theme=screen.getByRole('button',{name:'Passer au thème sombre'});
   fireEvent.click(theme);
   expect(screen.getByRole('button',{name:'Passer au thème clair'})).toBe(theme);
-  expect(screen.getByRole('button',{name:'Choisir la langue : FR'}).textContent).toContain('FR');
+  expect(screen.getByRole('button',{name:'Passer en anglais'}).textContent).toContain('FR');
+ });
+ test('the language button names the action, and the landmark labels follow the language (A1, I18N-01)',async()=>{
+  await mount('/how');
+  expect(screen.getByRole('navigation',{name:'Navigation'})).toBeTruthy();
+  fireEvent.click(screen.getByRole('button',{name:'Passer en anglais'}));
+  expect(screen.getByRole('button',{name:'Switch to French'}).textContent).toContain('EN');
+  expect(copy.en.navigation).toBe('Navigation');
+ });
+ test('the default guest name follows the language but a typed name is kept (I18N-01)',async()=>{
+  const Probe=()=>{const {state,save}=useSite();return <><p data-testid="guest">{state.name}</p><button onClick={()=>save('lang',state.lang==='fr'?'en':'fr')}>swap</button><button onClick={()=>save('name','Léa')}>type</button></>};
+  render(<SiteProvider><Probe/></SiteProvider>);
+  expect((await screen.findByTestId('guest')).textContent).toBe('GuépardCurieux');
+  fireEvent.click(screen.getByText('swap'));
+  await waitFor(()=>expect(screen.getByTestId('guest').textContent).toBe('CuriousCheetah'));
+  fireEvent.click(screen.getByText('type'));fireEvent.click(screen.getByText('swap'));
+  await waitFor(()=>expect(screen.getByTestId('guest').textContent).toBe('Léa'));
  });
 });
 
@@ -68,5 +84,19 @@ describe('A11Y-04 · account menu',()=>{
   expect(menu.open).toBe(false);expect(document.activeElement).toBe(summary.closest('summary'));
   menu.open=true;fireEvent.pointerDown(container.querySelector('main')!);
   expect(menu.open).toBe(false);
+ });
+ test('closing the settings dialog returns focus to the account menu summary, not to <body> (K1)',async()=>{
+  jest.mocked(authService.current).mockResolvedValueOnce({user:{id:'u1',username:'Jungle',avatar:'cheetah'}} as never);
+  const {container}=await mount('/how');
+  const summary=(await screen.findByText('Jungle')).closest('summary') as HTMLElement;
+  const menu=container.querySelector('details.account') as HTMLDetailsElement;
+  menu.open=true;
+  const opener=within(menu).getByRole('button',{name:'Paramètres'});act(()=>opener.focus());
+  fireEvent.click(opener);
+  const dialog=await waitFor(()=>{const element=container.querySelector('dialog[open]');expect(element).not.toBeNull();return element as HTMLDialogElement});
+  expect(menu.open).toBe(false);
+  act(()=>{dialog.close()});
+  await waitFor(()=>expect(container.querySelector('dialog')).toBeNull());
+  expect(document.activeElement).toBe(summary);
  });
 });

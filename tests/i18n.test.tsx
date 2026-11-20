@@ -7,6 +7,7 @@ import {copy} from '../src/i18n';
 import {gameCopy} from '../src/i18n/game';
 import {howCopy} from '../src/i18n/how';
 import {accountCopy,authCopy,authMessage} from '../src/i18n/account';
+import {clientText} from '../src/i18n/errors';
 import {roomCopy} from '../src/lib/room-copy';
 import {formatDate,formatDateTime,formatNumber,formatOptionalPercent,formatPadded,formatPercent,formatSeconds} from '../src/i18n/format';
 import RaceResults from '../src/components/lobby/RaceResults';
@@ -43,6 +44,17 @@ describe('I18N-01 · centralised labels',()=>{
   expect(authMessage(authCopy.fr,'mismatch')).toBe('Les mots de passe ne correspondent pas.');
   expect(authMessage(authCopy.en,'mismatch')).toBe('The passwords do not match.');
   expect(authMessage(authCopy.en,'unknown-key')).toBe('unknown-key');
+ });
+
+ test('client-side fallback messages exist in both languages',()=>{
+  expect(clientText('loginFailed','fr')).toBe('La connexion a échoué.');
+  expect(clientText('loginFailed','en-US')).toBe('Sign-in failed.');
+  expect(clientText('accountUnavailable','en')).toBe('Account unavailable.');
+  expect(clientText('loginUnavailable','fr')).toBe('La connexion est indisponible.');
+ });
+ test('the demo podium room name and the podium label are translated',()=>{
+  expect(gameCopy.fr.podiumRoomName).not.toBe(gameCopy.en.podiumRoomName);
+  expect(gameCopy.en.podiumRoomName).toBe('The Rapids Clearing');
  });
 
  const root=join(__dirname,'..');

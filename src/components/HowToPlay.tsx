@@ -21,7 +21,7 @@ const ui={
  card:'how-card rounded-[24px] [box-shadow:0_9px_0_#77512b38] overflow-hidden dark:text-canopy',
  copy:'how-card-copy pt-25 pb-30 px-28 phone:p-20',
  number:'text-[18px] font-black text-[#a55d20]',
- cardTitle:'text-[30px] mt-8 mb-12 phone:text-[27px]',
+ cardTitle:'text-[30px] mt-8 mb-12 phone:text-[27px] dark:text-deep-forest',
  cardText:'text-[19px] leading-[1.6]',
  art:'how-illustration relative flex flex-col justify-center items-center p-22 overflow-hidden h-250 phone:h-220',
  friends:'how-friends flex gap-18',

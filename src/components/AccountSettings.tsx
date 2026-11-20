@@ -19,7 +19,11 @@ export default function AccountSettings(){
  const [passwords,setPasswords]=useState({currentPassword:'',password:'',confirmation:''});
  const [photo,setPhoto]=useState<File|null>(null),photoInput=useRef<HTMLInputElement>(null);
  const [busy,setBusy]=useState(false),[notice,setNotice]=useState<{error:boolean;message:string}|null>(null);
- useEffect(()=>{const previous=document.activeElement;dialog.current?.showModal();return()=>{if(previous instanceof HTMLElement)previous.focus()}},[]);
+ useEffect(()=>{
+  const previous=document.activeElement;dialog.current?.showModal();
+  /* The opener is a button inside the account menu, which is closed by now: focus its summary instead of dropping to <body>. */
+  return()=>{if(!(previous instanceof HTMLElement))return;const menu=previous.closest('details');if(menu&&!menu.open)menu.querySelector('summary')?.focus();else previous.focus()};
+ },[]);
  async function profile(event:FormEvent){
   event.preventDefault();if(busy)return;setBusy(true);setNotice(null);
   try{const {user}=await authService.updateProfile({username,avatar});save('name',user.username);save('avatar',user.avatar);setUsername(user.username);setNotice({error:false,message:labels.profileSaved})}

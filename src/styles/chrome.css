@@ -40,7 +40,10 @@ nav{align-items:center;font-size:13px;font-weight:600}
  }
 }
 /* split: kept after .account small (same specificity, original order) */
-.animal-options small{font-size:12px;color:var(--color-option-note);display:block;margin-top:3px}
+.animal-options small{font-size:12px;color:var(--muted);display:block;margin-top:3px}
+@variant dark{
+ .animal-options small{color:var(--color-field-ink)}
+}
 /* Use the original home artwork, without stretching the footer mascot. */
 #app:has(>.lobby-page){min-height:100svh;display:flex;flex-direction:column}
 #app:has(>.lobby-page)>.canopy-header,#app:has(>.lobby-page)>.compact-footer{flex-shrink:0;width:100%;margin:0}

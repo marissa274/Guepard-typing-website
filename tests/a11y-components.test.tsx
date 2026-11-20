@@ -66,6 +66,15 @@ describe('A11Y-02 · heading structure',()=>{
   expect(screen.getAllByRole('heading',{level:1}).map(heading=>heading.textContent)).toEqual(['La clairière']);
   expect(screen.getByRole('heading',{level:3,name:'Alice'})).toBeTruthy();
  });
+ test('the h1 of a finished lobby is not inside the hidden title row, and the celebration sign is not a nested landmark (H1, H2)',async()=>{
+  serve(finished);const {container}=render(<Lobby id="a11y"/>);
+  await screen.findByRole('heading',{level:2,name:'Bravo à tous !'});
+  const h1=container.querySelector('h1') as HTMLElement;
+  expect(h1.classList.contains('sr-only')).toBe(true);
+  expect(h1.closest('.hidden')).toBeNull();
+  expect(container.querySelector('.celebration-sign')?.tagName).toBe('DIV');
+  expect(container.querySelector('.celebration-sign')?.closest('aside')).toBeNull();
+ });
  test('stand-alone results keep their own h1',()=>{
   render(<RaceResults room={finished}/>);
   expect(screen.getAllByRole('heading',{level:1}).map(heading=>heading.textContent)).toEqual(['Bravo à tous !']);

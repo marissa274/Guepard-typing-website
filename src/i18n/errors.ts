@@ -1,3 +1,4 @@
+import {copy} from '../i18n';
 const english:Record<string,string>={
  'Le serveur ne peut pas répondre. Réessayez.':'The server could not respond. Please try again.',
  'La base de données est indisponible.':'The database is unavailable.',
@@ -68,4 +69,8 @@ const english:Record<string,string>={
 export function clientError(message:string,language=typeof document==='undefined'?'fr':document.documentElement.lang){
  if(language.toLowerCase().startsWith('fr'))return message;
  return english[message]||'This action could not be completed. Check your input and try again.';
+}
+/** Client-side fallback messages (no server text available), in the language of the document. */
+export function clientText(key:'accountUnavailable'|'loginFailed'|'loginUnavailable',language=typeof document==='undefined'?'fr':document.documentElement.lang){
+ return copy[language.toLowerCase().startsWith('fr')?'fr':'en'][key];
 }
