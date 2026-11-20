@@ -7,7 +7,7 @@ import {accountCopy} from '../i18n/account';
 
 /* Utilities (TECH-03): the dialog is rendered by this component only. */
 const ui={
- dialog:'bg-card text-ink border border-line rounded-[23px] p-36 max-w-460 w-[calc(100%-32px)] [box-shadow:0_20px_80px_#0003] backdrop:bg-[#163d2c80] backdrop:[backdrop-filter:blur(4px)] [&_p]:leading-[1.8] [&_p]:text-[14px] [&_p]:mb-24 [&_p]:text-muted',
+ dialog:'bg-card text-ink border border-line rounded-[23px] p-36 max-w-460 w-[calc(100%-32px)] [box-shadow:0_20px_80px_var(--color-account-shadow-1)] backdrop:bg-account-fill-1 backdrop:[backdrop-filter:blur(4px)] [&_p]:leading-[1.8] [&_p]:text-[14px] [&_p]:mb-24 [&_p]:text-muted',
  close:'close absolute right-13 top-10 text-[27px]',
  title:'text-[27px] mb-16',
  primary:'button primary w-full mt-12',

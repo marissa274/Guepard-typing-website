@@ -9,16 +9,16 @@ const ui={
  controls:'m-0 p-0 [border:0] min-w-0',
  fields:'mt-4 mb-8 mx-0 gap-0 grid grid-cols-[1fr]',
  row:'py-3 px-0 gap-10 grid items-center grid-cols-[minmax(120px,0.9fr)_minmax(0px,1fr)] compact:grid-cols-[minmax(95px,0.8fr)_minmax(0px,1fr)]',
- label:'m-0 font-[650] text-[#405448] text-[16px] leading-[1.25] compact:text-[14px] upto-620:block',
- control:'py-8 pl-10 pr-32 border border-field-edge rounded-control bg-[#fff9ec] text-[#34433a] [box-shadow:#7d684026_0px_2px_5px] text-[16px] min-h-40 leading-[1.2] h-40 box-border in-[.room-settings-controls:disabled]:cursor-not-allowed',
- free:'in-[.room-settings-controls:disabled]:bg-[#f2e6cc] in-[.room-settings-controls:disabled]:text-[#766e54] in-[.room-settings-controls:disabled]:cursor-not-allowed',
- disclosure:'group py-9 px-0 border-t border-t-[#d9c9ab] last:pb-0',
- summary:'flex justify-between font-bold cursor-pointer [list-style:none] [&::-webkit-details-marker]:hidden text-[#255338] text-[16px] leading-[1.35] group-open:mb-18',
+ label:'m-0 font-[650] text-lobby-ink-15 text-[16px] leading-[1.25] compact:text-[14px] upto-620:block',
+ control:'py-8 pl-10 pr-32 border border-field-edge rounded-control bg-lobby-fill-11 text-lobby-ink-16 [box-shadow:#7d684026_0px_2px_5px] text-[16px] min-h-40 leading-[1.2] h-40 box-border in-[.room-settings-controls:disabled]:cursor-not-allowed',
+ free:'in-[.room-settings-controls:disabled]:bg-lobby-fill-12 in-[.room-settings-controls:disabled]:text-lobby-ink-17 in-[.room-settings-controls:disabled]:cursor-not-allowed',
+ disclosure:'group py-9 px-0 border-t border-t-lobby-edge-11 last:pb-0',
+ summary:'flex justify-between font-bold cursor-pointer [list-style:none] [&::-webkit-details-marker]:hidden text-lobby-ink-18 text-[16px] leading-[1.35] group-open:mb-18',
  checks:'mb-18 gap-14 grid grid-cols-[1fr_1fr]',
  check:'m-0 gap-10 font-medium flex items-center',
  hint:'wood-hint mt-5 mb-10 mx-0 text-moss text-[14px] leading-[1.4]',
  customLabel:'mt-18',
- error:'wood-error border border-[#cc9e73] bg-[#fff0dc] text-[#953e29] py-13 px-17 text-[13px] leading-[1.6] rounded-[10px] col-[1/-1] mt-6 mx-0 mb-0',
+ error:'wood-error border border-avatar-edge-1 bg-avatar-fill-2 text-avatar-ink-1 py-13 px-17 text-[13px] leading-[1.6] rounded-[10px] col-[1/-1] mt-6 mx-0 mb-0',
 };
 export default function RoomSettings({settings:s,disabled,onChange}:{settings:Settings;disabled:boolean;onChange:(patch:Partial<Settings>)=>void}){
  const {fr}=useSite(),copy=roomCopy(fr);
