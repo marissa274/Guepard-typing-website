@@ -122,6 +122,20 @@ export const scenarios:Record<string,Scenario>={
   await openLobby(page,room.id,guest);await page.getByRole('button',{name:'Voir mes statistiques'}).click();await expect(page.locator('.room-launch')).toBeVisible();
   return cleanup;
  },masks:[...masks,'.race-board'],viewports:base},
+ 'lobby-finished-host':{open:async page=>{
+  await page.goto('/');const {room,host,token,guest,cleanup}=await guestRoom(page);
+  await configureShortRace(host,room.id,token);await roomCommand(host,room.id,token,{action:'start'});const running=await waitForRace(host,room.id,token);
+  await roomCommand(page.request,room.id,guest,{action:'abandon'});await sendProgress(host,room.id,token,running.text!);
+  await openLobby(page,room.id,token);await expect(page.locator('main.lobby-results')).toBeVisible();
+  return cleanup;
+ },masks:[...masks,'.race-board'],viewports:base},
+ 'lobby-finished-host-details':{open:async page=>{
+  await page.goto('/');const {room,host,token,guest,cleanup}=await guestRoom(page);
+  await configureShortRace(host,room.id,token);await roomCommand(host,room.id,token,{action:'start'});const running=await waitForRace(host,room.id,token);
+  await roomCommand(page.request,room.id,guest,{action:'abandon'});await sendProgress(host,room.id,token,running.text!);
+  await openLobby(page,room.id,token);await page.getByRole('button',{name:'Voir mes statistiques'}).click();await expect(page.locator('.room-launch')).toBeVisible();
+  return cleanup;
+ },masks:[...masks,'.race-board'],viewports:base},
  race:{open:async page=>{
   await page.goto('/');const {room,host,token,guest,cleanup}=await guestRoom(page);
   await configureShortRace(host,room.id,token);await roomCommand(host,room.id,token,{action:'start'});await waitForRace(host,room.id,token);
