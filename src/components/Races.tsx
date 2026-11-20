@@ -53,7 +53,7 @@ const ui={
 };
 const imagePosition=(landscape:string)=>landscape==='river'?'phone:object-[30%_top]':'phone:object-[67%_top]';
 export function Nickname(){
- const {state,save,fr,c}=useSite(),copy=roomCopy(fr);
+ const {state,save,fr}=useSite(),copy=roomCopy(fr);
  return <div><label htmlFor="nickname">{copy.nickname}</label><input id="nickname" minLength={state.user?3:3} maxLength={state.user?24:20} value={state.name} readOnly={state.user} onChange={event=>save('name',event.target.value)} onBlur={()=>{if(!state.name.trim())save('nameIsDefault',true)}}/>{state.user?<p>{copy.profileSettings}</p>:<div className="guest-animal flex items-center gap-13 my-20 text-[13px] leading-[1.6]"><AnimalAvatar animal="cheetah"/><small>{copy.guestAnimal}</small></div>}</div>;
 }
 export function RaceCard({race,index=0,total=1}:{race:PublicRoom;index?:number;total?:number}){
