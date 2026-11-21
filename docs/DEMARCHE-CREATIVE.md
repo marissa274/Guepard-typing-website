@@ -12,6 +12,11 @@ Je cherche ensuite des références de sites pour enfants, ludiques, animés et 
 
 ## 2. Le nom : des jeux de mots à Guépard
 
+**Ma démarche.** J'ai d'abord choisi le thème de la **jungle**. J'ai ensuite cherché les animaux les plus rapides : le **lièvre**, le **lapin** et le **guépard**. J'ai choisi le guépard tout de suite, parce que c'est le plus rapide. Mon premier nom était **Guépard Type**, que j'ai dessiné (croquis ci-dessous). Je voulais quelque chose de plus original : j'ai raccourci en **Guépard**, qui fait penser à la jungle et aux animaux et va mieux avec mon thème. Les listes de noms proposées par ChatGPT, détaillées plus bas, n'ont pas été retenues.
+
+![Croquis du nom « Guépard Type », avec un clavier dans le G](design/croquis/croquis-guepard-type.jpg)
+
+
 **Recherche initiale, le 29 septembre 2026 selon l’export.** Je demande un nom évoquant la vitesse et la compétition, dans l’esprit de « GOAT » ou de « race ». ChatGPT propose : **KeyRush, GOAT Keys, QWERTY Rush, KeyRivals, Clack Race, FingerDash, KeySprint, RushRank, Clack Club et Qlash**. Ces propositions viennent de l’outil ; elles ne constituent pas toutes une sélection personnelle.
 
 **Recherche autour de QWERTY, puis des animaux.** Dans la conversation de conception Guépard, je demande d’abord un jeu de mots avec QWERTY et race. Je rejette ensuite cette piste et demande de partir des animaux les plus rapides, en proposant moi-même le guépard. Je demande aussi de retirer QWERTY du nom. ChatGPT explore alors des noms construits autour du clavier et du guépard.
@@ -40,10 +45,11 @@ Cette recherche limitée ne démontre donc pas l'unicité du nom ni du concept. 
 
 ![Concept exploratoire main et clavier, généré par ChatGPT à partir de ma description](design/croquis/concept-clavier-genere.png)
 
-**Le croquis personnel.** Dans mon explication rétrospective, je décris un croquis de clavier à partir duquel j’imagine le guépard endormi. Les deux exports ne contiennent pas de photo identifiée de ce croquis personnel, ni sa date. La référence de tigre visible à la page 5 de la conversation Guépard est une référence de style ; le dessin de guépard noir et blanc de la page 4 est une étape de la génération.
+**Mon croquis du logo.** Mon idée de base pour Guépard était un **guépard couché sur un clavier**. Je l'ai dessinée à la main dans mon carnet : le « tableau du clavier » et le guépard allongé dessus.
 
+![Croquis à la main : guépard couché sur le clavier](design/croquis/croquis-guepard-clavier.jpg)
 
-**Réalisation avec l’aide de l’IA.** La conversation de conception montre les étapes suivantes :
+**Du croquis au logo final.** Pour faire ressortir l'image à partir de ce croquis, j'ai utilisé ChatGPT. Les étapes retrouvées dans la conversation sont les suivantes.
 
 1. Un essai **CHEETAP** associe une patte de guépard à des touches de clavier (annexe, page 8).
 2. Pour **Guépard**, je demande à ChatGPT de générer un guépard endormi sur un clavier. Une première proposition est une mascotte 3D avec le nom écrit sous l’image (page 3).
@@ -52,7 +58,7 @@ Cette recherche limitée ne démontre donc pas l'unicité du nom ni du concept. 
 5. Je demande une **coloration au feutre** et le retrait du fond. La proposition colorée apparaît page 6. L’export indique encore qu’une vraie version transparente peut être une étape suivante : il ne prouve pas que cette demande a été entièrement réalisée à ce stade.
 6. Le logo est fourni à l’agent du site le **1er octobre 2026**. Le commit `24333c3`, enregistré le **2 octobre 2026 à 14 h 14** (heure de Toronto), contient le logo et son utilisation dans l’en-tête. Le fichier du site est une copie du fichier fourni `guepard.png`. Cette date correspond à l’enregistrement Git de cette version.
 
-L’idée, le choix du nom et les demandes de modification viennent de moi ; **ChatGPT a aidé à chercher les noms et à générer les propositions de logo**. Le rendu papier/crayon/feutre est une apparence demandée à l’outil : le logo final n’est pas présenté comme un dessin entièrement réalisé à la main. L’export ne précise pas le modèle de génération d’images utilisé.
+Le nom, l’idée du logo et son croquis viennent de moi ; les noms proposés par ChatGPT n’ont pas été retenus. **Le rendu final du logo a été produit par ChatGPT à partir de mon idée et de mes demandes de modification.** Le rendu papier/crayon/feutre est une apparence demandée à l’outil : le logo final n’est pas présenté comme un dessin entièrement réalisé à la main. L’export ne précise pas le modèle de génération d’images utilisé.
 
 **Symbolique.** Le guépard représente la vitesse ; le clavier représente la frappe. Le sommeil apporte de l’humour et un ton accueillant : l’animal le plus rapide se repose en attendant la prochaine course.
 
