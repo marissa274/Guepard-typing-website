@@ -58,6 +58,35 @@ L’idée, le choix du nom et les demandes de modification viennent de moi ; **C
 
 Le [logo final intégré au site](../public/assets/guepard-logo.png) conserve cette association.
 
+## Direction artistique : moodboard, palette et typographies
+
+Le détail est dans la [direction artistique](design/direction-artistique.md) et le [moodboard](design/moodboard.md) (version de travail du 7 octobre 2026).
+
+**Moodboard (4 références).** Une clairière illustrée, des animaux expressifs en relief 3D mat avec des traces de feutre, et un centre assez calme pour accueillir l'action de jeu.
+
+| Jungle et espace de jeu | Identité |
+| --- | --- |
+| ![Clairière de jungle et rivière bleue](../public/assets/relief-background.png) | ![Logo : guépard endormi sur un clavier](../public/assets/guepard-logo.png) |
+
+| Personnages | Ambiance des résultats |
+| --- | --- |
+| ![Animaux expressifs au rendu feutre et relief](../public/assets/relief-animals.png) | ![Clairière de célébration et fleurs](../public/assets/results-celebration-jungle-v3.png) |
+
+**Palette.**
+
+| Couleur | Code | Usage |
+| --- | --- | --- |
+| Beige sable | `#F7E7C6` | Papier, lumière, zones calmes |
+| Vert feuille | `#5BAE4A` | Feuilles, états positifs, touches secondaires |
+| Vert forêt | `#2F6B3D` | En-tête, pied de page, titres et contraste |
+| Orange mangue | `#F28C28` | Action principale et moments de départ |
+| Jaune soleil | `#F6C445` | Accents, chaleur et mise en valeur |
+| Bleu rivière | `#5BC0EB` | Eau, détails et respiration dans la palette |
+
+**Typographies.** **Nunito** pour les titres et le nom, **DM Sans** pour l'interface et les textes, **Kalam** pour quelques accents manuscrits. Les trois polices sont servies localement (`public/fonts/`).
+
+**Mots-clés.** Accueillant, ludique, artisanal, clair, vivant, collectif.
+
 ## 4. Chronologie documentée
 
 | Date précise | Événement | Source |
