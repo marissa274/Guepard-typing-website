@@ -173,12 +173,12 @@ main[tabindex="-1"]:focus{outline:none}
 @keyframes cheetah-gait{0%,100%{background-position:0 0}25%{background-position:33.333333% 0}50%{background-position:100% 0}75%{background-position:33.333333% 0}}
 @keyframes gait-cycle{0%,100%{background-position-x:0}25%{background-position-x:33.333333%}50%{background-position-x:66.666667%}75%{background-position-x:100%}}
 @keyframes finish-nod{50%{transform:rotate(-7deg) translateY(-3px)}}
-@keyframes sleeping-tail{0%,65%,100%{background-position:0 0}72%{background-position:100% 0}80%{background-position:0 100%}90%{background-position:100% 100%}}
+@keyframes sleeping-tail{0%,60%,100%{transform:rotate(0deg)}72%{transform:rotate(-7deg)}85%{transform:rotate(3deg)}}
 .lobby-page .woodland-back{padding:10px 18px;min-height:44px;line-height:1.35;border-radius:22px}
 /***** Three dimensional wooden podium and results *****/
 .podium-place-1 .race-runner{animation:finish-nod 1.2s ease-out 2}
 @media (prefers-reduced-motion:reduce){
- .race-runner[data-motion],.podium-place .race-runner,.lobby-page .lobby-sleeping-cheetah,.sleeping-cheetah,.podium-confetti i{animation:none!important}
+ .race-runner[data-motion],.podium-place .race-runner,.lobby-page .lobby-sleeping-cheetah,.sleeping-cheetah,.lobby-sleeping-cheetah::before,.sleeping-cheetah::before,.podium-confetti i{animation:none!important}
 }
 /* Every pose uses the same atlas window, so the animal keeps a consistent size. */
 @keyframes gait-cycle{0%,100%{background-position:0 var(--gait-row)}25%{background-position:33.333333% var(--gait-row)}50%{background-position:66.666667% var(--gait-row)}75%{background-position:100% var(--gait-row)}}

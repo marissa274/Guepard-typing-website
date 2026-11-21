@@ -60,11 +60,13 @@
 .lobby-page .lobby-giraffe::after{height:12%;bottom:-2%;border-radius:60% 60% 0 0;background:radial-gradient(ellipse at 50% 0,var(--color-lobby-tint-15),var(--color-lobby-tint-16) 55%,var(--color-lobby-tint-17));box-shadow:none}
 .lobby-page .lobby-toucan::before{content:'';position:absolute;left:-12%;width:63%;top:74%;height:7%;border-radius:30%;background:repeating-linear-gradient(6deg,var(--color-lobby-tint-18) 0 3px,var(--color-lobby-tint-19) 4px 7px,var(--color-lobby-tint-20) 8px);transform:rotate(8deg);z-index:-1}
 .monkey-vine{background:repeating-linear-gradient(35deg,var(--color-lobby-tint-21) 0 9px,var(--color-lobby-tint-22) 10px 14px,var(--color-lobby-tint-23) 15px 20px)}
-/* Scenery: the sleeping cheetah sprite (shared with the home page) and the background images. */
-.lobby-page .lobby-sleeping-cheetah,.sleeping-cheetah{background:url('/_next/image?url=%2Fassets%2Fsleeping-tail.webp&w=1080&q=75') 0 0/200% 200% no-repeat;aspect-ratio:1;animation:sleeping-tail 6s steps(1,end) infinite}
-@variant dark{
- .lobby-page .lobby-sleeping-cheetah{background-image:url('/_next/image?url=%2Fassets%2Fsleeping-tail.webp&w=1080&q=75')}
-}
+/* One fixed paper-textured portrait; only the separate tail layer rotates.
+   The body covers the tail root so its attachment stays continuous. */
+.lobby-page .lobby-sleeping-cheetah,.sleeping-cheetah{aspect-ratio:1;isolation:isolate}
+:is(.lobby-sleeping-cheetah,.sleeping-cheetah)::before,:is(.lobby-sleeping-cheetah,.sleeping-cheetah)::after{content:'';position:absolute;inset:0;background:url('/assets/sleeping-cheetah-paper.webp') center/100% 100% no-repeat;pointer-events:none}
+:is(.lobby-sleeping-cheetah,.sleeping-cheetah)::before{clip-path:polygon(65% 59%,73% 59%,73% 0,100% 0,100% 100%,65% 100%);transform-origin:67% 65%;animation:sleeping-tail 6s cubic-bezier(.77,0,.175,1) infinite}
+:is(.lobby-sleeping-cheetah,.sleeping-cheetah)::after{clip-path:polygon(0 0,73% 0,73% 59%,70% 59%,66% 64%,66% 100%,0 100%)}
+html[data-decor=pending] :is(.lobby-sleeping-cheetah,.sleeping-cheetah)::before,html[data-decor=pending] :is(.lobby-sleeping-cheetah,.sleeping-cheetah)::after{background-image:none}
 .create-room-page .woodland-scenery{background:linear-gradient(var(--color-lobby-tint-24),var(--color-lobby-tint-25)),url('/assets/relief-background.webp') center/cover}
 .lobby-page .woodland-scenery{background:url('/assets/relief-background.webp') center/cover}
 .lobby-results .woodland-scenery{background:url('/assets/results-celebration-jungle-v3.webp') center bottom/cover}

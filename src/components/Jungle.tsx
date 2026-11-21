@@ -13,7 +13,7 @@ const depth='scene-depth absolute inset-0 pointer-events-none transition-[transf
 const sky='object-cover transition-[transform] duration-[450ms] ease-[ease-out] [transform:scale(1.04)_translate(calc(var(--pointer-x)*-3px),calc(var(--pointer-y)*-2px))]';
 const ui={
  main:'home-main relative',
- scene:'jungle-scene relative w-full h-[calc(100svh_-_132px)] min-h-580 max-h-1100 bg-cream [--pointer-x:0] [--pointer-y:0] tablet:h-[calc(100svh_-_166px)] phone:max-h-850',
+ scene:'jungle-scene relative w-full h-[calc(100svh_-_132px)] min-h-580 max-h-1100 bg-cream [--pointer-x:0] [--pointer-y:0] upto-1250:h-auto upto-1250:min-h-0 upto-1250:max-h-none',
  background:'scene-background absolute inset-0 overflow-hidden pointer-events-none dark:bg-jungle-fill-1',
  skyLight:'scene-sky-light dark:hidden '+sky,
  skyDark:'scene-sky-dark hidden dark:block '+sky,
@@ -24,15 +24,15 @@ const ui={
  leavesLeft:'leaves-left left-[-3%] phone:left-[-10%]',
  leavesRight:'leaves-right right-[-3%] [transform:scaleX(-1)] phone:right-[-10%]',
  cutoutRight:'[animation-delay:-4s] [animation-duration:9s]',
- clearing:'jungle-clearing absolute z-6 left-1/2 top-[42%] [transform:translate(-50%,-50%)] w-[min(44vw,610px)] tablet:w-[55vw] phone:w-[83%]',
+ clearing:'jungle-clearing absolute z-6 left-1/2 top-[42%] [transform:translate(-50%,-50%)] w-[min(44vw,610px)] upto-1250:relative upto-1250:left-auto upto-1250:top-auto upto-1250:[transform:none] upto-1250:mx-auto upto-1250:pt-110 upto-1250:pb-280 tablet:w-[min(610px,75%)] phone:w-[calc(100%_-_32px)] phone:pt-80 phone:pb-250',
  menu:'jungle-menu hanging-boards relative isolate [--canopy-reach:max(65px,calc((100svh_-_132px)_*_.42_-_157px))] [transform-origin:50%_calc(0px_-_var(--canopy-reach))] [animation:wooden-sign-sway_6s_ease-in-out_3_alternate] hover:[animation-play-state:paused] focus-within:[animation-play-state:paused] motion-reduce:animate-none tablet:[--canopy-reach:max(65px,calc((100svh_-_166px)_*_.42_-_157px))] phone:[--canopy-reach:max(115px,calc((100svh_-_166px)_*_.42_-_128px))]',
  ropes:'board-ropes absolute left-0 right-0 top-[calc(0px_-_var(--canopy-reach))] -bottom-16 pointer-events-none -z-1 phone:-bottom-12',
  planks:'board-planks relative flex flex-col gap-25 phone:gap-20',
- board:'board-action relative isolate flex items-center justify-between gap-14 w-full min-h-88 py-21 px-46 text-left font-display font-black leading-[1.25] text-jungle-ink-1 drop-shadow-plank text-shadow-wood [transition:transform_.18s] hover:[filter:drop-shadow(2px_6px_3px_var(--color-jungle-shadow-2))_brightness(1.06)] focus-visible:outline-3 focus-visible:outline-solid focus-visible:outline-focus-woodland dark:focus-visible:outline-focus-night focus-visible:outline-offset-2 focus-visible:rounded-[7px] focus-visible:[box-shadow:0_0_0_2px_var(--color-parchment)] motion-reduce:[transition:none] phone:min-h-72 phone:py-18 phone:px-26 tiny:py-17 tiny:px-24',
+ board:'board-action relative isolate flex items-center justify-between gap-14 w-full min-h-88 py-21 px-46 text-left font-display font-black leading-[1.25] text-jungle-ink-1 drop-shadow-plank text-shadow-wood [transition:transform_.18s] hover:[filter:drop-shadow(2px_6px_3px_var(--color-jungle-shadow-2))_brightness(1.06)] focus-visible:outline-3 focus-visible:outline-solid focus-visible:outline-focus-woodland dark:focus-visible:outline-focus-night focus-visible:outline-offset-2 focus-visible:rounded-[7px] focus-visible:[box-shadow:0_0_0_2px_var(--color-parchment)] motion-reduce:[transition:none] phone:min-h-72 phone:py-18 phone:px-20 phone:gap-10',
  boardSize:'text-[clamp(19px,1.8vw,28px)] phone:text-[17px] tiny:text-[16px]',
- boardFirstSize:'text-[clamp(22px,2.2vw,33px)] phone:text-[21px] tiny:text-[19px]',
- icon:'text-[24px] phone:text-[20px]',
- mascot:'jungle-mascot sleeping-cheetah absolute z-7 left-[2%] -bottom-55 w-[clamp(290px,33vw,475px)] pointer-events-none [filter:drop-shadow(0_8px_6px_var(--color-jungle-shadow-3))] dark:[filter:brightness(.8)] phone:w-[67%] phone:min-w-235 phone:left-[-2%] phone:-bottom-25',
+ boardFirstSize:'text-[clamp(22px,2.2vw,33px)] phone:text-[clamp(18px,5vw,21px)]',
+ icon:'shrink-0 text-[24px] phone:text-[20px]',
+ mascot:'jungle-mascot sleeping-cheetah absolute z-7 left-[2%] -bottom-55 w-[clamp(290px,33vw,475px)] pointer-events-none [filter:drop-shadow(0_8px_6px_var(--color-jungle-shadow-3))] dark:[filter:brightness(.8)] upto-1250:w-270 phone:w-[clamp(210px,56vw,270px)] phone:left-[-2%] phone:-bottom-25',
 };
 const animalBase='scene-animal absolute pointer-events-none';
 const shadow='[filter:drop-shadow(5px_12px_9px_var(--color-jungle-shadow-4))]';
