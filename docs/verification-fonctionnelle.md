@@ -47,6 +47,21 @@ Corrections `PERF-01` : formats AVIF puis WebP pour `/_next/image`, largeurs des
 
 Le [rapport JSON archivé](verification/lighthouse-accueil.json) conserve les paramètres et résultats détaillés. Il correspond à la mesure médiane du thème sombre (91).
 
+### Régression de l’accueil mesurée le 20 novembre 2026 (PERF-01)
+
+Sur le déploiement public, Chrome mobile a donné une performance de 86 (fenêtre normale) et de 64 (navigation privée, sans cache), contre 91 à 93 en local. Lighthouse n’étant pas installable dans cet environnement, les causes ont été cherchées avec un script Playwright et le protocole CDP (`Emulation.setCPUThrottlingRate` à 4, latence 150 ms, 1,6 Mbit/s en descente, 750 kbit/s en montée, cache désactivé, viewport 412×823, facteur 1,75, mobile ; médiane de 3 à 5 mesures ; TBT approximé par la somme des tâches longues au-delà de 50 ms après le FCP). Ces valeurs servent à comparer l’avant et l’après ; elles ne remplacent pas une mesure Lighthouse.
+
+Causes : (1) la règle `html[data-decor=pending] … {background-image:none!important}` avait disparu de la feuille lors de la migration Tailwind, si bien que cinq planches décoratives (environ 250 Kio) se téléchargeaient en même temps que le ciel et retardaient le LCP ; (2) l’image du ciel, `loading` paresseux par défaut, n’était demandée qu’après la mise en page (965 ms au lieu de 210 ms) ; (3) les polices (`max-age=0`) et les images optimisées (4 h) étaient revalidées ou retéléchargées à chaque visite sans cache.
+
+| Accueil, thème clair, mobile émulé | LCP | FCP | TBT approx. | CLS | Transfert |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| Production avant correctifs | 2 884 ms | 1 132 ms | 315 ms | 0 | 608 Kio |
+| Local avant correctifs | 3 232 ms | 1 064 ms | 241 ms | 0 | 623 Kio |
+| Local après correctifs (thème clair) | 1 200 ms | 1 200 ms | 274 ms | 0 | 623 Kio |
+| Local après correctifs (thème sombre, cookie de thème) | 1 188 ms | 1 188 ms | 279 ms | 0 | 636 Kio |
+
+Correctifs : règle `data-decor` rétablie dans `src/styles/chrome.css`, ciel du thème actif en `loading="eager"` avec préchargement (`preload`) dans `src/components/Jungle.tsx`, en-têtes `Cache-Control` longs pour `/fonts` et `/assets` et durée de cache de 30 jours pour les images optimisées dans `next.config.ts`. Le TBT reste d’environ 270 ms : il vient surtout du code de React et de Next.js (hydratation), le code de l’application pesant moins de 50 ms. Le poids transféré est inchangé, mais il ne bloque plus le ciel ni le LCP. La performance Lighthouse doit être remesurée sur le déploiement public.
+
 ## Reproduire les contrôles
 
 Préparer `DATABASE_URL`, `AUTH_SECRET` et `APP_URL` dans l’environnement de test, selon [le guide d’installation](installation/comptes-et-base.md), puis exécuter :
