@@ -2,6 +2,7 @@ import {copy} from '../i18n';
 const english:Record<string,string>={
  'Le serveur ne peut pas répondre. Réessayez.':'The server could not respond. Please try again.',
  'La base de données est indisponible.':'The database is unavailable.',
+ 'Historique indisponible.':'History unavailable.',
  'Connectez-vous pour créer un salon.':'Log in to create a lobby.',
  'Votre accès à ce salon a été révoqué.':'Your access to this lobby has been revoked.',
  'Vous ne faites plus partie de ce salon.':'You are no longer a member of this lobby.',

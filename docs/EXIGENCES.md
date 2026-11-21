@@ -138,7 +138,7 @@ Les valeurs choisies et le traitement des erreurs sont documentés dans [bots.md
 
 | ID | Statut | Fichiers principaux | Tests associés | Notes et choix |
 | --- | --- | --- | --- | --- |
-| I18N-01 | partiel | `src/i18n.ts`, `src/i18n/`, composants | Tests sélecteur FR/EN, `tests/i18n.test.tsx` | Interface, libellés ARIA, nom invité par défaut, messages d'erreur du client et métadonnées des pages en FR/EN. Partiel : certains messages d'erreur renvoyés par l'API restent en français, et les noms propres (« Français », « English », prénoms de démonstration) sont volontairement non traduits. |
+| I18N-01 | complet | `src/i18n.ts`, `src/i18n/`, `src/i18n/errors.ts`, `src/lib/room-copy.ts`, composants | `tests/i18n.test.tsx`, `tests/server-error-i18n.test.tsx`, tests sélecteur FR/EN | Interface, libellés ARIA, nom invité par défaut, états vides, métadonnées des pages et messages d'erreur en FR/EN. Les messages d'erreur de l'API sont traduits côté client par une table FR→EN (97 entrées) ; un test parcourt `src/server` et `app/api` et échoue si un message destiné à l'utilisateur n'a pas de traduction. Choix documenté : les noms propres (« Français », « English », prénoms de démonstration) ne sont pas traduits, et les messages réservés à l'exploitant (journaux, erreurs de démarrage) restent en français. |
 | I18N-02 | complet | `Chrome.tsx`, `SiteContext.tsx` | `tests/flows.test.tsx` | Défaut selon navigateur, sélecteur global et préférence cookie conservée après rechargement. |
 | I18N-03 | complet | `src/i18n/format.ts` | Tests i18n et interface | Nombres, pourcentages, durées et dates formatés par `Intl` avec les locales `fr-FR` et `en-US` (par exemple 86 % et 13,2 s en français, 98% et 11.1 sec en anglais). |
 
