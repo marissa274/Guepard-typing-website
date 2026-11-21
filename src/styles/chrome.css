@@ -50,3 +50,5 @@ nav{align-items:center;font-size:13px;font-weight:600}
 #app:has(.celebration-results)>.compact-footer .footer-cheetah{display:none}
 #app:has(.celebration-results)>.compact-footer{min-height:95px;padding:24px 5% 18px}
 #app:has(.celebration-results)>.compact-footer .essential-links>a[href="/"],#app:has(.celebration-results)>.compact-footer .essential-links>a[href="/races"],#app:has(.celebration-results)>.compact-footer .essential-links>a[href="/how"]{display:none}
+/* PERF-01: the decorative sheets wait for the sky (data-decor is set by the script in app/layout.tsx) so that they do not compete with the LCP image. */
+html[data-decor=pending] :is(.header-branch,.animal-cutout,.leaves-cutout,.vines-cutout,.sleeping-cheetah,.footer-cheetah){background-image:none!important}
